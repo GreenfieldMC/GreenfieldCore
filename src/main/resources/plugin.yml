@@ -1,0 +1,5 @@
+main: com.njdaeger.greenfieldcore.GreenfieldCore
+version: ${project.version}
+name: ${project.artifactId}
+author: NJDaeger
+api-version: 1.13

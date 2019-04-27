@@ -160,9 +160,10 @@ public class OpenServerListener implements Listener {
     @EventHandler
     public void playerInteractEvent(PlayerInteractEvent event) {
 
-        Material type = event.getClickedBlock().getType();
+        Material type;
         switch (event.getAction()) {
             case RIGHT_CLICK_BLOCK:
+                type = event.getClickedBlock().getType();
                 switch (type) {
                     case DARK_OAK_DOOR:
                     case DARK_OAK_TRAPDOOR:
@@ -197,6 +198,7 @@ public class OpenServerListener implements Listener {
                 }
                 break;
             case PHYSICAL:
+                type = event.getClickedBlock().getType();
                 switch (type) {
                     case DARK_OAK_PRESSURE_PLATE:
                     case OAK_PRESSURE_PLATE:

@@ -11,6 +11,7 @@ public final class Util {
      * @param permission The permission to check
      */
     public static void broadcast(String message, String permission) {
+        Bukkit.getConsoleSender().sendMessage(message);
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
             if (player.hasPermission(permission)) player.sendMessage(message);
         }

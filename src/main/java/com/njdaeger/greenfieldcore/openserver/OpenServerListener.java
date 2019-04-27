@@ -160,8 +160,7 @@ public class OpenServerListener implements Listener {
     @EventHandler
     public void playerInteractEvent(PlayerInteractEvent event) {
 
-        Material type = event.getMaterial();
-
+        Material type = event.getClickedBlock().getType();
         switch (event.getAction()) {
             case RIGHT_CLICK_BLOCK:
                 switch (type) {

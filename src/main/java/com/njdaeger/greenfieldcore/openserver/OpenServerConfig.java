@@ -26,14 +26,6 @@ public class OpenServerConfig extends YmlConfig {
         return allowedCommands.contains(name);
     }
 
-    public void addAllowedCommand(String name) {
-        allowedCommands.add(name);
-    }
-
-    public void removeAllowedCommand(String name) {
-        allowedCommands.remove(name);
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
@@ -42,11 +34,14 @@ public class OpenServerConfig extends YmlConfig {
         this.enabled = enabled;
     }
 
-    void save() {
+    public void reload() {
+        allowedCommands.clear();
+        allowedCommands.addAll(getStringList("allowedCommands"));
+        this.enabled = getBoolean("enabled");
+    }
 
-        setEntry("allowedCommands", allowedCommands);
+    public void save() {
         setEntry("enabled", enabled);
-
     }
 
 }

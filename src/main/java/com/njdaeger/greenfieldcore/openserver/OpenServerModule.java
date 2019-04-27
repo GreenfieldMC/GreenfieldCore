@@ -25,16 +25,8 @@ public class OpenServerModule implements Module {
         return config.isCommandAllowed(name);
     }
 
-    public void addAllowedCommand(String name) {
-        config.addAllowedCommand(name);
-    }
-
-    public void removeAllowedCommand(String name) {
-        config.removeAllowedCommand(name);
-    }
-
-    public OpenServerConfig getConfig() {
-        return config;
+    public void reload() {
+        config.reload();
     }
 
     @Override

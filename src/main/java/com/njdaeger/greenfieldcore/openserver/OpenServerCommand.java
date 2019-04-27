@@ -13,17 +13,17 @@ public class OpenServerCommand {
 
     private final OpenServerModule openServer;
 
-    OpenServerCommand(GreenfieldCore plugin) {
+    OpenServerCommand(GreenfieldCore plugin, OpenServerModule module) {
         plugin.registerCommand(BCIBuilder.create("openserver")
                 .executor(this::openServer)
                 .completer(this::completion)
                 .permissions("greenfieldcore.openserver.command")
                 .maxArgs(1)
-                .usage("/openserver")
+                .usage("/openserver [reload|status]")
                 .description("Turns the server into OpenServer mode.")
                 .aliases("oserver", "os", "lock", "unlock")
                 .build());
-        this.openServer = plugin.getOpenServerModule();
+        this.openServer = module;
     }
 
     private void openServer(CommandContext context) throws BCIException {

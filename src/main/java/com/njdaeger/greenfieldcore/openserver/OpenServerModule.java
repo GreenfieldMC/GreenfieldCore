@@ -5,7 +5,6 @@ import com.njdaeger.greenfieldcore.Module;
 
 public class OpenServerModule implements Module {
 
-    private boolean enabled;
     private OpenServerConfig config;
     private final GreenfieldCore plugin;
 
@@ -32,8 +31,8 @@ public class OpenServerModule implements Module {
     @Override
     public void onEnable() {
         this.config = new OpenServerConfig(plugin);
-        new OpenServerListener(plugin);
-        new OpenServerCommand(plugin);
+        new OpenServerListener(plugin, this);
+        new OpenServerCommand(plugin, this);
     }
 
     @Override

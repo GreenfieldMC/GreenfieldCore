@@ -41,8 +41,8 @@ public class OpenServerListener implements Listener {
 
     private final OpenServerModule openserver;
 
-    OpenServerListener(GreenfieldCore plugin) {
-        this.openserver = plugin.getOpenServerModule();
+    OpenServerListener(GreenfieldCore plugin, OpenServerModule module) {
+        this.openserver = module;
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 

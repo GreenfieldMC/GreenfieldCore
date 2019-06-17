@@ -53,6 +53,7 @@ public class EditSignCommand {
         //We check to see if the player has a sign in their line of sight up to 5 blocks away
         Player player = context.asPlayer();
         RayTraceResult trace = player.rayTraceBlocks(5);
+        if (trace == null) return;
         Block block = trace.getHitBlock();
 
         //We check if its a sign and if the block exists.

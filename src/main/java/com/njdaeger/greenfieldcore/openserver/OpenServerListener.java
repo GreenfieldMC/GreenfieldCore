@@ -1,8 +1,10 @@
 package com.njdaeger.greenfieldcore.openserver;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
+import com.njdaeger.greenfieldcore.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -37,6 +39,12 @@ import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerUnleashEntityEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.bukkit.ChatColor.GRAY;
+import static org.bukkit.ChatColor.LIGHT_PURPLE;
+
 public class OpenServerListener implements Listener {
 
     private final OpenServerModule openserver;
@@ -46,46 +54,57 @@ public class OpenServerListener implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    private void cancel(Cancellable event, Player player) {
-        if (openserver.isEnabled() && !player.hasPermission("greenfieldcore.openserver.bypass"))
+
+
+    private boolean cancel(Cancellable event, Player player) {
+        if (openserver.isEnabled() && !player.hasPermission("greenfieldcore.openserver.bypass")) {
             event.setCancelled(true);
+            return true;
+        }
+        return false;
     }
 
     @EventHandler
     public void blockPlace(BlockPlaceEvent event) {
-        cancel(event, event.getPlayer());
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void blockBreak(BlockBreakEvent event) {
-        cancel(event, event.getPlayer());
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void blockDamage(BlockDamageEvent event) {
-        cancel(event, event.getPlayer());
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void blockDispenseArmor(BlockDispenseArmorEvent event) {
         if (event.getTargetEntity() instanceof Player) {
-            cancel(event, (Player) event.getTargetEntity());
+            if (cancel(event, (Player) event.getTargetEntity())) Util.notAllowed(event.getTargetEntity());
         }
     }
 
     @EventHandler
     public void blockFertilize(BlockFertilizeEvent event) {
-        if (event.getPlayer() != null) cancel(event, event.getPlayer());
+        if (event.getPlayer() != null) {
+            if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
+        }
     }
 
     @EventHandler
     public void blockIgnite(BlockIgniteEvent event) {
-        if (event.getPlayer() != null) cancel(event, event.getPlayer());
+        if (event.getPlayer() != null) {
+            if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
+        }
     }
 
     @EventHandler
     public void cauldronLevelChange(CauldronLevelChangeEvent event) {
-        if (event.getEntity() instanceof Player) cancel(event, (Player) event.getEntity());
+        if (event.getEntity() instanceof Player) {
+            if (cancel(event, (Player) event.getEntity())) Util.notAllowed(event.getEntity());
+        }
     }
 
     @EventHandler
@@ -115,29 +134,45 @@ public class OpenServerListener implements Listener {
 
     @EventHandler
     public void playerArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
-        cancel(event, event.getPlayer());
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void playerEnterBed(PlayerBedEnterEvent event) {
-        cancel(event, event.getPlayer());
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void playerBucketEmpty(PlayerBucketEmptyEvent event) {
         cancel(event, event.getPlayer());
+        Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void playerBucketFill(PlayerBucketFillEvent event) {
         cancel(event, event.getPlayer());
+        Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void playerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         String[] message = event.getMessage().split(" ");
         if (message[0] != null) {
-            if (!openserver.isCommandAllowed(message[0])) cancel(event, event.getPlayer());
+            PluginCommand command = Bukkit.getPluginCommand(message[0]);
+            if (command == null) Util.notAllowed(event.getPlayer());
+            else {
+                List<String> commands = new ArrayList<>(command.getAliases());
+                commands.add(command.getName());
+
+                for (int i = 0; i < commands.size(); i++) {
+                    if (openserver.isCommandAllowed(commands.get(i))) break;
+                    else {
+                        if (i == commands.size() - 1) {
+                            if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -193,13 +228,14 @@ public class OpenServerListener implements Listener {
                     case LEVER:
                         break;
                     default:
-                        cancel(event, event.getPlayer());
+                        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
                         break;
                 }
                 break;
             case PHYSICAL:
                 type = event.getClickedBlock().getType();
                 switch (type) {
+                    case STONE_PRESSURE_PLATE:
                     case DARK_OAK_PRESSURE_PLATE:
                     case OAK_PRESSURE_PLATE:
                     case ACACIA_PRESSURE_PLATE:
@@ -210,12 +246,12 @@ public class OpenServerListener implements Listener {
                     case LIGHT_WEIGHTED_PRESSURE_PLATE:
                         break;
                     default:
-                        cancel(event, event.getPlayer());
+                        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
                         break;
                 }
                 break;
             default:
-                cancel(event, event.getPlayer());
+                if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
         }
     }
 

@@ -1,7 +1,11 @@
 package com.njdaeger.greenfieldcore;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+
+import static org.bukkit.ChatColor.LIGHT_PURPLE;
+import static org.bukkit.ChatColor.GRAY;
 
 public final class Util {
 
@@ -16,4 +20,9 @@ public final class Util {
             if (player.hasPermission(permission)) player.sendMessage(message);
         }
     }
+
+    public static void notAllowed(Entity entity) {
+        entity.sendMessage(LIGHT_PURPLE + "[OpenServer] " + GRAY + "You cannot do that when the server is locked.");
+    }
+
 }

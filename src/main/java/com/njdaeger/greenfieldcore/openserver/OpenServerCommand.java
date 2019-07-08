@@ -8,6 +8,8 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import org.bukkit.ChatColor;
 
 import static com.njdaeger.greenfieldcore.Util.broadcast;
+import static org.bukkit.ChatColor.GRAY;
+import static org.bukkit.ChatColor.LIGHT_PURPLE;
 
 public class OpenServerCommand {
 
@@ -30,15 +32,15 @@ public class OpenServerCommand {
         if (context.subCommand((ctx) -> ctx.getAlias().equalsIgnoreCase("lock"), this::lock)) return;
         if (context.subCommand((ctx) -> ctx.getAlias().equalsIgnoreCase("unlock"), this::unlock)) return;
         if (context.subCommandAt(0, "reload", true, (ctx) -> {
-            context.send(ChatColor.LIGHT_PURPLE + "[OpenServer] " + ChatColor.GRAY + "Reloaded OpenServer config.");
+            context.send(LIGHT_PURPLE + "[OpenServer] " + GRAY + "Reloaded OpenServer config.");
             openServer.reload();
         })) return;
         if (context.subCommandAt(0, "status", true, (ctx) -> {
-            context.send(ChatColor.LIGHT_PURPLE + "[OpenServer] " + ChatColor.GRAY + "Enabled: " + openServer.isEnabled());
+            context.send(LIGHT_PURPLE + "[OpenServer] " + GRAY + "Enabled: " + openServer.isEnabled());
         })) return;
         if (context.hasArgs()) context.tooManyArgs();
         else {
-            broadcast(ChatColor.LIGHT_PURPLE + "[OpenServer] " + ChatColor.GRAY + "OpenServer is now " + (openServer.isEnabled() ? "disabled." : "enabled."), "greenfieldcore.openserver.message");
+            broadcast(LIGHT_PURPLE + "[OpenServer] " + GRAY + "OpenServer is now " + (openServer.isEnabled() ? "disabled." : "enabled."), "greenfieldcore.openserver.message");
             openServer.setEnabled(!openServer.isEnabled());
         }
     }
@@ -48,7 +50,7 @@ public class OpenServerCommand {
         if (openServer.isEnabled()) context.send(ChatColor.RED + "OpenServer already enabled, do /unlock to unlock the server.");
         else {
             openServer.setEnabled(true);
-            broadcast(ChatColor.LIGHT_PURPLE + "[OpenServer] " + ChatColor.GRAY + "OpenServer is now enabled.", "greenfieldcore.openserver.message");
+            broadcast(LIGHT_PURPLE + "[OpenServer] " + GRAY + "OpenServer is now enabled.", "greenfieldcore.openserver.message");
         }
     }
 
@@ -57,12 +59,12 @@ public class OpenServerCommand {
         if (!openServer.isEnabled()) context.send(ChatColor.RED + "OpenServer already disabled, do /lock to lock the server.");
         else {
             openServer.setEnabled(false);
-            broadcast(ChatColor.LIGHT_PURPLE + "[OpenServer] " + ChatColor.GRAY + "OpenServer is now disabled.", "greenfieldcore.openserver.message");
+            broadcast(LIGHT_PURPLE + "[OpenServer] " + GRAY + "OpenServer is now disabled.", "greenfieldcore.openserver.message");
         }
     }
 
     private void completion(TabContext context) {
-        context.completionIf((ctx) -> !ctx.getAlias().equalsIgnoreCase("lock") && !ctx.getAlias().equalsIgnoreCase("unlock"), "reload", "status");
+        context.completionIf((ctx) -> ctx.isLength(1) && !ctx.getAlias().equalsIgnoreCase("lock") && !ctx.getAlias().equalsIgnoreCase("unlock"), "reload", "status");
     }
 
 

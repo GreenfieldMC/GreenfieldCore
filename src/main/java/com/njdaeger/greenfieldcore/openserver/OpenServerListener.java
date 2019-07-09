@@ -4,7 +4,7 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -21,8 +21,11 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -31,6 +34,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -39,18 +43,13 @@ import org.bukkit.event.player.PlayerRecipeDiscoverEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerUnleashEntityEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.bukkit.ChatColor.GRAY;
-import static org.bukkit.ChatColor.LIGHT_PURPLE;
-
 public class OpenServerListener implements Listener {
 
     private final OpenServerModule openserver;
 
     OpenServerListener(GreenfieldCore plugin, OpenServerModule module) {
         this.openserver = module;
+
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -156,22 +155,11 @@ public class OpenServerListener implements Listener {
 
     @EventHandler
     public void playerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        if (!openserver.isEnabled()) return;
         String[] message = event.getMessage().split(" ");
         if (message[0] != null) {
-            PluginCommand command = Bukkit.getPluginCommand(message[0]);
-            if (command == null) Util.notAllowed(event.getPlayer());
-            else {
-                List<String> commands = new ArrayList<>(command.getAliases());
-                commands.add(command.getName());
-
-                for (int i = 0; i < commands.size(); i++) {
-                    if (openserver.isCommandAllowed(commands.get(i))) break;
-                    else {
-                        if (i == commands.size() - 1) {
-                            if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
-                        }
-                    }
-                }
+            if (!openserver.isCommandAllowed(message[0])) {
+                if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
             }
         }
     }
@@ -197,6 +185,9 @@ public class OpenServerListener implements Listener {
 
         Material type;
         switch (event.getAction()) {
+            case LEFT_CLICK_AIR:
+            case RIGHT_CLICK_AIR:
+                break;
             case RIGHT_CLICK_BLOCK:
                 type = event.getClickedBlock().getType();
                 switch (type) {
@@ -253,6 +244,26 @@ public class OpenServerListener implements Listener {
             default:
                 if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
         }
+    }
+
+    @EventHandler
+    public void hangingBreak(HangingBreakByEntityEvent event) {
+        if (event.getCause() == HangingBreakEvent.RemoveCause.ENTITY && event.getRemover() instanceof Player) {
+            if (cancel(event, (Player) event.getRemover())) Util.notAllowed(event.getRemover());
+
+        }
+    }
+
+    @EventHandler
+    public void damageEntity(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player) {
+            if (cancel(event, (Player) event.getDamager())) Util.notAllowed(event.getDamager());
+        }
+    }
+
+    @EventHandler
+    public void interactEntity(PlayerInteractEntityEvent event) {
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler

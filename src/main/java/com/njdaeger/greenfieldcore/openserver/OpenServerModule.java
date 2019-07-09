@@ -26,6 +26,7 @@ public class OpenServerModule implements Module {
 
     public void reload() {
         config.reload();
+        config.save();
     }
 
     @Override

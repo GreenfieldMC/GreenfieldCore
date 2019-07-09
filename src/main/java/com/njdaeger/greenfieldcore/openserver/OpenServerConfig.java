@@ -34,10 +34,11 @@ public class OpenServerConfig extends YmlConfig {
         this.enabled = enabled;
     }
 
+    @Override
     public void reload() {
+        super.reload();
         allowedCommands.clear();
         allowedCommands.addAll(getStringList("allowedCommands"));
-        this.enabled = getBoolean("enabled");
     }
 
     public void save() {

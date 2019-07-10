@@ -8,8 +8,7 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import org.bukkit.ChatColor;
 
 import static com.njdaeger.greenfieldcore.Util.broadcast;
-import static org.bukkit.ChatColor.GRAY;
-import static org.bukkit.ChatColor.LIGHT_PURPLE;
+import static org.bukkit.ChatColor.*;
 
 public class OpenServerCommand {
 
@@ -47,20 +46,19 @@ public class OpenServerCommand {
 
     private void lock(CommandContext context) throws BCIException {
         if (context.hasArgs()) context.tooManyArgs();
-        if (openServer.isEnabled()) context.send(ChatColor.RED + "OpenServer already enabled, do /unlock to unlock the server.");
-        else {
-            openServer.setEnabled(true);
-            broadcast(LIGHT_PURPLE + "[OpenServer] " + GRAY + "OpenServer is now enabled.", "greenfieldcore.openserver.message");
-        }
+        if (openServer.isEnabled()) throw new BCIException(RED + "OpenServer already enabled, do /unlock to unlock the server.");
+
+        openServer.setEnabled(true);
+        broadcast(LIGHT_PURPLE + "[OpenServer] " + GRAY + "OpenServer is now enabled.", "greenfieldcore.openserver.message");
     }
 
     private void unlock(CommandContext context) throws BCIException {
         if (context.hasArgs()) context.tooManyArgs();
-        if (!openServer.isEnabled()) context.send(ChatColor.RED + "OpenServer already disabled, do /lock to lock the server.");
-        else {
-            openServer.setEnabled(false);
-            broadcast(LIGHT_PURPLE + "[OpenServer] " + GRAY + "OpenServer is now disabled.", "greenfieldcore.openserver.message");
-        }
+        if (!openServer.isEnabled()) throw new BCIException(RED + "OpenServer already disabled, do /lock to lock the server.");
+
+        openServer.setEnabled(false);
+        broadcast(LIGHT_PURPLE + "[OpenServer] " + GRAY + "OpenServer is now disabled.", "greenfieldcore.openserver.message");
+
     }
 
     private void completion(TabContext context) {

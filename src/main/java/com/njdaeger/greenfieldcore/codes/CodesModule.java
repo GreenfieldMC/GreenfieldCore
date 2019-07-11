@@ -15,14 +15,15 @@ public class CodesModule implements Module {
 
     @Override
     public void onEnable() {
-        config = new CodesConfig(plugin);
-        codes = new Codes(config.getCodes());
+        config = new CodesConfig(plugin, this);
+        codes = new Codes(config);
 
         new CodesCommand(plugin, this);
     }
 
     @Override
     public void onDisable() {
+        config.save();
     }
 
     public CodesConfig getConfig() {

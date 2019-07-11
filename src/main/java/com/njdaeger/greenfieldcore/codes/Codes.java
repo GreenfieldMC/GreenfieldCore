@@ -1,9 +1,7 @@
 package com.njdaeger.greenfieldcore.codes;
 
 import com.google.common.base.Strings;
-import com.njdaeger.btu.ActionBar;
 import com.njdaeger.btu.Text;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
@@ -15,26 +13,30 @@ import static org.bukkit.ChatColor.*;
 
 public class Codes {
 
-    private final List<String> codes;
     private String codesString;
+    private int size;
 
-    public Codes(List<String> rawCodes) {
-        this.codes = rawCodes;
-        StringBuilder codesString = new StringBuilder();
+    public Codes(CodesConfig config) {
+        reload(config.getCodes());
+    }
+
+    public void reload(List<String> codes) {
+        StringBuilder codesBuilder = new StringBuilder();
         int start = 1;
-        for (String code : rawCodes) {
-            codesString.append(GRAY).append(start).append(") ").append(WHITE).append(code).append("\n");
+        for (String code : codes) {
+            codesBuilder.append(GRAY).append(start).append(") ").append(WHITE).append(code).append("\n");
             start++;
         }
-        this.codesString = codesString.toString();
+        this.codesString = codesBuilder.toString();
+        this.size = ChatPaginator.paginate(this.codesString, 1, 55, 8).getTotalPages();
     }
 
     public void sendTo(CommandSender sender, int page) {
-        if (page <= -1) {
+        if (page <= 0 || page > size) {
             sender.sendMessage(RED + "No more pages to display.");
             return;
         }
-        ChatPaginator.ChatPage chatPage = ChatPaginator.paginate(codesString, page, 51, 8);
+        ChatPaginator.ChatPage chatPage = ChatPaginator.paginate(codesString, page, 55, 8);
         sender.sendMessage(GRAY + "=== " + LIGHT_PURPLE + "[Codes]" + GRAY + " ==================== Page: " + LIGHT_PURPLE + page + "/" + chatPage.getTotalPages() + GRAY + " ===");
         int padding = 1;
         for (String line : chatPage.getLines()) {
@@ -57,6 +59,10 @@ public class Codes {
                 e.click("/codes " + (page + 1));
             }).append(" =====").setColor(GRAY).sendTo((Player) sender);
         }
+    }
+
+    public int getTotalPages() {
+        return size;
     }
 
 }

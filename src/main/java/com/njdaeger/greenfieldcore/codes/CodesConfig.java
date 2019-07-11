@@ -1,7 +1,7 @@
 package com.njdaeger.greenfieldcore.codes;
 
 import com.njdaeger.bcm.types.YmlConfig;
-import org.bukkit.plugin.Plugin;
+import com.njdaeger.greenfieldcore.GreenfieldCore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,9 +10,11 @@ import java.util.List;
 public class CodesConfig extends YmlConfig {
 
     private List<String> codes;
+    private final CodesModule module;
 
-    public CodesConfig(Plugin plugin) {
+    public CodesConfig(GreenfieldCore plugin, CodesModule module) {
         super(plugin, "codes");
+        this.module = module;
 
         addEntry("codes", Arrays.asList(
                 "Floors in buildings should be 3 blocks in height and have one block between multiple floors. (See https://i.imgur.com/sMBuzaO.png)",
@@ -28,6 +30,32 @@ public class CodesConfig extends YmlConfig {
 
     public List<String> getCodes() {
         return codes;
+    }
+
+    public void addCode(String code) {
+        codes.add(code);
+        module.getCodes().reload(codes);
+    }
+
+    public void removeCode(int index) {
+        codes.remove(index);
+        module.getCodes().reload(codes);
+    }
+
+    public String getCode(int index) {
+        if (index < 0 || index >= codes.size()) return null;
+        return codes.get(index);
+    }
+
+    @Override
+    public void reload() {
+        super.reload();
+        this.codes.clear();
+        this.codes.addAll(getStringList("codes"));
+    }
+
+    public void save() {
+        setEntry("codes", codes);
     }
 
 }

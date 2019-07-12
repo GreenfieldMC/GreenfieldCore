@@ -143,14 +143,12 @@ public class OpenServerListener implements Listener {
 
     @EventHandler
     public void playerBucketEmpty(PlayerBucketEmptyEvent event) {
-        cancel(event, event.getPlayer());
-        Util.notAllowed(event.getPlayer());
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler
     public void playerBucketFill(PlayerBucketFillEvent event) {
-        cancel(event, event.getPlayer());
-        Util.notAllowed(event.getPlayer());
+        if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
     }
 
     @EventHandler

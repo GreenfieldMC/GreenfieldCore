@@ -4,10 +4,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.util.Random;
+
 import static org.bukkit.ChatColor.LIGHT_PURPLE;
 import static org.bukkit.ChatColor.GRAY;
 
 public final class Util {
+
+    public static final Random RANDOM = new Random();
 
     /**
      * Broadcasts a message to the players on the server if they have permission to see the message.

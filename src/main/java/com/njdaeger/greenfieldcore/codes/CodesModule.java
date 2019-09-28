@@ -3,14 +3,13 @@ package com.njdaeger.greenfieldcore.codes;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 
-public class CodesModule implements Module {
+public class CodesModule extends Module {
 
     private Codes codes;
     private CodesConfig config;
-    private final GreenfieldCore plugin;
 
     public CodesModule(GreenfieldCore plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override

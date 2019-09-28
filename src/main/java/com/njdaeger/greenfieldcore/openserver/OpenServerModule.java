@@ -3,13 +3,12 @@ package com.njdaeger.greenfieldcore.openserver;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 
-public class OpenServerModule implements Module {
+public final class OpenServerModule extends Module {
 
     private OpenServerConfig config;
-    private final GreenfieldCore plugin;
 
     public OpenServerModule(GreenfieldCore plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     public boolean isEnabled() {

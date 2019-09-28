@@ -5,13 +5,12 @@ import com.njdaeger.greenfieldcore.Module;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.bukkit.Bukkit;
 
-public class TreePlanterModule implements Module {
+public class TreePlanterModule extends Module {
 
     private static WorldEditPlugin worldEdit;
-    private final GreenfieldCore plugin;
 
     public TreePlanterModule(GreenfieldCore plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override

@@ -1,9 +1,15 @@
 package com.njdaeger.greenfieldcore;
 
-public interface Module {
+public abstract class Module {
 
-    void onEnable();
+    protected final GreenfieldCore plugin;
 
-    void onDisable();
+    public Module(GreenfieldCore plugin) {
+        this.plugin = plugin;
+    }
+
+    public abstract void onEnable();
+
+    public abstract void onDisable();
 
 }

@@ -3,12 +3,10 @@ package com.njdaeger.greenfieldcore.signs;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 
-public class SignEditorModule implements Module {
-
-    private final GreenfieldCore plugin;
+public final class SignEditorModule extends Module {
 
     public SignEditorModule(GreenfieldCore plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override

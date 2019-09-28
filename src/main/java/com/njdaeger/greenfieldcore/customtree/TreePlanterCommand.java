@@ -16,15 +16,14 @@ import org.bukkit.ChatColor;
 public class TreePlanterCommand {
 
     public TreePlanterCommand(GreenfieldCore plugin) {
-        plugin.registerCommand(BCIBuilder.create("/gtree")
-                .aliases("gtree")
+        plugin.registerCommand(BCIBuilder.create("/tree")
                 .executor(this::gTree)
                 .completer(this::gTreeCompletion)
                 .minArgs(1)
                 .maxArgs(1)
                 .permissions("worldedit.tool.tree")
                 .description("Creates a custom tree")
-                .usage("//gtree <type>")
+                .usage("//tree <type>")
                 .build());
     }
 

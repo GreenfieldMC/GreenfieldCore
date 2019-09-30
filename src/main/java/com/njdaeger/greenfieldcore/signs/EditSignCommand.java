@@ -32,20 +32,17 @@ public class EditSignCommand {
 
     private void editSign(CommandContext context) throws BCIException {
         Player player = context.asPlayer();
-        Block block = player.rayTraceBlocks(5).getHitBlock();
-        if (block == null) {
-            context.send(ChatColor.RED + "You are not looking at a block close enough.");
-            return;
-        }
+        RayTraceResult trace = player.rayTraceBlocks(5);
+        if (trace == null) throw new BCIException(ChatColor.RED + "You are not looking at a block. (Are you too far away?)");
+        Block block = trace.getHitBlock();
+        if (block == null) throw new BCIException(ChatColor.RED + "You are not looking at a sign block. (Are you too far away?)");
         if (block.getState() instanceof Sign) {
             int line = context.integerAt(0);
             Sign sign = (Sign) block.getState();
             String replacement = context.joinArgs(1).replaceAll("(?<!\\\\)&(?=[a-fA-F0-9K-Ok-oRr])", ChatColor.COLOR_CHAR + "");
             sign.setLine(line - 1, replacement.replaceAll("\\\\&", "&"));
             sign.update(true, false);
-        } else {
-            context.send(ChatColor.RED + "You are not looking at a sign.");
-        }
+        } else throw new BCIException(ChatColor.RED + "You are not looking at a sign block.");
     }
 
     private void completer(TabContext context) throws BCIException {

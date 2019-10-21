@@ -20,8 +20,8 @@ public final class TestResultModule extends Module {
         RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServicesManager().getRegistration(Permission.class);
         if (permissionProvider != null) {
             this.permission = permissionProvider.getProvider();
-            new TestResultCommands(plugin, this);
             this.config = new TestResultConfig(plugin);
+            new TestResultCommands(plugin, this);
         } else plugin.getLogger().warning("Could not enable TestResultModule. (Vault isn't installed)");
     }
 

@@ -10,6 +10,7 @@ import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -105,11 +106,25 @@ public class PaintingSwitchModule extends Module implements Listener {
     }
 
     @EventHandler
+    public void onBreak(HangingBreakByEntityEvent e) {
+        PaintingSession session;
+        if (e.getRemover() instanceof Player && e.getEntity() instanceof Painting && (session = users.get(e.getRemover().getUniqueId())) != null) {
+            if (session.isSwitching()) {
+                session.setLastArt(session.getSelected().getArt());
+                session.setSwitching(false, null);
+                e.getRemover().sendMessage(ChatColor.LIGHT_PURPLE + "[PaintingSwitch] " + ChatColor.GRAY + "Painting removed.");
+            }
+        }
+    }
+
+    @EventHandler
     public void onScroll(PlayerItemHeldEvent event) {
         if (event.getPlayer().hasPermission(PERM)) {
             PaintingSession session = users.getOrDefault(event.getPlayer().getUniqueId(), new PaintingSession());
             if (session.isSwitching()) {
-                applyNextArt(session, event.getNewSlot() - event.getPreviousSlot());
+                int diff = event.getNewSlot() - event.getPreviousSlot();
+                int shift = diff == 8 ? -1 : diff == -8 ? 1 : diff;
+                applyNextArt(session, shift);
             }
         }
     }

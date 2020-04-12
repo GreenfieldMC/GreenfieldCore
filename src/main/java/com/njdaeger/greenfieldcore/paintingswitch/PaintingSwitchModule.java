@@ -125,6 +125,7 @@ public class PaintingSwitchModule extends Module implements Listener {
                 int diff = event.getNewSlot() - event.getPreviousSlot();
                 int shift = diff == 8 ? -1 : diff == -8 ? 1 : diff;
                 applyNextArt(session, shift);
+                event.setCancelled(true);
             }
         }
     }

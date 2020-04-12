@@ -10,6 +10,7 @@ import com.njdaeger.greenfieldcore.openserver.OpenServerModule;
 import com.njdaeger.greenfieldcore.paintingswitch.PaintingSwitchModule;
 import com.njdaeger.greenfieldcore.signs.SignEditorModule;
 import com.njdaeger.greenfieldcore.testresult.TestResultModule;
+import com.njdaeger.greenfieldcore.utilities.UtilitiesModule;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class GreenfieldCore extends JavaPlugin {
@@ -21,6 +22,7 @@ public final class GreenfieldCore extends JavaPlugin {
     private final TreePlanterModule treePlanterModule = new TreePlanterModule(this);
     private final TestResultModule testResultModule = new TestResultModule(this);
     private final PaintingSwitchModule paintingSwitchModule = new PaintingSwitchModule(this);
+    private final UtilitiesModule utilitiesModule = new UtilitiesModule(this);
 
     @Override
     public void onEnable() {
@@ -30,6 +32,7 @@ public final class GreenfieldCore extends JavaPlugin {
         treePlanterModule.onEnable();
         testResultModule.onEnable();
         paintingSwitchModule.onEnable();
+        utilitiesModule.onEnable();
     }
 
     @Override

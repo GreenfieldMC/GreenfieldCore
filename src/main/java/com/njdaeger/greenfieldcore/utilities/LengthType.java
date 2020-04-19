@@ -4,7 +4,6 @@ public enum LengthType {
 
     CENTIMETER("Centimeter", "Centimeters", 0, 100, false, LengthTypeArrays.metricUnits),
     METER("Meter", "Meters", 1, 1000, false, LengthTypeArrays.metricUnits),
-    //BLOCK("Block", "Blocks", 2, 1000, false,  LengthTypeArrays.metricUnits),
     KILOMETER("Kilometer", "Kilometers", 2, 1000, false, LengthTypeArrays.metricUnits),
     MILE("Mile", "Miles", 3, 1760, true, LengthTypeArrays.imperialUnits),
     YARD("Yard", "Yards", 2, 1760, true, LengthTypeArrays.imperialUnits),
@@ -83,10 +82,9 @@ public enum LengthType {
         if (!imperial) {
             switch (this) {
                 case CENTIMETER:
-                    number /= METER.toNextUnit;
+                    number /= CENTIMETER.toNextUnit;
                 case METER:
-                //case BLOCK:
-                    number /= KILOMETER.toNextUnit;
+                    number /= METER.toNextUnit;
             }
         }
         return number;

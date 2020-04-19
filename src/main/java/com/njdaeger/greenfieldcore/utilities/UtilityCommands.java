@@ -26,19 +26,6 @@ public class UtilityCommands {
     <user> is requesting completion approval
     Mark as completed and remove
 
-    /convertTo <from> <to> <number>
-
-    block
-    inch
-    foot
-    yard
-    mile
-    centimeter
-    decimeter
-    meter
-    kilometer
-
-
      */
 
     public UtilityCommands(GreenfieldCore plugin) {

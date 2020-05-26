@@ -156,7 +156,7 @@ public class OpenServerListener implements Listener {
         if (!openserver.isEnabled()) return;
         String[] message = event.getMessage().split(" ");
         if (message[0] != null) {
-            if (!openserver.isCommandAllowed(message[0])) {
+            if (!openserver.isCommandAllowed(message[0].substring(1))) {
                 if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());
             }
         }

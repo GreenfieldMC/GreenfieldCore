@@ -36,7 +36,7 @@ public class TreePlanterCommand {
         } catch (InvalidToolBindException e) {
             throw new BCIException(ChatColor.RED + "Blocks can't be used.");
         }
-        context.send(ChatColor.LIGHT_PURPLE + "Tree tool bound to " + type.getName());
+        context.send(ChatColor.LIGHT_PURPLE + "Tree tool bound to " + type.getId());
     }
 
     private void gTreeCompletion(TabContext context) {

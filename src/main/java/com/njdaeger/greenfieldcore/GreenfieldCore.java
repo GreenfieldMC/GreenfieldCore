@@ -23,7 +23,8 @@ public final class GreenfieldCore extends JavaPlugin {
     private final TestResultModule testResultModule = new TestResultModule(this);
     private final PaintingSwitchModule paintingSwitchModule = new PaintingSwitchModule(this);
     private final UtilitiesModule utilitiesModule = new UtilitiesModule(this);
-
+    private final MCLinkIntegration mcLinkModule = new MCLinkIntegration(this);
+    
     @Override
     public void onEnable() {
         openServerModule.onEnable();
@@ -33,6 +34,7 @@ public final class GreenfieldCore extends JavaPlugin {
         testResultModule.onEnable();
         paintingSwitchModule.onEnable();
         utilitiesModule.onEnable();
+        mcLinkModule.onEnable();
     }
 
     @Override

@@ -86,6 +86,14 @@
     <dependencies>
 
         <dependency>
+            <groupId>net.dries007.mclink</groupId>
+            <artifactId>MCLink-Bukkit</artifactId>
+            <version>0.3.2</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/Noah/.m2/repository/net/dries007/mclink/MCLink-Bukkit/0.3.2/MCLink-Bukkit-0.3.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>com.njdaeger</groupId>
             <artifactId>BukkitCommandInterface</artifactId>
             <version>0.0.1</version>
@@ -129,7 +137,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.14.4-R0.1-SNAPSHOT</version>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 

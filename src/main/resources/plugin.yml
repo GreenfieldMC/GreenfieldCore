@@ -5,3 +5,5 @@ author: NJDaeger
 api-version: 1.13
 softdepend:
   - WorldEdit
+  - Vault
+  - MCLink

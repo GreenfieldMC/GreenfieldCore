@@ -17,9 +17,9 @@ public final class GreenfieldCore extends JavaPlugin {
 
     private final CommandStore commandStore = new CommandStore(this);
     private final OpenServerModule openServerModule = new OpenServerModule(this);
-    private final SignEditorModule signEditorModule = new SignEditorModule(this);
+    //private final SignEditorModule signEditorModule = new SignEditorModule(this);
     private final CodesModule codesModule = new CodesModule(this);
-    private final TreePlanterModule treePlanterModule = new TreePlanterModule(this);
+    //private final TreePlanterModule treePlanterModule = new TreePlanterModule(this);
     private final TestResultModule testResultModule = new TestResultModule(this);
     private final PaintingSwitchModule paintingSwitchModule = new PaintingSwitchModule(this);
     private final UtilitiesModule utilitiesModule = new UtilitiesModule(this);
@@ -28,9 +28,9 @@ public final class GreenfieldCore extends JavaPlugin {
     @Override
     public void onEnable() {
         openServerModule.onEnable();
-        signEditorModule.onEnable();
+        //signEditorModule.onEnable();
         codesModule.onEnable();
-        treePlanterModule.onEnable();
+        //treePlanterModule.onEnable();
         testResultModule.onEnable();
         paintingSwitchModule.onEnable();
         utilitiesModule.onEnable();
@@ -40,7 +40,7 @@ public final class GreenfieldCore extends JavaPlugin {
     @Override
     public void onDisable() {
         openServerModule.onDisable();
-        signEditorModule.onDisable();
+        //signEditorModule.onDisable();
         codesModule.onDisable();
     }
 

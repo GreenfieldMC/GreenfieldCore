@@ -25,7 +25,7 @@ public class CodesCommand {
                 .aliases("buildcodes", "bcodes")
                 .executor(this::codes)
                 .completer(this::completer)
-                .permissions("greenfieldcore.codes.command")
+                .permissions("greenfieldcore.codes")
                 .description("List or change the server codes")
                 .usage("/codes [add|remove|<page>] [<newCode>|<codeNumber>]")
                 .build());

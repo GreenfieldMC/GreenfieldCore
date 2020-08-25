@@ -60,10 +60,31 @@ public class TestResultCommands {
                 .maxArgs(2)
                 .build()
         );
+    
+        plugin.registerCommand(BCIBuilder.create("testinfo")
+            .executor(this::testInfo)
+            .permissions("greenfieldcore.testinfo")
+            .description("General test build rules.")
+            .usage("/testinfo")
+            .maxArgs(0)
+            .build()
+        );
 
     }
 
-
+    private void testInfo(CommandContext context) {
+        context.send(LIGHT_PURPLE + "[TestInfo] TestBuild rules to follow");
+        context.send(LIGHT_PURPLE + "1. " + GRAY + "No hypermodern buildings.");
+        context.send(LIGHT_PURPLE + "2. " + GRAY + "Max floor height of a house is 3 floors (excluding basement). Max floor height of a house is 5 floors (excluding basement).");
+        context.send(LIGHT_PURPLE + "3. " + GRAY + "Interior must be completed.");
+        context.send(LIGHT_PURPLE + "4. " + GRAY + "Codes (/codes) must be followed");
+        context.send(LIGHT_PURPLE + "5. " + GRAY + "@ an administrator in Discord when your build is complete.");
+        context.send(LIGHT_PURPLE + "6. " + GRAY + "Don't become inactive for several months during a test build.");
+        context.send(LIGHT_PURPLE + "7. " + GRAY + "You may build within and on the wooden logs, but do not exceed the plot limit.");
+        context.send(LIGHT_PURPLE + "8. " + GRAY + "You may not ask anyone for help nor advice once the test has begun.");
+        context.send(LIGHT_PURPLE + "9. " + GRAY + "Please stick to a house, office, or apartment building unless prior arrangements were made.");
+    }
+    
     private void pass(CommandContext context) throws BCIException {
         Player player = context.argAt(context.getAlias().startsWith("testresult") ? 1 : 0, PlayerParser.class);
         String group = permission.getPrimaryGroup(player);

@@ -11,7 +11,7 @@ public final class SignEditorModule extends Module {
 
     @Override
     public void onEnable() {
-        new EditSignCommand(plugin);
+        //new EditSignCommand(plugin);
     }
 
     @Override

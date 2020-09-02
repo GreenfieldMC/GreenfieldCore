@@ -3,7 +3,8 @@ version: ${project.version}
 name: ${project.artifactId}
 author: NJDaeger
 api-version: 1.13
-softdepend:
+depend:
   - WorldEdit
   - Vault
   - MCLink
+  - CoPerms

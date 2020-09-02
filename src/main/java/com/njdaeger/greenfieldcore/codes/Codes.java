@@ -1,13 +1,12 @@
 package com.njdaeger.greenfieldcore.codes;
 
 import com.google.common.base.Strings;
-import com.njdaeger.btu.Text;
+import com.njdaeger.pdk.utils.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.bukkit.ChatColor.*;
 
@@ -47,17 +46,14 @@ public class Codes {
             else sender.sendMessage("   " + Strings.repeat(" ", padding) + line);
         }
         if (sender instanceof Player) {
-            final Consumer<Text.ClickEvent> multiOccurrence = e -> {
-                e.action(Text.ClickAction.RUN_COMMAND);
-                e.click("/codes -1");
-            };
-            Text.of("===== ").setColor(GRAY).append(page <= 1 ? "|X|" : "<<").setColor(LIGHT_PURPLE).setBold(true).clickEvent(page <= 1 ? multiOccurrence : e -> {
-                e.action(Text.ClickAction.RUN_COMMAND);
-                e.click("/codes " + (page - 1));
-            }).append(" ========================== ").setColor(GRAY).append(page >= chatPage.getTotalPages() ? "|X|" : ">>").setColor(LIGHT_PURPLE).setBold(true).clickEvent(page >= chatPage.getTotalPages() ? multiOccurrence : e -> {
-                e.action(Text.ClickAction.RUN_COMMAND);
-                e.click("/codes " + (page + 1));
-            }).append(" =====").setColor(GRAY).sendTo((Player) sender);
+            Text.ClickEvent<String> outOfRange = new Text.ClickEvent<>(Text.ClickAction.RUN_COMMAND, "/codes -1");
+            Text.of("===== ").setColor(GRAY)
+                .append(page <= 1 ? "|X|" : "<<").setColor(LIGHT_PURPLE).setBold(true)
+                .clickEvent(page <= 1 ? outOfRange : new Text.ClickEvent<>(Text.ClickAction.RUN_COMMAND, "/codes " + (page - 1)))
+                .append(" ========================== ").setColor(GRAY)
+                .append(page >= chatPage.getTotalPages() ? "|X|" : ">>").setColor(LIGHT_PURPLE).setBold(true)
+                .clickEvent(page >= chatPage.getTotalPages() ? outOfRange : new Text.ClickEvent<>(Text.ClickAction.RUN_COMMAND, "/codes " + (page + 1)))
+                .append(" =====").setColor(GRAY).sendTo((Player) sender);
         }
     }
 

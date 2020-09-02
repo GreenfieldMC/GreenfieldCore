@@ -1,23 +1,8 @@
 package com.njdaeger.greenfieldcore.signs;
 
-import com.njdaeger.bci.SenderType;
-import com.njdaeger.bci.base.BCIException;
-import com.njdaeger.bci.defaults.BCIBuilder;
-import com.njdaeger.bci.defaults.CommandContext;
-import com.njdaeger.bci.defaults.TabContext;
-import com.njdaeger.greenfieldcore.GreenfieldCore;
-import org.bukkit.ChatColor;
-import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
-import org.bukkit.util.RayTraceResult;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class EditSignCommand {
 
-    public EditSignCommand(GreenfieldCore plugin) {
+    /*public EditSignCommand(GreenfieldCore plugin) {
         plugin.registerCommand(BCIBuilder.create("editsign")
                 .executor(this::editSign)
                 .completer(this::completer)
@@ -92,5 +77,5 @@ public class EditSignCommand {
                 context.completion(lineWords.toArray(new String[0]));
             }
         }
-    }
+    }*/
 }

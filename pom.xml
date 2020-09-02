@@ -6,7 +6,7 @@
 
     <groupId>com.njdaeger</groupId>
     <artifactId>GreenfieldCore</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -50,21 +50,10 @@
                 <configuration>
                     <relocations>
                         <relocation>
-                            <pattern>com.njdaeger.bci</pattern>
-                            <shadedPattern>com.njdaeger.greenfieldcore.libs.bci</shadedPattern>
+                            <pattern>com.njdaeger.pdk</pattern>
+                            <shadedPattern>com.njdaeger.greenfieldcore.libs.pdk</shadedPattern>
                         </relocation>
-                        <relocation>
-                            <pattern>com.njdaeger.btu</pattern>
-                            <shadedPattern>com.njdaeger.greenfieldcore.libs.btu</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.njdaeger.bcm</pattern>
-                            <shadedPattern>com.njdaeger.greenfieldcore.libs.bcm</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>com.njdaeger.butil</pattern>
-                            <shadedPattern>com.njdaeger.greenfieldcore.libs.butil</shadedPattern>
-                        </relocation>
+
                     </relocations>
                 </configuration>
             </plugin>
@@ -95,36 +84,15 @@
 
         <dependency>
             <groupId>com.njdaeger</groupId>
-            <artifactId>BukkitCommandInterface</artifactId>
-            <version>0.0.1</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.njdaeger</groupId>
-            <artifactId>BukkitConfigManager</artifactId>
-            <version>0.0.2</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.njdaeger</groupId>
-            <artifactId>BukkitTextUtils</artifactId>
-            <version>0.0.1</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.njdaeger</groupId>
-            <artifactId>BukkitUtilities</artifactId>
-            <version>0.0.1</version>
+            <artifactId>PluginDevelopmentKit</artifactId>
+            <version>0.0.3</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
+            <artifactId>Vault</artifactId>
+            <version>1.7.3</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

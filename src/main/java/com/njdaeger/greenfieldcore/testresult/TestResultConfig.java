@@ -1,15 +1,16 @@
 package com.njdaeger.greenfieldcore.testresult;
 
-import com.njdaeger.bcm.types.YmlConfig;
+import com.njdaeger.pdk.config.ConfigType;
+import com.njdaeger.pdk.config.Configuration;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
 
-public class TestResultConfig extends YmlConfig {
+public class TestResultConfig extends Configuration {
 
     public TestResultConfig(Plugin plugin) {
-        super(plugin, "testresults");
+        super(plugin, ConfigType.YML, "testresults");
 
         addEntry("testing-groups", Collections.singletonList("Testing"));
         addEntry("passing-group", "Worker");

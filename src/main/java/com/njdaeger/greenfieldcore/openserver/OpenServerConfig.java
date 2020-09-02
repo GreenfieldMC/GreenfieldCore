@@ -1,6 +1,7 @@
 package com.njdaeger.greenfieldcore.openserver;
 
-import com.njdaeger.bcm.types.YmlConfig;
+import com.njdaeger.pdk.config.ConfigType;
+import com.njdaeger.pdk.config.Configuration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
@@ -11,13 +12,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class OpenServerConfig extends YmlConfig {
+public class OpenServerConfig extends Configuration {
 
     private final List<String> allowedCommands;
     private boolean enabled;
 
     public OpenServerConfig(Plugin plugin) {
-        super(plugin, "openserver");
+        super(plugin, ConfigType.YML, "openserver");
 
         addEntry("allowedCommands", Arrays.asList("/afk", "/tp", "/warp", "/warps"));
         addEntry("enabled", false);
@@ -69,6 +70,7 @@ public class OpenServerConfig extends YmlConfig {
 
     public void save() {
         setEntry("enabled", enabled);
+        super.save();
     }
 
 }

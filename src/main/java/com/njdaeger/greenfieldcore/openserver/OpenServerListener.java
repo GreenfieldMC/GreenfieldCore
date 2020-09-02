@@ -4,7 +4,6 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -20,7 +19,6 @@ import org.bukkit.event.block.EntityBlockFormEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
-import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
@@ -124,11 +122,6 @@ public class OpenServerListener implements Listener {
     @EventHandler
     public void entityCombustByEntity(EntityCombustByEntityEvent event) {
         if (event.getCombuster() instanceof Player) cancel(event, (Player) event.getEntity());
-    }
-
-    @EventHandler
-    public void entityCreatePortal(EntityCreatePortalEvent event) {
-        if (event.getEntity() instanceof Player) cancel(event, (Player) event.getEntity());
     }
 
     @EventHandler

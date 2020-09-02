@@ -1,19 +1,20 @@
 package com.njdaeger.greenfieldcore.codes;
 
-import com.njdaeger.bcm.types.YmlConfig;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
+import com.njdaeger.pdk.config.ConfigType;
+import com.njdaeger.pdk.config.Configuration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CodesConfig extends YmlConfig {
+public class CodesConfig extends Configuration {
 
     private List<String> codes;
     private final CodesModule module;
 
     public CodesConfig(GreenfieldCore plugin, CodesModule module) {
-        super(plugin, "codes");
+        super(plugin, ConfigType.YML, "codes");
         this.module = module;
 
         addEntry("codes", Arrays.asList(
@@ -56,6 +57,7 @@ public class CodesConfig extends YmlConfig {
 
     public void save() {
         setEntry("codes", codes);
+        super.save();
     }
 
 }

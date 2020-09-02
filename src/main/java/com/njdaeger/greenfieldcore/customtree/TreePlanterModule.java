@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 
 public class TreePlanterModule extends Module {
 
-    private static WorldEditPlugin worldEdit;
+    //private static WorldEditPlugin worldEdit;
 
     public TreePlanterModule(GreenfieldCore plugin) {
         super(plugin);
@@ -15,10 +15,10 @@ public class TreePlanterModule extends Module {
 
     @Override
     public void onEnable() {
-        if(Bukkit.getPluginManager().getPlugin("WorldEdit") != null) {
+        /*if(Bukkit.getPluginManager().getPlugin("WorldEdit") != null) {
             worldEdit = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
             new TreePlanterCommand(plugin);
-        } else plugin.getLogger().warning("Tree planter module not loaded. (WorldEdit is not installed)");
+        } else plugin.getLogger().warning("Tree planter module not loaded. (WorldEdit is not installed)");*/
     }
 
     @Override
@@ -26,8 +26,8 @@ public class TreePlanterModule extends Module {
 
     }
 
-    public static WorldEditPlugin getWorldEdit() {
+    /*public static WorldEditPlugin getWorldEdit() {
         return worldEdit;
-    }
+    }*/
 
 }

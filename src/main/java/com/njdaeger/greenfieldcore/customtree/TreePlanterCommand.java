@@ -1,21 +1,8 @@
 package com.njdaeger.greenfieldcore.customtree;
 
-import com.njdaeger.bci.base.BCIException;
-import com.njdaeger.bci.defaults.BCIBuilder;
-import com.njdaeger.bci.defaults.CommandContext;
-import com.njdaeger.bci.defaults.TabContext;
-import com.njdaeger.greenfieldcore.GreenfieldCore;
-import com.njdaeger.greenfieldcore.customtree.tools.ClassicPalmTool;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.command.tool.InvalidToolBindException;
-import com.sk89q.worldedit.util.HandSide;
-import com.sk89q.worldedit.world.item.ItemType;
-import org.bukkit.ChatColor;
-
 public class TreePlanterCommand {
 
-    public TreePlanterCommand(GreenfieldCore plugin) {
+    /*public TreePlanterCommand(GreenfieldCore plugin) {
         plugin.registerCommand(BCIBuilder.create("/tree")
                 .executor(this::gTree)
                 .completer(this::gTreeCompletion)
@@ -41,6 +28,6 @@ public class TreePlanterCommand {
 
     private void gTreeCompletion(TabContext context) {
         context.completionAt(0, "palm");
-    }
+    }*/
 
 }

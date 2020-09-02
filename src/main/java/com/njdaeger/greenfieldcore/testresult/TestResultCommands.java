@@ -1,10 +1,10 @@
 package com.njdaeger.greenfieldcore.testresult;
 
-import com.njdaeger.bci.base.BCIException;
-import com.njdaeger.bci.defaults.BCIBuilder;
-import com.njdaeger.bci.defaults.CommandContext;
-import com.njdaeger.bci.defaults.TabContext;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
+import com.njdaeger.pdk.command.CommandBuilder;
+import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.pdk.command.TabContext;
+import com.njdaeger.pdk.command.exception.PDKCommandException;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -24,30 +24,28 @@ public class TestResultCommands {
         this.permission = module.getPermissions();
         this.config = module.getConfig();
 
-        plugin.registerCommand(BCIBuilder.create("pass")
+        CommandBuilder.of("pass")
                 .executor(this::pass)
                 .completer((c) -> c.subCompletionAt(0, this::playerCompletion))
                 .permissions("greenfieldcore.testresults.pass")
                 .description("Pass a test builder")
                 .usage("/pass <player>")
-                .minArgs(1)
-                .maxArgs(1)
-                .build()
-        );
+                .min(1)
+                .max(1)
+                .build().register(plugin);
 
-        plugin.registerCommand(BCIBuilder.create("fail")
+        CommandBuilder.of("fail")
                 .executor(this::fail)
                 .completer((c) -> c.subCompletionAt(0, this::playerCompletion))
                 .permissions("greenfieldcore.testresults.fail")
                 .description("Fail a test builder")
                 .usage("/fail <player>")
-                .minArgs(1)
-                .maxArgs(1)
-                .build()
-        );
+                .min(1)
+                .max(1)
+                .build().register(plugin);
+        
 
-        plugin.registerCommand(BCIBuilder.create("testresult")
-                .aliases("testresults", "result")
+        CommandBuilder.of("testresult", "testresults", "result")
                 .executor(this::testResult)
                 .completer((c) -> {
                     c.subCompletionAt(0, (x) -> x.completion("pass", "fail"));
@@ -56,19 +54,17 @@ public class TestResultCommands {
                 .permissions("greenfieldcore.testresults.fail", "greenfieldcore.testresults.pass")
                 .description("Pass or fail a test builder")
                 .usage("/testresult <pass|fail> <player>")
-                .minArgs(2)
-                .maxArgs(2)
-                .build()
-        );
+                .min(2)
+                .max(2)
+                .build().register(plugin);
     
-        plugin.registerCommand(BCIBuilder.create("testinfo")
+        CommandBuilder.of("testinfo")
             .executor(this::testInfo)
             .permissions("greenfieldcore.testinfo")
             .description("General test build rules.")
             .usage("/testinfo")
-            .maxArgs(0)
-            .build()
-        );
+            .max(0)
+            .build().register(plugin);
 
     }
 
@@ -85,21 +81,21 @@ public class TestResultCommands {
         context.send(LIGHT_PURPLE + "9. " + GRAY + "Please stick to a house, office, or apartment building unless prior arrangements were made.");
     }
     
-    private void pass(CommandContext context) throws BCIException {
+    private void pass(CommandContext context) throws PDKCommandException {
         Player player = context.argAt(context.getAlias().startsWith("testresult") ? 1 : 0, PlayerParser.class);
         String group = permission.getPrimaryGroup(player);
-        if (group == null) throw new BCIException(ChatColor.RED + player.getName() + " is not in a group.");
-        if (!config.testingGroups().contains(group)) throw new BCIException(ChatColor.RED + group + " is not a part of the testing groups.");
+        if (group == null) context.error(ChatColor.RED + player.getName() + " is not in a group.");
+        if (!config.testingGroups().contains(group)) context.error(ChatColor.RED + group + " is not a part of the testing groups.");
         permission.playerAddGroup(player, config.passingGroup());
         player.sendMessage(LIGHT_PURPLE + "[TestResult] " + GRAY + "You passed! Welcome to the team!");
         context.send(LIGHT_PURPLE + "[TestResult] " + GRAY + "Passed " + LIGHT_PURPLE + player.getName() + GRAY + ".");
     }
 
-    private void fail(CommandContext context) throws BCIException {
+    private void fail(CommandContext context) throws PDKCommandException {
         Player player = context.argAt(context.getAlias().startsWith("testresult") ? 1 : 0, PlayerParser.class);
         String group = permission.getPrimaryGroup(player);
-        if (group == null) throw new BCIException(ChatColor.RED + player.getName() + " is not in a group.");
-        if (!config.testingGroups().contains(group)) throw new BCIException(ChatColor.RED + group + " is not in any of the following: " + config.testingGroups().toString());
+        if (group == null) context.error(ChatColor.RED + player.getName() + " is not in a group.");
+        if (!config.testingGroups().contains(group)) context.error(ChatColor.RED + group + " is not in any of the following: " + config.testingGroups().toString());
         permission.playerAddGroup(player, config.failingGroup());
         player.sendMessage(LIGHT_PURPLE + "[TestResult] " + GRAY + "We apologize to inform you have failed the test build. Kicking in 10 seconds.");
         context.send(LIGHT_PURPLE + "[TestResult] " + GRAY + "Failed " + LIGHT_PURPLE + player.getName() + GRAY + ".");
@@ -109,7 +105,7 @@ public class TestResultCommands {
         }, 200);
     }
 
-    private void testResult(CommandContext context) throws BCIException {
+    private void testResult(CommandContext context) throws PDKCommandException {
         context.subCommandAt(0, "pass", true, this::pass);
         context.subCommandAt(0, "fail", true, this::fail);
     }

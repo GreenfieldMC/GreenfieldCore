@@ -27,7 +27,7 @@ public final class TestResultModule extends Module {
 
     @Override
     public void onDisable() {
-
+        config.save();
     }
 
     public Permission getPermissions() {

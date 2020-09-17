@@ -311,7 +311,7 @@ public class CommandStoreCommands {
         if (maxPage <= page) text.append("->").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + " " + svr).append(" ").append("-->|").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0);
         else text.append("->").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + (page + 1) + " " + svr).append(" ").append("-->|").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + maxPage + " " + svr);
         text.append(" === ").setColor(GRAY);
-        text.append("[\uD83D\uDD0D]")
+        text.append("[☀]")
             .hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of(isSearch ? "Search for another query." : "Search for a command.").setColor(GRAY))
             .clickEvent(Text.ClickAction.SUGGEST_COMMAND, "/fcmd " + (context.hasFlag("s") ? "-s " : "") + (isSearch && context.hasFlag("c") ? "-c " : ""));
         text.append(" =").setColor(GRAY);

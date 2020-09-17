@@ -13,7 +13,7 @@ public class PageFlag extends Flag<Integer> {
     private final CommandStoreModule module;
     
     public PageFlag(CommandStoreModule module) {
-        super(Integer.class, "Specify a page number to search.", "-p <pageNum>", "p");
+        super(Integer.class, "Specify a page number to search.", "-page <pageNum>", "page");
         this.module = module;
     }
     

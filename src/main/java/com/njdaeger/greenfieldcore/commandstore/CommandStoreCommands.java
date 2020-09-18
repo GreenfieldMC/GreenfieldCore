@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -246,9 +247,12 @@ public class CommandStoreCommands {
         int maxPage = (int)Math.ceil(storage.getCommands().size()/8.);
         if (page < 1 || maxPage < page) context.error(RED + "There are no more pages to display.");
         
-        List<AbstractCommandStorage.Command> commands;
-        if (context.hasFlag("command")) commands = storage.getCommands().stream().sorted(Comparator.comparingInt(c -> StringUtils.getLevenshteinDistance(c.getCommand().toUpperCase(), context.joinArgs().toUpperCase()))).skip((page-1)*8).limit(8).collect(Collectors.toList());
-        else commands = storage.getCommands().stream().sorted(Comparator.comparingInt(c -> StringUtils.getLevenshteinDistance(c.getDescription().toUpperCase(), context.joinArgs().toUpperCase()))).skip((page-1)*8).limit(8).collect(Collectors.toList());
+        Function<AbstractCommandStorage.Command, String> command = (c) -> context.hasFlag("command") ? c.getCommand().toUpperCase() : c.getDescription().toUpperCase();
+        List<AbstractCommandStorage.Command> commands = storage.getCommands().stream().sorted(Comparator.comparingInt(c -> {
+            int lev = StringUtils.getLevenshteinDistance(command.apply((AbstractCommandStorage.Command)c), context.joinArgs().toUpperCase());
+            int index = command.apply((AbstractCommandStorage.Command)c).indexOf(context.joinArgs().toUpperCase());
+            return lev > index ? index : lev;
+        }).reversed()).skip((page-1)*8).limit(8).collect(Collectors.toList());
         
         // === CommandStorage --- User === Search Query ===
         Text.TextSection text = Text.of("=== ").setColor(GRAY).append("CommandStorage ").setColor(LIGHT_PURPLE)
@@ -302,13 +306,13 @@ public class CommandStoreCommands {
     
         String nextPage = isSearch ? "/fcmd -page " : "/lcmd ";
         
-        if (page > 1) text.append("|<--").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 1 + " " + svr).append(" ").append("<-").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + (page - 1) + " " + svr);
-        else text.append("|<--").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + " " + svr).append(" ").append("<-").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + " " + svr);
+        if (page > 1) text.append("|<--").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 1 + " " + svr + (isSearch ? context.joinArgs() : "")).append(" ").append("<-").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + (page - 1) + " " + svr + (isSearch ? context.joinArgs() : ""));
+        else text.append("|<--").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + " " + svr + (isSearch ? context.joinArgs() : "")).append(" ").append("<-").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + " " + svr + (isSearch ? context.joinArgs() : ""));
         text.append(" ==== ").setColor(GRAY);
         text.append(" [" + formatPageNum(page, maxPage) + "]").setColor(LIGHT_PURPLE);
         text.append(" ==== ").setColor(GRAY);
-        if (maxPage <= page) text.append("->").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + " " + svr).append(" ").append("-->|").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0);
-        else text.append("->").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + (page + 1) + " " + svr).append(" ").append("-->|").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + maxPage + " " + svr);
+        if (maxPage <= page) text.append("->").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + " " + svr + (isSearch ? context.joinArgs() : "")).append(" ").append("-->|").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + 0 + svr + (isSearch ? context.joinArgs() : ""));
+        else text.append("->").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + (page + 1) + " " + svr + (isSearch ? context.joinArgs() : "")).append(" ").append("-->|").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, nextPage + maxPage + " " + svr + (isSearch ? context.joinArgs() : ""));
         text.append(" === ").setColor(GRAY);
         text.append("[☀]")
             .hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of(isSearch ? "Search for another query." : "Search for a command.").setColor(GRAY))

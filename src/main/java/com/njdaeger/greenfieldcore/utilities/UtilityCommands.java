@@ -1,6 +1,7 @@
 package com.njdaeger.greenfieldcore.utilities;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
+import com.njdaeger.greenfieldcore.Util;
 import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.command.TabContext;
@@ -27,7 +28,10 @@ public class UtilityCommands {
 
      */
 
-    public UtilityCommands(GreenfieldCore plugin) {
+    private final UtilitiesModule module;
+
+    public UtilityCommands(UtilitiesModule module, GreenfieldCore plugin) {
+        this.module = module;
         CommandBuilder.of("nv")
                 .permissions("greenfieldcore.nightvision")
                 .usage("/nv")
@@ -45,6 +49,15 @@ public class UtilityCommands {
                 .max(3)
                 .min(3)
                 .build().register(plugin);
+
+        CommandBuilder.of("badblue")
+                .permissions("greenfieldcore.badblue")
+                .usage("/badblue")
+                .description("Nothing")
+                .executor(this::badBlue)
+                .max(0)
+                .build().register(plugin);
+
     }
 
     private void nightVision(CommandContext context) throws PDKCommandException {
@@ -72,6 +85,12 @@ public class UtilityCommands {
         context.completionIf(p -> context.getLength() < 3, Stream.of(LengthType.values()).map(LengthType::name).map(String::toLowerCase).toArray(String[]::new));
         String current = context.getCurrent();
         context.completionAt(2, current + "1", current + "2", current + "3", current + "4", current + "5", current + "6", current + "7", current + "8", current + "9", current + "0", (context.getCurrent().contains(".") ? "" : current + "."));
+    }
+
+    private void badBlue(CommandContext context) throws PDKCommandException {
+        if (context.getSender().getName().equalsIgnoreCase("Bluecolty")) context.error("Unknown command. Try /help for a list of commands.");
+        context.send(LIGHT_PURPLE  + "[Utilities] " + GRAY + "Bad blue is now " + (module.isBadBlue() ? "disabled." : "enabled."));
+        module.setBadBlue(!module.isBadBlue());
     }
 
 }

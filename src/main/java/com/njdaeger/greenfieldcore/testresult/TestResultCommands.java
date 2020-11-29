@@ -70,15 +70,16 @@ public class TestResultCommands {
 
     private void testInfo(CommandContext context) {
         context.send(LIGHT_PURPLE + "[TestInfo] TestBuild rules to follow");
-        context.send(LIGHT_PURPLE + "1. " + GRAY + "No hypermodern buildings.");
-        context.send(LIGHT_PURPLE + "2. " + GRAY + "Max floor height of a house is 3 floors (excluding basement). Max floor height of a house is 5 floors (excluding basement).");
+        context.send(LIGHT_PURPLE + "1. " + GRAY + "Absolutely no hypermodern buildings.");
+        context.send(LIGHT_PURPLE + "2. " + GRAY + "Maximum number of floors in a house is 3. (Excluding basement)");
         context.send(LIGHT_PURPLE + "3. " + GRAY + "Interior must be completed.");
-        context.send(LIGHT_PURPLE + "4. " + GRAY + "Codes (/codes) must be followed");
-        context.send(LIGHT_PURPLE + "5. " + GRAY + "@ an administrator in Discord when your build is complete.");
-        context.send(LIGHT_PURPLE + "6. " + GRAY + "Don't become inactive for several months during a test build.");
-        context.send(LIGHT_PURPLE + "7. " + GRAY + "You may build within and on the wooden logs, but do not exceed the plot limit.");
+        context.send(LIGHT_PURPLE + "4. " + GRAY + "All codes (/codes, or acceptance message) must be followed. You may reference these during your test.");
+        context.send(LIGHT_PURPLE + "5. " + GRAY + "@ an administrator in Discord when you complete your test build.");
+        context.send(LIGHT_PURPLE + "6. " + GRAY + "You have 30 days and 3 attempts to complete your test build. If you take longer than 30 days or fail 3 attempts, you will be remove from the whitelist and will need to reapply.");
+        context.send(LIGHT_PURPLE + "7. " + GRAY + "You may build within the wooden logs. Your house cannot sit on the logs, but your fence can.");
         context.send(LIGHT_PURPLE + "8. " + GRAY + "You may not ask anyone for help nor advice once the test has begun.");
-        context.send(LIGHT_PURPLE + "9. " + GRAY + "Please stick to a house, office, or apartment building unless prior arrangements were made.");
+        context.send(LIGHT_PURPLE + "9. " + GRAY + "You are to build an American styled house from any era. (Keep it realistic to what you would find in a typical, American, city.");
+        context.send(LIGHT_PURPLE + "10. " + GRAY + "You may use a google earth/maps reference for your test build.");
     }
     
     private void pass(CommandContext context) throws PDKCommandException {

@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.commandstore;
 
+import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.command.TabContext;
 import com.njdaeger.pdk.command.exception.ArgumentParseException;
@@ -10,9 +11,9 @@ import java.util.stream.IntStream;
 
 public class PageFlag extends Flag<Integer> {
     
-    private final CommandStoreModule module;
+    private final Module module;
     
-    public PageFlag(CommandStoreModule module) {
+    public PageFlag(Module module) {
         super(Integer.class, "Specify a page number to search.", "-page <pageNum>", "page");
         this.module = module;
     }
@@ -30,7 +31,9 @@ public class PageFlag extends Flag<Integer> {
     
     @Override
     public void complete(TabContext context) throws PDKCommandException {
-        AbstractCommandStorage storage = (context.hasFlag("s") || context.isConsole()) && context.hasPermission("greenfieldcore.commandstorage.search.server") ? module.getServerStorage() : module.getUserStorage(context.asPlayer().getUniqueId());
-        context.completion(IntStream.rangeClosed(1, (int)Math.ceil(storage.getCommands().size()/8.)).mapToObj(String::valueOf).toArray(String[]::new));
+        if (module instanceof CommandStoreModule) {
+            AbstractCommandStorage storage = (context.hasFlag("s") || context.isConsole()) && context.hasPermission("greenfieldcore.commandstorage.search.server") ? ((CommandStoreModule) module).getServerStorage() : ((CommandStoreModule) module).getUserStorage(context.asPlayer().getUniqueId());
+            context.completion(IntStream.rangeClosed(1, (int)Math.ceil(storage.getCommands().size()/8.)).mapToObj(String::valueOf).toArray(String[]::new));
+        }
     }
 }

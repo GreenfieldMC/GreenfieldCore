@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore;
 
 import com.njdaeger.greenfieldcore.codes.CodesModule;
 import com.njdaeger.greenfieldcore.commandstore.CommandStoreModule;
+import com.njdaeger.greenfieldcore.hotspots.HotspotModule;
 import com.njdaeger.greenfieldcore.openserver.OpenServerModule;
 import com.njdaeger.greenfieldcore.paintingswitch.PaintingSwitchModule;
 import com.njdaeger.greenfieldcore.testresult.TestResultModule;
@@ -17,7 +18,8 @@ public final class GreenfieldCore extends JavaPlugin {
     private final UtilitiesModule utilitiesModule = new UtilitiesModule(this);
     private final MCLinkIntegration mcLinkModule = new MCLinkIntegration(this);
     private final CommandStoreModule storeModule = new CommandStoreModule(this);
-    
+    private final HotspotModule hotspotModule = new HotspotModule(this);
+
     @Override
     public void onEnable() {
         openServerModule.onEnable();
@@ -29,6 +31,7 @@ public final class GreenfieldCore extends JavaPlugin {
         utilitiesModule.onEnable();
         mcLinkModule.onEnable();
         storeModule.onEnable();
+        hotspotModule.onEnable();
     }
 
     @Override
@@ -37,5 +40,6 @@ public final class GreenfieldCore extends JavaPlugin {
         openServerModule.onDisable();
         codesModule.onDisable();
         storeModule.onDisable();
+        hotspotModule.onDisable();
     }
 }

@@ -107,7 +107,7 @@ public class UtilityCommands {
         voidee.teleport(new Location(voidee.getLocation().getWorld(), voidee.getLocation().getX(), -10000000, voidee.getLocation().getZ()));
         Bukkit.getScheduler().runTaskLater(context.getPlugin(), () -> {
             voidee.teleport(new Location(voidee.getLocation().getWorld(), voidee.getLocation().getX(), -20000000, voidee.getLocation().getZ()));
-        }, 2700);
+        }, 54);
     }
 
     private void badBlue(CommandContext context) throws PDKCommandException {

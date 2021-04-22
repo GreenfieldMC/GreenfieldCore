@@ -2,10 +2,13 @@ package com.njdaeger.greenfieldcore.utilities;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Util;
+import com.njdaeger.greenfieldcore.testresult.PlayerParser;
 import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.command.TabContext;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
@@ -58,6 +61,18 @@ public class UtilityCommands {
                 .max(0)
                 .build().register(plugin);
 
+        CommandBuilder.of("void")
+                .permissions("greenfieldcore.void")
+                .usage("/void <player>")
+                .description("Void your friends!")
+                .executor(this::voidCommand)
+                .completer(c -> {
+                    c.playerCompletionAt(0);
+                })
+                .max(1)
+                .min(1)
+                .build().register(plugin);
+
     }
 
     private void nightVision(CommandContext context) throws PDKCommandException {
@@ -85,6 +100,14 @@ public class UtilityCommands {
         context.completionIf(p -> context.getLength() < 3, Stream.of(LengthType.values()).map(LengthType::name).map(String::toLowerCase).toArray(String[]::new));
         String current = context.getCurrent();
         context.completionAt(2, current + "1", current + "2", current + "3", current + "4", current + "5", current + "6", current + "7", current + "8", current + "9", current + "0", (context.getCurrent().contains(".") ? "" : current + "."));
+    }
+
+    private void voidCommand(CommandContext context) throws PDKCommandException {
+        Player voidee = context.argAt(0, PlayerParser.class);
+        voidee.teleport(new Location(voidee.getLocation().getWorld(), voidee.getLocation().getX(), -10000000, voidee.getLocation().getZ()));
+        Bukkit.getScheduler().runTaskLater(context.getPlugin(), () -> {
+            voidee.teleport(new Location(voidee.getLocation().getWorld(), voidee.getLocation().getX(), -20000000, voidee.getLocation().getZ()));
+        }, 2700);
     }
 
     private void badBlue(CommandContext context) throws PDKCommandException {

@@ -11,11 +11,8 @@ import org.dynmap.markers.MarkerSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Enumeration;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 public class HotspotModule extends Module {

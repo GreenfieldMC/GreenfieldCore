@@ -6,7 +6,7 @@
 
     <groupId>com.njdaeger</groupId>
     <artifactId>GreenfieldCore</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -24,6 +24,10 @@
         <repository>
             <id>dynmap</id>
             <url>http://repo.mikeprimm.com/</url>
+        </repository>
+        <repository>
+            <id>coreprotect</id>
+            <url>https://maven.playpro.com/</url>
         </repository>
     </repositories>
 
@@ -78,6 +82,18 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>net.coreprotect</groupId>
+            <artifactId>coreprotect</artifactId>
+            <version>19.5</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>*</artifactId>
+                    <groupId>*</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>us.dynmap</groupId>
             <artifactId>dynmap-api</artifactId>

@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.hotspots;
 
+import com.earth2me.essentials.Essentials;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.commandstore.PageFlag;
 import com.njdaeger.pdk.command.CommandBuilder;
@@ -8,7 +9,6 @@ import com.njdaeger.pdk.command.TabContext;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.Text;
 import org.bukkit.map.MinecraftFont;
-import org.dynmap.markers.MarkerIcon;
 
 import java.util.Comparator;
 import java.util.List;
@@ -71,6 +71,7 @@ public class HotspotCommands {
             Hotspot hs = storage.getHotspot(context.integerAt(1));
             if (hs == null) context.error(RED + "Unknown hotspot ID: " + GRAY + "#" + context.integerAt(1));
             else {
+                Essentials.getPlugin(Essentials.class).getUser(context.asPlayer().getUniqueId()).setLastLocation(context.getLocation());
                 context.asPlayer().teleport(hs.getLocation());
                 context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully teleported to " + hs.getName());
                 return;
@@ -80,6 +81,7 @@ public class HotspotCommands {
         List<Hotspot> hotspots = storage.getHotspots(context.joinArgs(1));
         if (hotspots.isEmpty()) context.error(RED + "Unknown hotspot name: " + GRAY + context.joinArgs(1));
         else if (hotspots.size() == 1) {
+            Essentials.getPlugin(Essentials.class).getUser(context.asPlayer().getUniqueId()).setLastLocation(context.getLocation());
             context.asPlayer().teleport(hotspots.get(0).getLocation());
             context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully teleported to " + hotspots.get(0).getName());
         } else {

@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore;
 
+import com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule;
 import com.njdaeger.greenfieldcore.codes.CodesModule;
 import com.njdaeger.greenfieldcore.commandstore.CommandStoreModule;
 import com.njdaeger.greenfieldcore.hotspots.HotspotModule;
@@ -27,6 +28,7 @@ public final class GreenfieldCore extends JavaPlugin {
     private final CommandStoreModule storeModule = new CommandStoreModule(this);
     private final HotspotModule hotspotModule = new HotspotModule(this);
     private final PowerShovelModule powerShovelModule = new PowerShovelModule(this);
+    private final AdvancedBuildModule advancedBuildModule = new AdvancedBuildModule(this);
 
     @Override
     public void onEnable() {
@@ -48,6 +50,7 @@ public final class GreenfieldCore extends JavaPlugin {
         storeModule.onEnable();
         hotspotModule.onEnable();
         powerShovelModule.onEnable();
+        advancedBuildModule.onEnable();
     }
 
     @Override
@@ -58,6 +61,7 @@ public final class GreenfieldCore extends JavaPlugin {
         storeModule.onDisable();
         hotspotModule.onDisable();
         powerShovelModule.onDisable();
+        advancedBuildModule.onDisable();
     }
 
     public CoreProtectAPI getCoreApi() {

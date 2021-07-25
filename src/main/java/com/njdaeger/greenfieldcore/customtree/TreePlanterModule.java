@@ -2,8 +2,6 @@ package com.njdaeger.greenfieldcore.customtree;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import org.bukkit.Bukkit;
 
 public class TreePlanterModule extends Module {
 

@@ -3,25 +3,27 @@ package com.njdaeger.greenfieldcore.advancedbuild;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.pdk.command.CommandBuilder;
-import com.njdaeger.pdk.command.CommandContext;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Waterlogged;
+import org.bukkit.block.data.type.Candle;
 import org.bukkit.block.data.type.CommandBlock;
 import org.bukkit.block.data.type.Jigsaw;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+
+import java.util.List;
+import java.util.function.BiPredicate;
 
 import static org.bukkit.ChatColor.GRAY;
 import static org.bukkit.ChatColor.LIGHT_PURPLE;
@@ -29,6 +31,9 @@ import static org.bukkit.ChatColor.LIGHT_PURPLE;
 public class AdvancedBuildModule extends Module implements Listener {
 
     private AdvBuildConfig config;
+    private List<BiPredicate<PlayerInteractEvent, Material>> ignoreList = List.of(
+            (playerInteractEvent, handMaterial) -> Tag.BEDS.isTagged(handMaterial) || Tag.TRAPDOORS.isTagged(handMaterial)
+    );
 
     public AdvancedBuildModule(GreenfieldCore plugin) {
         super(plugin);
@@ -39,7 +44,10 @@ public class AdvancedBuildModule extends Module implements Listener {
         this.config = new AdvBuildConfig(plugin);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         CommandBuilder.of("advbuild", "avb")
-                .executor(this::advBuildCmd)
+                .executor(context -> {
+                    config.setEnabled(context.asPlayer(), !config.isEnabledFor(context.asPlayer()));
+                    context.send(LIGHT_PURPLE + "[AdvBuild] " + GRAY + (config.isEnabledFor(context.asPlayer()) ? "Enabled Advanced Building." : "Disabled Advanced Building."));
+                })
                 .permissions("greenfieldcore.advbuild")
                 .max(0)
                 .usage("/advbuild")
@@ -52,9 +60,44 @@ public class AdvancedBuildModule extends Module implements Listener {
         config.save();
     }
 
-    private void advBuildCmd(CommandContext context) {
-        config.setEnabled(context.asPlayer(), !config.isEnabledFor(context.asPlayer()));
-        context.send(LIGHT_PURPLE + "[AdvBuild] " + GRAY + (config.isEnabledFor(context.asPlayer()) ? "Enabled Advanced Building." : "Disabled Advanced Building."));
+    @EventHandler
+    public void blockPlace(BlockPlaceEvent e) {
+        Material newType = switch (e.getBlockPlaced().getType()) {
+            case COPPER_BLOCK -> Material.WAXED_COPPER_BLOCK;
+            case EXPOSED_COPPER -> Material.WAXED_EXPOSED_COPPER;
+            case WEATHERED_COPPER -> Material.WAXED_WEATHERED_COPPER;
+            case OXIDIZED_COPPER -> Material.WAXED_OXIDIZED_COPPER;
+            case CUT_COPPER -> Material.WAXED_CUT_COPPER;
+            case EXPOSED_CUT_COPPER ->  Material.WAXED_EXPOSED_CUT_COPPER;
+            case WEATHERED_CUT_COPPER -> Material.WAXED_WEATHERED_CUT_COPPER;
+            case OXIDIZED_CUT_COPPER -> Material.WAXED_OXIDIZED_CUT_COPPER;
+            case CUT_COPPER_STAIRS -> Material.WAXED_CUT_COPPER_STAIRS;
+            case EXPOSED_CUT_COPPER_STAIRS -> Material.WAXED_EXPOSED_CUT_COPPER_STAIRS;
+            case WEATHERED_CUT_COPPER_STAIRS -> Material.WAXED_WEATHERED_CUT_COPPER_STAIRS;
+            case OXIDIZED_CUT_COPPER_STAIRS -> Material.WAXED_OXIDIZED_CUT_COPPER_STAIRS;
+            case CUT_COPPER_SLAB -> Material.WAXED_CUT_COPPER_SLAB;
+            case EXPOSED_CUT_COPPER_SLAB -> Material.WAXED_EXPOSED_CUT_COPPER_SLAB;
+            case WEATHERED_CUT_COPPER_SLAB -> Material.WAXED_WEATHERED_CUT_COPPER_SLAB;
+            case OXIDIZED_CUT_COPPER_SLAB -> Material.WAXED_OXIDIZED_CUT_COPPER_SLAB;
+            default -> null;
+        };
+        if (newType != null) {
+            BlockData newData = Bukkit.createBlockData(e.getBlockPlaced().getBlockData().getAsString().replace("minecraft:", "minecraft:waxed_"));
+            Location loc = e.getBlock().getLocation().clone();
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (switch (loc.getBlock().getType()) {
+                    case COPPER_BLOCK, EXPOSED_COPPER, WEATHERED_COPPER, OXIDIZED_COPPER -> false;
+                    case CUT_COPPER, EXPOSED_CUT_COPPER, WEATHERED_CUT_COPPER, OXIDIZED_CUT_COPPER -> false;
+                    case CUT_COPPER_STAIRS, EXPOSED_CUT_COPPER_STAIRS, WEATHERED_CUT_COPPER_STAIRS, OXIDIZED_CUT_COPPER_STAIRS -> false;
+                    case CUT_COPPER_SLAB, EXPOSED_CUT_COPPER_SLAB, WEATHERED_CUT_COPPER_SLAB, OXIDIZED_CUT_COPPER_SLAB -> false;
+                    default -> true;
+                }) return;
+                plugin.getCoreApi().logRemoval(e.getPlayer().getName(), loc, loc.getBlock().getType(), loc.getBlock().getBlockData());
+                loc.getBlock().setType(newType, false);
+                loc.getBlock().setBlockData(newData, false);
+                plugin.getCoreApi().logPlacement(e.getPlayer().getName(), e.getBlock().getLocation(), newType, newData);
+            }, 1);
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -68,8 +111,14 @@ public class AdvancedBuildModule extends Module implements Listener {
             Location placeableLocation = new Location(e.getPlayer().getWorld(), clickedBlock.getX() + face.getDirection().getBlockX(), clickedBlock.getY() + face.getDirection().getBlockY(), clickedBlock.getZ() + face.getDirection().getBlockZ());
             Material handMat = e.getPlayer().getInventory().getItemInMainHand().getType();
 
-            if (Tag.BEDS.isTagged(handMat)) return;
-            if (placeBlock(placeableLocation, handMat, e.getPlayer(), face)) e.getPlayer().playSound(placeableLocation, Sound.ENTITY_ITEM_PICKUP, 1.1f, 2.f);
+            //So we can add as many negations as we want later, we just make it a list of negation bipredicates
+            if (ignoreList.stream().anyMatch(biPred -> biPred.test(e, handMat))) return;
+            if (placeBlock(clickedBlock.getLocation(), placeableLocation, handMat, e.getPlayer(), face)) {
+                e.getPlayer().playSound(placeableLocation, Sound.ENTITY_ITEM_PICKUP, 1.1f, 2.f);
+                e.setCancelled(true);
+                e.setUseInteractedBlock(Event.Result.DENY);
+                e.setUseItemInHand(Event.Result.DENY);
+            }
 
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getPlayer().isSneaking()) {
             Block clickedBlock = e.getClickedBlock();
@@ -81,10 +130,10 @@ public class AdvancedBuildModule extends Module implements Listener {
         }
     }
 
-    private boolean placeBlock(Location location, Material material, Player player, BlockFace clickedFace) {
-        if (!canPlaceAt(location, material, player)) return false;
-        Material oldType = location.getBlock().getType();
-        BlockData oldData = location.getBlock().getBlockData().clone();
+    private boolean placeBlock(Location clickedBlockLocation, Location placementLocation, Material material, Player player, BlockFace clickedFace) {
+        if (!canPlaceAt(placementLocation, material, player)) return false;
+        Material oldType = placementLocation.getBlock().getType();
+        BlockData oldData = placementLocation.getBlock().getBlockData().clone();
         Material pairedOldType = null;
         BlockData pairedOldData = null;
 
@@ -96,19 +145,25 @@ public class AdvancedBuildModule extends Module implements Listener {
         boolean blockPlaced = false;
         if (data instanceof Bisected) {
             pairedData = material.createBlockData();
-            pairedLocation = location.clone().add(0, 1, 0);
+            pairedLocation = placementLocation.clone().add(0, 1, 0);
 
             pairedOldType = pairedLocation.getBlock().getType();
             pairedOldData = pairedLocation.getBlock().getBlockData().clone();
 
             ((Bisected)pairedData).setHalf(((Bisected) data).getHalf() == Bisected.Half.BOTTOM ? Bisected.Half.TOP : Bisected.Half.BOTTOM);
-            location.getBlock().setType(material, false);
+            placementLocation.getBlock().setType(material, false);
             pairedLocation.getBlock().setType(material, false);
             pairedLocation.getBlock().setBlockData(pairedData, false);
             blockPlaced = true;
         }
 
         switch (material) {
+            case AIR:
+                if (clickedBlockLocation.getBlock().getBlockData() instanceof Candle c) {
+                    c.setLit(!c.isLit());
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> clickedBlockLocation.getBlock().setBlockData(c, false), 2);
+                    return true;
+                }
             case DEAD_BRAIN_CORAL_FAN:
             case DEAD_BUBBLE_CORAL_FAN:
             case DEAD_FIRE_CORAL_FAN:
@@ -122,14 +177,14 @@ public class AdvancedBuildModule extends Module implements Listener {
                         ((Directional) data).setFacing(clickedFace);
                     }
                 }
-                location.getBlock().setType(material, false);
-                location.getBlock().setBlockData(data, false);
+                placementLocation.getBlock().setType(material, false);
+                placementLocation.getBlock().setBlockData(data, false);
                 blockPlaced = true;
                 break;
             case OBSERVER:
                 ((Directional) data).setFacing(get3DDirection(player).getOppositeFace());
-                location.getBlock().setType(material, false);
-                location.getBlock().setBlockData(data, false);
+                placementLocation.getBlock().setType(material, false);
+                placementLocation.getBlock().setBlockData(data, false);
                 return true;
             case OAK_SAPLING:
             case SPRUCE_SAPLING:
@@ -164,48 +219,106 @@ public class AdvancedBuildModule extends Module implements Listener {
             case BAMBOO:
             case CACTUS:
             case LILY_PAD:
-                location.getBlock().setType(material, false);
-                location.getBlock().setBlockData(data, false);
+            case SPORE_BLOSSOM:
+            case HANGING_ROOTS:
+            case NETHER_WART:
+                placementLocation.getBlock().setType(material, false);
+                placementLocation.getBlock().setBlockData(data, false);
                 blockPlaced = true;
+                //TODO torches/levers/buttons
         }
 
-        if (data instanceof Jigsaw) {
-            if (location.getBlock().getType() == material) return false;
-            ((Jigsaw) data).setOrientation(getJigsawOrientation(clickedFace, player));
-            location.getBlock().setType(material, false);
-            location.getBlock().setBlockData(data, false);
+        if (data instanceof Candle c) {
+            switch (material) {
+                case LIME_CANDLE, PINK_CANDLE, GRAY_CANDLE, LIGHT_GRAY_CANDLE, RED_CANDLE, PURPLE_CANDLE:
+                    switch (clickedFace) {
+                        case EAST -> c.setCandles(1);
+                        case NORTH -> c.setCandles(2);
+                        case WEST -> c.setCandles(3);
+                        case SOUTH -> c.setCandles(4);
+                        case UP, DOWN -> {
+                            switch (player.getFacing()) {
+                                case EAST -> c.setCandles(1);
+                                case NORTH -> c.setCandles(2);
+                                case WEST -> c.setCandles(3);
+                                case SOUTH -> c.setCandles(4);
+                            }
+                        }
+                    }
+                    break;
+                case CYAN_CANDLE:
+                    switch (clickedFace) {
+                        case EAST, WEST -> c.setCandles(1);
+                        case NORTH, SOUTH -> c.setCandles(2);
+                        case UP, DOWN -> {
+                            switch (player.getFacing()) {
+                                case EAST, WEST -> c.setCandles(1);
+                                case NORTH, SOUTH -> c.setCandles(2);
+                            }
+                        }
+                    }
+            }
+            placementLocation.getBlock().setType(material, false);
+            placementLocation.getBlock().setBlockData(data, false);
+            blockPlaced = true;
+
+
+            /*
+            directional:
+
+            1 candle = light towards east
+            2 candles = light towards north
+            3 candles = light towards west
+            4 candles = light towards west
+
+            - lime
+            - pink
+            - gray
+            - light gray
+            - cyan
+            - red
+            - purple
+             */
+
+        }
+
+        if (data instanceof Jigsaw j) {
+            if (placementLocation.getBlock().getType() == material) return false;
+            j.setOrientation(getJigsawOrientation(clickedFace, player));
+            placementLocation.getBlock().setType(material, false);
+            placementLocation.getBlock().setBlockData(data, false);
             return true;
         }
-        if (data instanceof CommandBlock) {
-            ((CommandBlock) data).setFacing(get3DDirection(player));
-            location.getBlock().setType(material, false);
-            location.getBlock().setBlockData(data, false);
+        if (data instanceof CommandBlock c) {
+            c.setFacing(get3DDirection(player));
+            placementLocation.getBlock().setType(material, false);
+            placementLocation.getBlock().setBlockData(data, false);
             return true;
         }
 
-        if (data instanceof Directional && !material.name().endsWith("_WALL_FAN") && !material.name().contains("SIGN")) {
+        if (data instanceof Directional d && !material.name().endsWith("_WALL_FAN") && !material.name().contains("SIGN")) {
             if (pairedData != null) {
-                ((Directional)pairedData).setFacing(facing);
+                d.setFacing(facing);
                 pairedLocation.getBlock().setBlockData(pairedData, false);
             }
-            ((Directional) data).setFacing(facing);
-            location.getBlock().setType(material, false);
-            location.getBlock().setBlockData(data, false);
+            d.setFacing(facing);
+            placementLocation.getBlock().setType(material, false);
+            placementLocation.getBlock().setBlockData(data, false);
             blockPlaced = true;
         }
-        if (data instanceof Waterlogged && !material.name().contains("SIGN")) {
+        if (data instanceof Waterlogged w && !material.name().contains("SIGN")) {
             if (pairedData != null) {
-                ((Waterlogged) pairedData).setWaterlogged(false);
+                w.setWaterlogged(false);
                 pairedLocation.getBlock().setBlockData(pairedData, false);
             }
-            location.getBlock().setType(material, false);
-            ((Waterlogged) data).setWaterlogged(false);
-            location.getBlock().setBlockData(data, false);
+            placementLocation.getBlock().setType(material, false);
+            w.setWaterlogged(false);
+            placementLocation.getBlock().setBlockData(data, false);
             blockPlaced = true;
         }
         if (blockPlaced) {
-            plugin.getCoreApi().logRemoval(plugin.getName(), location, oldType, oldData);
-            plugin.getCoreApi().logPlacement(player.getName(), location, location.getBlock().getType(), data);
+            plugin.getCoreApi().logRemoval(plugin.getName(), placementLocation, oldType, oldData);
+            plugin.getCoreApi().logPlacement(player.getName(), placementLocation, placementLocation.getBlock().getType(), data);
             if (pairedData != null) {
                 plugin.getCoreApi().logRemoval(plugin.getName(), pairedLocation, pairedOldType, pairedOldData);
                 plugin.getCoreApi().logPlacement(player.getName(), pairedLocation, pairedLocation.getBlock().getType(), pairedData);
@@ -222,40 +335,24 @@ public class AdvancedBuildModule extends Module implements Listener {
     }
 
     private Jigsaw.Orientation getJigsawOrientation(BlockFace clickedFace, Player player) {
-        switch (clickedFace) {
-            case NORTH:
-                return Jigsaw.Orientation.NORTH_UP;
-            case EAST:
-                return Jigsaw.Orientation.EAST_UP;
-            case SOUTH:
-                return Jigsaw.Orientation.SOUTH_UP;
-            case WEST:
-                return Jigsaw.Orientation.WEST_UP;
-            case DOWN:
-                switch (player.getFacing()) {
-                    case NORTH:
-                        return Jigsaw.Orientation.DOWN_NORTH;
-                    case EAST:
-                        return Jigsaw.Orientation.DOWN_EAST;
-                    case SOUTH:
-                        return Jigsaw.Orientation.DOWN_SOUTH;
-                    case WEST:
-                        return Jigsaw.Orientation.DOWN_WEST;
-                }
-            case UP:
-                switch (player.getFacing()) {
-                    case NORTH:
-                        return Jigsaw.Orientation.UP_NORTH;
-                    case EAST:
-                        return Jigsaw.Orientation.UP_EAST;
-                    case SOUTH:
-                        return Jigsaw.Orientation.UP_SOUTH;
-                    case WEST:
-                        return Jigsaw.Orientation.UP_WEST;
-                }
-            default:
-                return Jigsaw.Orientation.NORTH_UP;
-        }
+        return switch (clickedFace) {
+            case EAST -> Jigsaw.Orientation.EAST_UP;
+            case SOUTH -> Jigsaw.Orientation.SOUTH_UP;
+            case WEST -> Jigsaw.Orientation.WEST_UP;
+            case DOWN -> switch (player.getFacing()) {
+                case EAST -> Jigsaw.Orientation.DOWN_EAST;
+                case SOUTH -> Jigsaw.Orientation.DOWN_SOUTH;
+                case WEST -> Jigsaw.Orientation.DOWN_WEST;
+                default -> Jigsaw.Orientation.NORTH_UP;
+            };
+            case UP -> switch (player.getFacing()) {
+                case EAST -> Jigsaw.Orientation.UP_EAST;
+                case SOUTH -> Jigsaw.Orientation.UP_SOUTH;
+                case WEST -> Jigsaw.Orientation.UP_WEST;
+                default -> Jigsaw.Orientation.UP_NORTH;
+            };
+            default -> Jigsaw.Orientation.NORTH_UP;
+        };
     }
 
     private boolean canPlaceAt(Location location, Material material, Player player) {

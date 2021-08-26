@@ -54,7 +54,6 @@ public class CandleHandler extends BlockHandler {
                 } else data = candleSessionData;
             }
             case CYAN_CANDLE -> {
-                //todo work on cyan candle session
                 boolean northSouth;
                 if (clickedFace == BlockFace.UP || clickedFace == BlockFace.DOWN)
                     northSouth = (player.getFacing() == BlockFace.NORTH || player.getFacing() == BlockFace.SOUTH);
@@ -62,8 +61,8 @@ public class CandleHandler extends BlockHandler {
                 candleSessionData = session.getCandleData(placeMaterial, northSouth);
                 if (candleSessionData == null) {
                     data.setLit(true);
-                    data.setCandles(northSouth ? 1 : 2);
                 } else data = candleSessionData;
+                data.setCandles(northSouth ? 1 : 2);
             }
             case LIME_CANDLE, PINK_CANDLE, GRAY_CANDLE, RED_CANDLE, PURPLE_CANDLE, LIGHT_GRAY_CANDLE -> {
                 candleSessionData = session.getCandleData(placeMaterial, false);
@@ -97,13 +96,13 @@ public class CandleHandler extends BlockHandler {
 
     public static class CandleSession {
 
-        private Map<Material, Candle> dataMap;
+        private final Map<Material, Candle> dataMap;
 
         //Cyan candles in the resource pack are a bit of a special candle. It is an X/Z axis based directional candle- meaning, it only has 2 direction variants. Per variant, it has
         //2 different states- dirty or clean. The rest of the candles do not have this quality, so there needs to be a special case for cyan.
         //TRUE indicates North/South Orientation
         //FALSE indicates East/West Orientation
-        private Map<Boolean, Candle> cyanCandleData;
+        private final Map<Boolean, Candle> cyanCandleData;
 
         private CandleSession() {
             dataMap = new HashMap<>();

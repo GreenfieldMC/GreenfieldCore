@@ -9,14 +9,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.Candle;
-import org.bukkit.block.data.type.CommandBlock;
-import org.bukkit.block.data.type.Jigsaw;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,8 +27,8 @@ import static org.bukkit.ChatColor.LIGHT_PURPLE;
 
 public class AdvancedBuildModule extends Module implements Listener {
 
-    private AdvBuildConfig config;;
-    private List<BlockHandler> blockHandlers = List.of(
+    private AdvBuildConfig config;
+    private final List<BlockHandler> blockHandlers = List.of(
             new AirHandler(),
             new BisectedHandler(),
             new CandleHandler(),
@@ -42,7 +36,10 @@ public class AdvancedBuildModule extends Module implements Listener {
             new CoralHandler(),
             new DefaultPlantHandler(),
             new JigsawHandler(),
-            new ObserverHandler()
+            new ObserverHandler(),
+            new DirectionalHandler(),
+            new SwitchHandler(),
+            new TorchHandler()
     );
 
     public AdvancedBuildModule(GreenfieldCore plugin) {
@@ -73,6 +70,13 @@ public class AdvancedBuildModule extends Module implements Listener {
 
     @EventHandler
     public void blockPlace(BlockPlaceEvent e) {
+        switch (e.getBlockPlaced().getType()) {
+            case BUDDING_AMETHYST, SMALL_AMETHYST_BUD, MEDIUM_AMETHYST_BUD, LARGE_AMETHYST_BUD, AMETHYST_CLUSTER -> {
+                e.setBuild(false);
+                e.setCancelled(true);
+                return;
+            }
+        }
         Material newType = switch (e.getBlockPlaced().getType()) {
             case COPPER_BLOCK -> Material.WAXED_COPPER_BLOCK;
             case EXPOSED_COPPER -> Material.WAXED_EXPOSED_COPPER;
@@ -113,7 +117,6 @@ public class AdvancedBuildModule extends Module implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void interact(PlayerInteractEvent e) {
-        //TODO torches/levers/buttons
         if (e.getHand() == EquipmentSlot.OFF_HAND || !config.isEnabledFor(e.getPlayer())) return;
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getPlayer().isSneaking()) {
 

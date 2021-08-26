@@ -46,7 +46,10 @@ public class DefaultPlantHandler extends BlockHandler {
                 Material.SPORE_BLOSSOM,
                 Material.HANGING_ROOTS,
                 Material.NETHER_WART,
-                Material.TWISTING_VINES
+                Material.TWISTING_VINES,
+                Material.AZALEA,
+                Material.FLOWERING_AZALEA,
+                Material.SCAFFOLDING
         );
     }
 

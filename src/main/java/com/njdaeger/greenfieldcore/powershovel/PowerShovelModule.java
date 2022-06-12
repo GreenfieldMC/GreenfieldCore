@@ -14,7 +14,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Skull;
 import org.bukkit.block.data.type.Fence;
 import org.bukkit.block.data.type.Wall;
-import org.bukkit.craftbukkit.libs.org.apache.commons.codec.binary.Base64;
+//import org.bukkit.craftbukkit.libs.org.apache.commons.codec.binary.Base64;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,7 +36,7 @@ public class PowerShovelModule extends Module implements Listener {
     private static final Map<UUID, Long> TIMEOUTS = new HashMap<>();
 
     static {
-        PROFILE.getProperties().put("textures", new Property("textures", new String(Base64.encodeBase64(String.format("{textures:{SKIN:{url:\"%s\"}}}", "http://textures.minecraft.net/texture/633c0bb37ebe1193ee4618103460a7f129277a8c7fd081b6aedb34a92bd5").getBytes()))));
+//        PROFILE.getProperties().put("textures", new Property("textures", new String(Base64.encodeBase64(String.format("{textures:{SKIN:{url:\"%s\"}}}", "http://textures.minecraft.net/texture/633c0bb37ebe1193ee4618103460a7f129277a8c7fd081b6aedb34a92bd5").getBytes()))));
     }
 
     public PowerShovelModule(GreenfieldCore plugin) {
@@ -83,23 +83,23 @@ public class PowerShovelModule extends Module implements Listener {
             }
 
             if (clickedBlock.getBlockData() instanceof Fence) { //if they right click a fence, assume they are placing a transformer
-                plugin.getCoreApi().logRemoval(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
                 Fence fence = (Fence) clickedBlock.getBlockData();
                 fence.setFace(clickedFace, true);
                 clickedBlock.setBlockData(fence, false);
-                plugin.getCoreApi().logPlacement(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
 
                 Location transformerLocation = new Location(clickedBlock.getWorld(), clickedBlock.getX() + clickedFace.getDirection().getBlockX(), clickedBlock.getY(), clickedBlock.getZ()  + clickedFace.getDirection().getBlockZ());
-                plugin.getCoreApi().logRemoval(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
                 transformerLocation.getBlock().setType(Material.MOSSY_COBBLESTONE_WALL, false);
                 Wall wall = (Wall) transformerLocation.getBlock().getBlockData();
                 wall.setUp(true);
                 wall.setHeight(clickedFace.getOppositeFace(), Wall.Height.LOW);
                 transformerLocation.getBlock().setBlockData(wall, false);
-                plugin.getCoreApi().logPlacement(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
 
                 transformerLocation = new Location(transformerLocation.getWorld(), transformerLocation.getX(), transformerLocation.getY() + 1, transformerLocation.getZ());
-                plugin.getCoreApi().logRemoval(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
                 transformerLocation.getBlock().setType(Material.PLAYER_HEAD);
                 Skull skull = (Skull) transformerLocation.getBlock().getState();
 
@@ -114,12 +114,12 @@ public class PowerShovelModule extends Module implements Listener {
                 }
                 skull.update(false, false);
 
-                plugin.getCoreApi().logPlacement(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
             }
 
             else {
                 Location meterLocation = new Location(clickedBlock.getWorld(), clickedBlock.getX() + clickedFace.getDirection().getBlockX(), clickedBlock.getY(), clickedBlock.getZ()  + clickedFace.getDirection().getBlockZ());
-                plugin.getCoreApi().logRemoval(e.getPlayer().getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
                 meterLocation.getBlock().setType(Material.MOSSY_COBBLESTONE_WALL, false);
                 Wall wall = (Wall) meterLocation.getBlock().getBlockData();
                 wall.setUp(true);
@@ -128,7 +128,7 @@ public class PowerShovelModule extends Module implements Listener {
                 if (clickedFace != BlockFace.EAST) wall.setHeight(BlockFace.EAST, Wall.Height.TALL);
                 if (clickedFace != BlockFace.WEST) wall.setHeight(BlockFace.WEST, Wall.Height.TALL);
                 meterLocation.getBlock().setBlockData(wall, false);
-                plugin.getCoreApi().logPlacement(e.getPlayer().getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
             }
         }
     }

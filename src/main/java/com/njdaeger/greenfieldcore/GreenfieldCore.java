@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore;
 
+import com.njdaeger.authenticationhub.AuthenticationHub;
 import com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule;
 import com.njdaeger.greenfieldcore.codes.CodesModule;
 import com.njdaeger.greenfieldcore.commandstore.CommandStoreModule;
@@ -7,6 +8,7 @@ import com.njdaeger.greenfieldcore.hotspots.HotspotModule;
 import com.njdaeger.greenfieldcore.openserver.OpenServerModule;
 import com.njdaeger.greenfieldcore.paintingswitch.PaintingSwitchModule;
 import com.njdaeger.greenfieldcore.powershovel.PowerShovelModule;
+import com.njdaeger.greenfieldcore.redblock.RedblockModule;
 import com.njdaeger.greenfieldcore.testresult.TestResultModule;
 import com.njdaeger.greenfieldcore.utilities.UtilitiesModule;
 import net.coreprotect.CoreProtect;
@@ -24,11 +26,12 @@ public final class GreenfieldCore extends JavaPlugin {
     private final TestResultModule testResultModule = new TestResultModule(this);
     private final PaintingSwitchModule paintingSwitchModule = new PaintingSwitchModule(this);
     private final UtilitiesModule utilitiesModule = new UtilitiesModule(this);
-    private final MCLinkIntegration mcLinkModule = new MCLinkIntegration(this);
+    private final AuthHubIntegration authHubIntegration = new AuthHubIntegration(this);
     private final CommandStoreModule storeModule = new CommandStoreModule(this);
     private final HotspotModule hotspotModule = new HotspotModule(this);
     private final PowerShovelModule powerShovelModule = new PowerShovelModule(this);
     private final AdvancedBuildModule advancedBuildModule = new AdvancedBuildModule(this);
+    private final RedblockModule redblockModule = new RedblockModule(this);
 
     @Override
     public void onEnable() {
@@ -46,11 +49,12 @@ public final class GreenfieldCore extends JavaPlugin {
         testResultModule.onEnable();
         paintingSwitchModule.onEnable();
         utilitiesModule.onEnable();
-        mcLinkModule.onEnable();
+        authHubIntegration.onEnable();
         storeModule.onEnable();
         hotspotModule.onEnable();
         powerShovelModule.onEnable();
         advancedBuildModule.onEnable();
+        redblockModule.onEnable();
     }
 
     @Override
@@ -62,10 +66,15 @@ public final class GreenfieldCore extends JavaPlugin {
         hotspotModule.onDisable();
         powerShovelModule.onDisable();
         advancedBuildModule.onDisable();
+        redblockModule.onDisable();
     }
 
     public CoreProtectAPI getCoreApi() {
         return coreApi;
+    }
+
+    public boolean isCoreProtectEnabled() {
+        return coreApi != null;
     }
 
     private CoreProtectAPI initializeCoreProtect() {

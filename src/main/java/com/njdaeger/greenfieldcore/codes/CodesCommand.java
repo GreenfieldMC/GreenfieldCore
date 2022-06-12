@@ -10,7 +10,6 @@ import com.njdaeger.pdk.utils.ActionBar;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.bukkit.ChatColor.*;
@@ -82,7 +81,7 @@ public class CodesCommand {
         if (context.hasPermission("greenfieldcore.codes.add")) first.add("add");
         if (context.hasPermission("greenfieldcore.codes.remove")) first.add("remove");
         if (context.hasPermission("greenfieldcore.codes.reload")) first.add("reload");
-        if (!config.getCodes().isEmpty()) first.addAll(IntStream.range(1, codes.getCodes().getTotalPages() + 1).mapToObj(String::valueOf).collect(Collectors.toList()));
+        if (!config.getCodes().isEmpty()) first.addAll(IntStream.range(1, codes.getCodes().getTotalPages() + 1).mapToObj(String::valueOf).toList());
         context.completionIf(ctx -> ctx.isLength(1), (f) -> first);
 
         if (context.hasPermission("greenfieldcore.codes.remove") && context.argAt(0).equalsIgnoreCase("remove")) {

@@ -26,8 +26,8 @@ public class HotspotModule extends Module {
 
     @Override
     public void onEnable() {
-        if (Bukkit.getPluginManager().getPlugin("dynmap") == null) {
-            Bukkit.getLogger().warning("Unable to start HotspotModule. Dynmap is not found.");
+        if (Bukkit.getPluginManager().getPlugin("dynmap") == null || Bukkit.getPluginManager().getPlugin("essentials") == null) {
+            Bukkit.getLogger().warning("Unable to start HotspotModule. Dynmap or Essentials was not found.");
             return;
         }
         this.markerApi = ((DynmapAPI)Bukkit.getPluginManager().getPlugin("dynmap")).getMarkerAPI();
@@ -108,7 +108,7 @@ public class HotspotModule extends Module {
 
     @Override
     public void onDisable() {
-        storage.save();
+        if (storage != null) storage.save();
     }
 
     public HotspotStorage getStorage() {

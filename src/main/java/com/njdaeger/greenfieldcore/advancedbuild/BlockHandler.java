@@ -37,8 +37,10 @@ public abstract class BlockHandler {
     }
 
     public final void log(boolean placement, Player player, Block changedBlock) {
-        if (placement) GreenfieldCore.getPlugin(GreenfieldCore.class).getCoreApi().logPlacement(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
-        else GreenfieldCore.getPlugin(GreenfieldCore.class).getCoreApi().logRemoval(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
+        var plugin = GreenfieldCore.getPlugin(GreenfieldCore.class);
+        if (!plugin.isCoreProtectEnabled()) return;
+        if (placement) plugin.getCoreApi().logPlacement(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
+        else plugin.getCoreApi().logRemoval(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
     }
 
     public final Jigsaw.Orientation getJigsawOrientation(BlockFace clickedFace, Player player) {
@@ -66,7 +68,7 @@ public abstract class BlockHandler {
         BlockData data = material.createBlockData();
         if (!location.getBlock().getType().isAir() || location.getBlock().getType().isSolid()) return false;
         if (data instanceof Bisected) {
-            return location.getBlockY() != 255 && (location.clone().add(0, 1, 0).getBlock().getType().isAir() || !location.clone().add(0, 1, 0).getBlock().getType().isSolid());
+            return location.getBlockY() != location.getBlock().getWorld().getMaxHeight() && (location.clone().add(0, 1, 0).getBlock().getType().isAir() || !location.clone().add(0, 1, 0).getBlock().getType().isSolid());
         }
         return true;
     }

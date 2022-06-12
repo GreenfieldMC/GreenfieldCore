@@ -107,10 +107,10 @@ public class AdvancedBuildModule extends Module implements Listener {
                     case CUT_COPPER_SLAB, EXPOSED_CUT_COPPER_SLAB, WEATHERED_CUT_COPPER_SLAB, OXIDIZED_CUT_COPPER_SLAB -> false;
                     default -> true;
                 }) return;
-                plugin.getCoreApi().logRemoval(e.getPlayer().getName(), loc, loc.getBlock().getType(), loc.getBlock().getBlockData());
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), loc, loc.getBlock().getType(), loc.getBlock().getBlockData());
                 loc.getBlock().setType(newType, false);
                 loc.getBlock().setBlockData(newData, false);
-                plugin.getCoreApi().logPlacement(e.getPlayer().getName(), e.getBlock().getLocation(), newType, newData);
+                if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), e.getBlock().getLocation(), newType, newData);
             }, 1);
         }
     }
@@ -132,22 +132,25 @@ public class AdvancedBuildModule extends Module implements Listener {
                 e.setUseInteractedBlock(Event.Result.DENY);
                 e.setUseItemInHand(Event.Result.DENY);
             }
-        } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && !e.getPlayer().isSneaking() && e.getClickedBlock() != null && e.getMaterial().createBlockData() instanceof Candle) {
-            if (!(e.getClickedBlock().getBlockData() instanceof Candle c)) return;
+        } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && !e.getPlayer().isSneaking() && e.getClickedBlock() != null && e.getClickedBlock().getBlockData() instanceof Candle c) {
+//            if (!(e.getClickedBlock().getBlockData() instanceof Candle c)) return;
+            //todo right click on rail to rotate
+            //todo if it has a block below it, minecraft adds a candle so stop that somehow
+            //todo lighting rod place facing down if placed on top of block and if placed on/beside another lightning rod, do opposite of its direction
             c.setCandles(c.getCandles() == c.getMaximumCandles() ? 1 : c.getCandles() + 1);
             CandleHandler.CANDLE_SESSIONS.get(e.getPlayer().getUniqueId()).updateCandle(e.getClickedBlock().getType(), c);
             Block clickedBlock = e.getClickedBlock();
             if (clickedBlock == null) return;
-            plugin.getCoreApi().logRemoval(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+            if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
             clickedBlock.setBlockData(c, false);
-            plugin.getCoreApi().logPlacement(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+            if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getPlayer().isSneaking()) {
             Block clickedBlock = e.getClickedBlock();
             if (clickedBlock == null) return;
-            plugin.getCoreApi().logRemoval(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+            if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
             clickedBlock.setType(Material.AIR, false);
             e.getPlayer().playSound(clickedBlock.getLocation(), clickedBlock.getBlockData().getSoundGroup().getBreakSound(), .1f, 2.f);
-            plugin.getCoreApi().logPlacement(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+            if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
         }
     }
 

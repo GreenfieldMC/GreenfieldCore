@@ -6,7 +6,7 @@
 
     <groupId>com.njdaeger</groupId>
     <artifactId>GreenfieldCore</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.6-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -21,10 +21,10 @@
             <id>spigot</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/org/spigotmc/spigot-api/</url>
         </repository>
-<!--        <repository>-->
-<!--            <id>enginehub-maven</id>-->
-<!--            <url>http://maven.enginehub.org/repo/</url>-->
-<!--        </repository>-->
+        <repository>
+            <id>enginehub-maven</id>
+            <url>https://maven.enginehub.org/repo/</url>
+        </repository>
         <repository>
             <id>vault-repo</id>
             <url>http://nexus.hc.to/content/repositories/pub_releases</url>
@@ -140,18 +140,25 @@
 <!--            </exclusions>-->
 <!--        </dependency>-->
 
+<!--        <dependency>-->
+<!--            <groupId>net.dries007.mclink</groupId>-->
+<!--            <artifactId>MCLink-Bukkit</artifactId>-->
+<!--            <version>0.3.2</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>C:/Users/Noah/.m2/repository/net/dries007/mclink/MCLink-Bukkit/0.3.2/MCLink-Bukkit-0.3.2.jar</systemPath>-->
+<!--        </dependency>-->
+
         <dependency>
-            <groupId>net.dries007.mclink</groupId>
-            <artifactId>MCLink-Bukkit</artifactId>
-            <version>0.3.2</version>
-            <scope>system</scope>
-            <systemPath>C:/Users/Noah/.m2/repository/net/dries007/mclink/MCLink-Bukkit/0.3.2/MCLink-Bukkit-0.3.2.jar</systemPath>
+            <groupId>com.njdaeger</groupId>
+            <artifactId>AuthenticationHub</artifactId>
+            <version>0.1.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.njdaeger</groupId>
             <artifactId>PluginDevelopmentKit</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.5</version>
             <scope>compile</scope>
         </dependency>
 
@@ -171,23 +178,23 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>1.18.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.sk89q.worldedit</groupId>-->
-<!--            <artifactId>worldedit-core</artifactId>-->
-<!--            <version>7.1.0-SNAPSHOT</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-core</artifactId>
+            <version>7.2.7</version>
+            <scope>provided</scope>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.sk89q.worldedit</groupId>-->
-<!--            <artifactId>worldedit-bukkit</artifactId>-->
-<!--            <version>7.1.0-SNAPSHOT</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-bukkit</artifactId>
+            <version>7.2.7</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 

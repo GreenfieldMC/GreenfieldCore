@@ -57,9 +57,9 @@ public class HotspotStorage extends Configuration {
             addEntry("categories.healthcare.name", "Healthcare");
             addEntry("categories.healthcare.default-marker", "medical.png");
             addEntry("categories.entertainment.name", "Entertainment");
-            addEntry("categories.entertainment.default-marker", "entertainment.png"); //todo
+            addEntry("categories.entertainment.default-marker", "entertainment.png");
             addEntry("categories.publicspace.name", "Public Space");
-            addEntry("categories.publicspace.default-marker", "publicspace.png"); //todo
+            addEntry("categories.publicspace.default-marker", "publicspace.png");
             super.save();
         }
 
@@ -124,6 +124,7 @@ public class HotspotStorage extends Configuration {
     }
 
     public Hotspot deleteHotspot(int id) {
+        setEntry("hotspots." + id, null);
         return hotspots.remove(id);
     }
 

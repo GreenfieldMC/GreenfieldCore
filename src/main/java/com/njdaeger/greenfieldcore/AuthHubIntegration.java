@@ -45,7 +45,14 @@ public class AuthHubIntegration extends Module implements Listener {
 
     @Override
     public void onDisable() {
-
+        //if rsp is not null, run a for loop over all players in the patreonUserPrefixes map and remove their prefixes
+        if (rsp != null) {
+            var chat = rsp.getProvider();
+            patreonUsersPrefixes.forEach((uuid, prefix) -> {
+                var player = Bukkit.getPlayer(uuid);
+                if (player != null) chat.setPlayerPrefix(player, prefix.isEmpty() ? null : prefix);
+            });
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

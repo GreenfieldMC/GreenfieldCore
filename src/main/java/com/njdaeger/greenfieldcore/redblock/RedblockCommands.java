@@ -168,6 +168,9 @@ public class RedblockCommands {
         if (unassgin && assignedTo != null) context.error(RED + "You cannot assign and unassign at the same time.");
         if (unrank && minRank != null) context.error(RED + "You cannot rank and unrank at the same time.");
 
+        if (assignedTo == null && !unassgin) assignedTo = rb.getAssignedTo();
+        if (minRank == null && !unrank) minRank = rb.getMinRank();
+
         storage.editRedblock(rb, context.joinArgs(), assignedTo, minRank);
         context.send(LIGHT_PURPLE + "[Redblock] " + GRAY + "Redblock #" + rb.getId() + " has been edited.");
     }

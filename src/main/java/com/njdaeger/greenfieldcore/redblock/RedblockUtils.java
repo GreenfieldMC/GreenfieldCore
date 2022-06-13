@@ -48,12 +48,38 @@ public class RedblockUtils {
      * Creates armorstands for the given location and content
      * @param lines The lines of content to display
      * @param redblockLocation The location the redblock is located at
+Fi     * @param id The id of the redblock
+     * @param minRank The minimum recommended rank for this redblock
+     * @param assignedTo The player this redblock is assigned to
      * @return A list of armorstand UUIDs that were created
      */
-    static List<UUID> spawnArmorstands(List<String> lines, Location redblockLocation, int id) {
-        var standLocation = redblockLocation.clone();
-        standLocation.add(.5, .75 + lines.size()*.25, .5);
+    static List<UUID> spawnArmorstands(List<String> lines, Location redblockLocation, int id, String minRank, String assignedTo) {
+        var textLocation = redblockLocation.clone();
+        textLocation.add(.5, .75 + lines.size()*.25, .5);
         List<UUID> armorstands = new ArrayList<>();
+
+        var restrictionLocation = textLocation.clone().add(0, .35, 0);
+
+        if (assignedTo != null) {
+            var assignStand = (ArmorStand) textLocation.getWorld().spawnEntity(restrictionLocation, EntityType.ARMOR_STAND);
+            assignStand.setGravity(false);
+            assignStand.setCustomName(ChatColor.GRAY + "" + ChatColor.BOLD + "Assigned To: " + ChatColor.BLUE + assignedTo);
+            assignStand.setCustomNameVisible(true);
+            assignStand.setInvisible(true);
+            assignStand.setMarker(true);
+            armorstands.add(assignStand.getUniqueId());
+            restrictionLocation.add(0, .25, 0);
+        }
+
+        if (minRank != null) {
+            var rankStand = (ArmorStand) redblockLocation.getWorld().spawnEntity(restrictionLocation, EntityType.ARMOR_STAND);
+            rankStand.setGravity(false);
+            rankStand.setCustomName(ChatColor.GRAY + "" + ChatColor.BOLD + "Recommended Rank: " + ChatColor.BLUE + minRank);
+            rankStand.setCustomNameVisible(true);
+            rankStand.setInvisible(true);
+            rankStand.setMarker(true);
+            armorstands.add(rankStand.getUniqueId());
+        }
 
         //create one armorstand above the redblockLocation and set the custom name to the ID of the redblock
         var idStand = (ArmorStand) redblockLocation.getWorld().spawnEntity(redblockLocation.clone().add(.5, 0, .5), EntityType.ARMOR_STAND);
@@ -67,14 +93,14 @@ public class RedblockUtils {
 
         //spawn an invisible armorstand entity at the location with no gravity and a custom name that is the content of the redblock
         for (String line : lines) {
-            var armorStand = (ArmorStand) standLocation.getWorld().spawnEntity(standLocation, EntityType.ARMOR_STAND);
+            var armorStand = (ArmorStand) textLocation.getWorld().spawnEntity(textLocation, EntityType.ARMOR_STAND);
             armorStand.setGravity(false);
             armorStand.setCustomName(line);
             armorStand.setCustomNameVisible(true);
             armorStand.setInvisible(true);
             armorStand.setMarker(true);
             armorstands.add(armorStand.getUniqueId());
-            standLocation.add(0, -0.25, 0);
+            textLocation.add(0, -0.25, 0);
         }
         return armorstands;
     }

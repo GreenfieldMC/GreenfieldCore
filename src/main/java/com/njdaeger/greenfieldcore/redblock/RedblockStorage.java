@@ -3,10 +3,7 @@ package com.njdaeger.greenfieldcore.redblock;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.Configuration;
 import com.njdaeger.pdk.config.ISection;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -89,8 +86,8 @@ public class RedblockStorage extends Configuration {
     public Redblock createRedblock(String content, Player createdBy, Location location, UUID assignedTo, String minRank) {
 
         //spawn the actual block
-        createCube(Material.RED_WOOL, location, null, BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
-        var armorstands = spawnArmorstands(getContentLines(content), location, redblockIndex);
+        createCube(Material.RED_WOOL, location, null, DARK_BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", DARK_BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
+        var armorstands = spawnArmorstands(getContentLines(content), location, redblockIndex, minRank, assignedTo == null ? null : Bukkit.getOfflinePlayer(assignedTo).getName());
 
         //load the redblock into memory
         Redblock redblock = new Redblock(redblockIndex++, content, Redblock.Status.INCOMPLETE, location, createdBy.getUniqueId(), System.currentTimeMillis(), null, 0, null, 0, assignedTo, assignedTo != null ? System.currentTimeMillis() : 0, minRank, armorstands);
@@ -108,18 +105,24 @@ public class RedblockStorage extends Configuration {
         //if the redblock content does not match the content variable, set the content of the redblock to the new content, and update the armorstands
         if (content != null && !content.isEmpty() && !redblock.getContent().equals(content)) {
             redblock.setContent(content);
-            removeArmorstands(redblock.getArmorstands());
-            redblock.setArmorstands(spawnArmorstands(getContentLines(content), redblock.getLocation(), redblock.getId()));
         }
         //if  assignedTo is null and the redblock is assigned to someone, unassign the redblock and set the assignedOn to 0, otherwise update the assignedOn and assignedTo
         if (assignedTo == null && redblock.getAssignedTo() != null) {
             redblock.setAssignedTo(null);
             redblock.setAssignedOn(0);
-        } else if (assignedTo != null) {
+        } else if (assignedTo != null && !assignedTo.equals(redblock.getAssignedTo())) {
             redblock.setAssignedTo(assignedTo);
             redblock.setAssignedOn(System.currentTimeMillis());
         }
-        redblock.setMinRank(minRank);
+
+        if (minRank == null && redblock.getMinRank() != null) {
+            redblock.setMinRank(null);
+        } else if (minRank != null && !minRank.equals(redblock.getMinRank())) {
+            redblock.setMinRank(minRank);
+        }
+
+        removeArmorstands(redblock.getArmorstands());
+        redblock.setArmorstands(spawnArmorstands(getContentLines(content == null ? redblock.getContent() : content), redblock.getLocation(), redblock.getId(), minRank, assignedTo == null ? null : Bukkit.getOfflinePlayer(assignedTo).getName()));
     }
 
     public void completeRedblock(Redblock redblock, Player completedBy) {
@@ -133,7 +136,7 @@ public class RedblockStorage extends Configuration {
         redblock.setStatus(Redblock.Status.INCOMPLETE);
         redblock.setCompletedBy(null);
         redblock.setCompletedOn(0);
-        createCube(Material.RED_WOOL, redblock.getLocation(), null, BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
+        createCube(Material.RED_WOOL, redblock.getLocation(), null, DARK_BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", DARK_BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
     }
 
     public void approveRedblock(Redblock redblock, Player approvedBy) {

@@ -1,6 +1,7 @@
 package com.njdaeger.greenfieldcore.redblock;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
@@ -49,14 +50,24 @@ public class RedblockUtils {
      * @param redblockLocation The location the redblock is located at
      * @return A list of armorstand UUIDs that were created
      */
-    static List<UUID> spawnArmorstands(List<String> lines, Location redblockLocation) {
+    static List<UUID> spawnArmorstands(List<String> lines, Location redblockLocation, int id) {
         var standLocation = redblockLocation.clone();
-        standLocation.add(.5, .5 + lines.size()*.25, -.5);
+        standLocation.add(.5, .75 + lines.size()*.25, .5);
+        List<UUID> armorstands = new ArrayList<>();
+
+        //create one armorstand above the redblockLocation and set the custom name to the ID of the redblock
+        var idStand = (ArmorStand) redblockLocation.getWorld().spawnEntity(redblockLocation.clone().add(.5, 0, .5), EntityType.ARMOR_STAND);
+        idStand.setGravity(false);
+        idStand.setCustomName(ChatColor.GRAY + "" + ChatColor.BOLD + "ID: " + ChatColor.BLUE + id);
+        idStand.setCustomNameVisible(true);
+        idStand.setInvisible(true);
+        idStand.setMarker(true);
+        armorstands.add(idStand.getUniqueId());
+
 
         //spawn an invisible armorstand entity at the location with no gravity and a custom name that is the content of the redblock
-        List<UUID> armorstands = new ArrayList<>();
         for (String line : lines) {
-            ArmorStand armorStand = (ArmorStand) standLocation.getWorld().spawnEntity(standLocation, EntityType.ARMOR_STAND);
+            var armorStand = (ArmorStand) standLocation.getWorld().spawnEntity(standLocation, EntityType.ARMOR_STAND);
             armorStand.setGravity(false);
             armorStand.setCustomName(line);
             armorStand.setCustomNameVisible(true);
@@ -111,15 +122,16 @@ public class RedblockUtils {
      * Search through the list of redblocks and return the one that is closest to the given location.
      * @param redblocks The list of redblocks to search through
      * @param location The location to search around
+     * @param searchRadius The radius of the search
      * @return The redblock that is closest to the given location, or null if no redblocks are in the list
      */
-    static Redblock getNearestRedblock(List<Redblock> redblocks, Location location) {
+    static Redblock getNearestRedblock(List<Redblock> redblocks, Location location, int searchRadius) {
         if (redblocks.isEmpty()) return null;
-        Redblock nearestRedblock = redblocks.get(0);
+        Redblock nearestRedblock = null;
         double nearestDistance = Double.MAX_VALUE;
         for (Redblock redblock : redblocks) {
-            double distance = redblock.getLocation().distanceSquared(location);
-            if (distance < nearestDistance) {
+            double distance = redblock.getLocation().distance(location);
+            if (distance < nearestDistance && (searchRadius == -1 || distance <= searchRadius)) {
                 nearestRedblock = redblock;
                 nearestDistance = distance;
             }

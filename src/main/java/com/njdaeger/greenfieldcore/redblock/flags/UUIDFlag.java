@@ -9,12 +9,11 @@ import org.bukkit.OfflinePlayer;
 
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Predicate;
 
-public abstract class AbstractUUIDFlag extends Flag<UUID> {
+public class UUIDFlag extends Flag<UUID> {
 
-    public AbstractUUIDFlag(Predicate<TabContext> onlyAllowWhen, String description, String usage, String aliases) {
-        super(onlyAllowWhen, UUID.class, description, usage, aliases);
+    public UUIDFlag(String description, String usage, String aliases) {
+        super(UUID.class, description, usage, aliases);
     }
 
     @Override

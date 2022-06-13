@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import static com.njdaeger.greenfieldcore.redblock.RedblockUtils.*;
+import static org.bukkit.ChatColor.*;
 
 public class RedblockStorage extends Configuration {
 
@@ -69,7 +70,7 @@ public class RedblockStorage extends Configuration {
         return redblocks.get(id);
     }
 
-    public List<Redblock> getAllRedblocks() {
+    public List<Redblock> getRedblocks() {
         return redblocks.values().stream().toList();
     }
 
@@ -88,8 +89,8 @@ public class RedblockStorage extends Configuration {
     public Redblock createRedblock(String content, Player createdBy, Location location, UUID assignedTo, String minRank) {
 
         //spawn the actual block
-        createCube(Material.RED_WOOL, location, null, ChatColor.BOLD + "[Click this]", ChatColor.BOLD + "[if it's fixed]");
-        var armorstands = spawnArmorstands(getContentLines(content), location);
+        createCube(Material.RED_WOOL, location, null, BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
+        var armorstands = spawnArmorstands(getContentLines(content), location, redblockIndex);
 
         //load the redblock into memory
         Redblock redblock = new Redblock(redblockIndex++, content, Redblock.Status.INCOMPLETE, location, createdBy.getUniqueId(), System.currentTimeMillis(), null, 0, null, 0, assignedTo, assignedTo != null ? System.currentTimeMillis() : 0, minRank, armorstands);
@@ -105,10 +106,10 @@ public class RedblockStorage extends Configuration {
 
     public void editRedblock(Redblock redblock, String content, UUID assignedTo, String minRank) {
         //if the redblock content does not match the content variable, set the content of the redblock to the new content, and update the armorstands
-        if (!redblock.getContent().equals(content)) {
+        if (content != null && !content.isEmpty() && !redblock.getContent().equals(content)) {
             redblock.setContent(content);
             removeArmorstands(redblock.getArmorstands());
-            redblock.setArmorstands(spawnArmorstands(getContentLines(content), redblock.getLocation()));
+            redblock.setArmorstands(spawnArmorstands(getContentLines(content), redblock.getLocation(), redblock.getId()));
         }
         //if  assignedTo is null and the redblock is assigned to someone, unassign the redblock and set the assignedOn to 0, otherwise update the assignedOn and assignedTo
         if (assignedTo == null && redblock.getAssignedTo() != null) {
@@ -125,14 +126,14 @@ public class RedblockStorage extends Configuration {
         redblock.setStatus(Redblock.Status.PENDING);
         redblock.setCompletedBy(completedBy.getUniqueId());
         redblock.setCompletedOn(System.currentTimeMillis());
-        createCube(Material.LIME_WOOL, redblock.getLocation(), ChatColor.GREEN + "Left click for", ChatColor.GREEN + "" + ChatColor.BOLD + "[APPROVE]", ChatColor.RED + "Right click for", ChatColor.RED + "" + ChatColor.BOLD + "[DENY]");
+        createCube(Material.LIME_WOOL, redblock.getLocation(), GREEN + "Left click for", GREEN + "" + BOLD + "[APPROVE]", RED + "Right click for", RED + "" + BOLD + "[DENY]");
     }
 
     public void denyRedblock(Redblock redblock) {
         redblock.setStatus(Redblock.Status.INCOMPLETE);
         redblock.setCompletedBy(null);
         redblock.setCompletedOn(0);
-        createCube(Material.RED_WOOL, redblock.getLocation(), null, ChatColor.BOLD + "[Click this]", ChatColor.BOLD + "[if it's fixed]");
+        createCube(Material.RED_WOOL, redblock.getLocation(), null, BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
     }
 
     public void approveRedblock(Redblock redblock, Player approvedBy) {

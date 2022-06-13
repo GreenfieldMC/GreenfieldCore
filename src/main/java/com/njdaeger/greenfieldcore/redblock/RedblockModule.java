@@ -14,12 +14,13 @@ public class RedblockModule extends Module {
 
     @Override
     public void onEnable() {
-        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
-            Bukkit.getLogger().warning("Unable to start RedblockModule. Vault was not found.");
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null || Bukkit.getPluginManager().getPlugin("Essentials") == null) {
+            Bukkit.getLogger().warning("Unable to start RedblockModule. Vault or Essentials was not found.");
             return;
         }
         this.storage = new RedblockStorage(plugin);
         new RedblockCommands(this, this.storage, plugin);
+        Bukkit.getPluginManager().registerEvents(new RedblockListener(storage), plugin);
     }
 
     @Override

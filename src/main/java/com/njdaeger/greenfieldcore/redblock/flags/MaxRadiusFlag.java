@@ -8,10 +8,10 @@ import com.njdaeger.pdk.command.flag.Flag;
 
 import java.util.stream.IntStream;
 
-public class PageFlag extends Flag<Integer> {
+public class MaxRadiusFlag extends Flag<Integer> {
 
-    public PageFlag() {
-        super(Integer.class, "Which page of the redblock list to view", "-page <pageNumber>", "page");
+    public MaxRadiusFlag() {
+        super(Integer.class, "Filter the maximum distance a redblock can be to show up in the search.", "-radius <radius>", "radius");
     }
 
     @Override

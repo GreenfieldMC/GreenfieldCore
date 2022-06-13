@@ -34,11 +34,13 @@ public class Redblock {
     private long approvedOn;
     private UUID createdBy;
     private long createdOn;
-    private Location location;
+    private final Location location;
     private String minRank;
     private UUID assignedTo;
     private long assignedOn;
     private List<UUID> armorstands;
+    private final Location boxUpperBound;
+    private final Location boxLowerBound;
 
     public Redblock(int id, String content, Status status, Location location, UUID createdBy, long createdOn, UUID approvedBy, long approvedOn, UUID completedBy, long completedOn, UUID assignedTo, long assignedOn, String minRank, List<UUID> armorstands) {
         this.id = id;
@@ -55,6 +57,8 @@ public class Redblock {
         this.assignedTo = assignedTo;
         this.assignedOn = assignedOn;
         this.armorstands = armorstands;
+        this.boxUpperBound = new Location(location.getWorld(), location.getBlockX() + 1, location.getBlockY() - 1, location.getBlockZ() + 1);
+        this.boxLowerBound = new Location(location.getWorld(), location.getBlockX() - 1, location.getBlockY() - 3, location.getBlockZ() - 1);
     }
 
     public String getContent() {
@@ -129,8 +133,16 @@ public class Redblock {
         return location;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
+    public boolean isPartOfRedblock(Location location) {
+        if (location.getWorld() != this.location.getWorld()) return false;
+        if (this.location.equals(location)) return true;
+        //check if the location is within the box created by the upper and lower bound
+        if (location.getBlockX() >= boxLowerBound.getBlockX() && location.getBlockX() <= boxUpperBound.getBlockX()) {
+            if (location.getBlockY() >= boxLowerBound.getBlockY() && location.getBlockY() <= boxUpperBound.getBlockY()) {
+                return location.getBlockZ() >= boxLowerBound.getBlockZ() && location.getBlockZ() <= boxUpperBound.getBlockZ();
+            }
+        }
+        return false;
     }
 
     public String getMinRank() {
@@ -165,6 +177,22 @@ public class Redblock {
         this.armorstands = armorstands;
     }
 
+    public boolean isPending() {
+        return status == Status.PENDING;
+    }
+
+    public boolean isApproved() {
+        return status == Status.APPROVED;
+    }
+
+    public boolean isDeleted() {
+        return status == Status.DELETED;
+    }
+
+    public boolean isIncomplete() {
+        return status == Status.INCOMPLETE;
+    }
+
     @Override
     public String toString() {
         return "Redblock{" +
@@ -191,5 +219,4 @@ public class Redblock {
         APPROVED,
         DELETED
     }
-
 }

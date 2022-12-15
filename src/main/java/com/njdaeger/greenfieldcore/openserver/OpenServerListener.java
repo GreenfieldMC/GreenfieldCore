@@ -207,6 +207,15 @@ public class OpenServerListener implements Listener {
                     case SPRUCE_BUTTON:
                     case SPRUCE_FENCE_GATE:
                     case STONE_BUTTON:
+                    case POLISHED_BLACKSTONE_BUTTON:
+                    case CRIMSON_BUTTON:
+                    case CRIMSON_TRAPDOOR:
+                    case CRIMSON_FENCE_GATE:
+                    case CRIMSON_DOOR:
+                    case WARPED_BUTTON:
+                    case WARPED_TRAPDOOR:
+                    case WARPED_FENCE:
+                    case WARPED_DOOR:
                     case LEVER:
                         break;
                     default:
@@ -226,6 +235,9 @@ public class OpenServerListener implements Listener {
                     case SPRUCE_PRESSURE_PLATE:
                     case HEAVY_WEIGHTED_PRESSURE_PLATE:
                     case LIGHT_WEIGHTED_PRESSURE_PLATE:
+                    case POLISHED_BLACKSTONE_PRESSURE_PLATE:
+                    case WARPED_PRESSURE_PLATE:
+                    case CRIMSON_PRESSURE_PLATE:
                         break;
                     default:
                         if (cancel(event, event.getPlayer())) Util.notAllowed(event.getPlayer());

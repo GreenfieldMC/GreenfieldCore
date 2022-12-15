@@ -82,7 +82,16 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>plugin.yml</include>
-                    <include>*.png</include>
+<!--                    <include>*.png</include>-->
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+<!--                    <include>plugin.yml</include>-->
+                    <include>**/*.png</include>
+
                 </includes>
             </resource>
         </resources>
@@ -151,7 +160,7 @@
         <dependency>
             <groupId>com.njdaeger</groupId>
             <artifactId>AuthenticationHub</artifactId>
-            <version>0.1.0</version>
+            <version>0.3.0</version>
             <scope>provided</scope>
         </dependency>
 

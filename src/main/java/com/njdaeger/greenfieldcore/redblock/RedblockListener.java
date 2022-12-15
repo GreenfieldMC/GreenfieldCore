@@ -1,13 +1,16 @@
 package com.njdaeger.greenfieldcore.redblock;
 
+import com.njdaeger.pdk.utils.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.ArrayList;
@@ -57,6 +60,24 @@ public class RedblockListener implements Listener {
                 }
             }
 
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player player = e.getPlayer();
+        RedblockUtils.userNameMap.put(player.getUniqueId(), player.getName());
+        List<Redblock> redblocks = storage.getRedblocksFiltered(rb -> rb.getAssignedTo() != null && rb.getAssignedTo().equals(player.getUniqueId()) && rb.isIncomplete());
+        if (redblocks.size() > 0) {
+            var text = Text.of("[Redblocks] ").setColor(ChatColor.LIGHT_PURPLE)
+                    .append("You have ").setColor(ChatColor.GRAY)
+                    .append(redblocks.size() + "").setColor(ChatColor.LIGHT_PURPLE)
+                    .append(" redblocks assigned to you. ").setColor(ChatColor.GRAY)
+                    .append("\n[Click this to view them]").setColor(ChatColor.LIGHT_PURPLE).setUnderlined(true)
+                    .clickEvent(Text.ClickAction.RUN_COMMAND, "/rbl -mine -incomplete");
+            Bukkit.getScheduler().runTaskLater(storage.getPlugin(), () -> {
+                Text.sendTo(text, player);
+            }, 100);
         }
     }
 

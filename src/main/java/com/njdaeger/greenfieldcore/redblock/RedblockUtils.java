@@ -9,8 +9,11 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RedblockUtils {
+
+    public static Map<UUID, String> userNameMap = new ConcurrentHashMap<>();
 
     /**
      * Takes a content string and splits it up into lines that can be used to display the Redblock content with armorstands.

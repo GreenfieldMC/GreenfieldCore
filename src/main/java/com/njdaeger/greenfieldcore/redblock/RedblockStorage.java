@@ -20,10 +20,12 @@ public class RedblockStorage extends Configuration {
 
     private final Map<Integer, Redblock> redblocks;
     private int redblockIndex = 0;
+    private RedblockModule module;
 
-    public RedblockStorage(Plugin plugin) {
+    public RedblockStorage(Plugin plugin, RedblockModule module) {
         super(plugin, ConfigType.YML, "redblocks");
 
+        this.module = module;
         this.redblocks = new HashMap<>();
 
         if (hasSection("redblocks")) {
@@ -84,7 +86,6 @@ public class RedblockStorage extends Configuration {
     }
 
     public Redblock createRedblock(String content, Player createdBy, Location location, UUID assignedTo, String minRank) {
-
         //spawn the actual block
         createCube(Material.RED_WOOL, location, null, DARK_BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", DARK_BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
         var armorstands = spawnArmorstands(getContentLines(content), location, redblockIndex, minRank, assignedTo == null ? null : Bukkit.getOfflinePlayer(assignedTo).getName());
@@ -92,6 +93,7 @@ public class RedblockStorage extends Configuration {
         //load the redblock into memory
         Redblock redblock = new Redblock(redblockIndex++, content, Redblock.Status.INCOMPLETE, location, createdBy.getUniqueId(), System.currentTimeMillis(), null, 0, null, 0, assignedTo, assignedTo != null ? System.currentTimeMillis() : 0, minRank, armorstands);
         redblocks.put(redblock.getId(), redblock);
+        module.updateRedblock(redblock, false);
         return redblock;
     }
 
@@ -99,6 +101,7 @@ public class RedblockStorage extends Configuration {
         redblock.setStatus(Redblock.Status.DELETED);
         redblock.setArmorstands(removeArmorstands(redblock.getArmorstands()));
         createCube(Material.AIR, redblock.getLocation());
+        module.updateRedblock(redblock, false);
     }
 
     public void editRedblock(Redblock redblock, String content, UUID assignedTo, String minRank) {
@@ -123,6 +126,7 @@ public class RedblockStorage extends Configuration {
 
         removeArmorstands(redblock.getArmorstands());
         redblock.setArmorstands(spawnArmorstands(getContentLines(content == null ? redblock.getContent() : content), redblock.getLocation(), redblock.getId(), minRank, assignedTo == null ? null : Bukkit.getOfflinePlayer(assignedTo).getName()));
+        module.updateRedblock(redblock, true);
     }
 
     public void completeRedblock(Redblock redblock, Player completedBy) {
@@ -130,6 +134,7 @@ public class RedblockStorage extends Configuration {
         redblock.setCompletedBy(completedBy.getUniqueId());
         redblock.setCompletedOn(System.currentTimeMillis());
         createCube(Material.LIME_WOOL, redblock.getLocation(), GREEN + "Left click for", GREEN + "" + BOLD + "[APPROVE]", RED + "Right click for", RED + "" + BOLD + "[DENY]");
+        module.updateRedblock(redblock, false);
     }
 
     public void denyRedblock(Redblock redblock) {
@@ -137,6 +142,7 @@ public class RedblockStorage extends Configuration {
         redblock.setCompletedBy(null);
         redblock.setCompletedOn(0);
         createCube(Material.RED_WOOL, redblock.getLocation(), null, DARK_BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", DARK_BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
+        module.updateRedblock(redblock, false);
     }
 
     public void approveRedblock(Redblock redblock, Player approvedBy) {
@@ -145,6 +151,7 @@ public class RedblockStorage extends Configuration {
         redblock.setApprovedOn(System.currentTimeMillis());
         createCube(Material.AIR, redblock.getLocation());
         redblock.setArmorstands(removeArmorstands(redblock.getArmorstands()));
+        module.updateRedblock(redblock, false);
     }
 
     private void saveRedblock(Redblock redblock) {

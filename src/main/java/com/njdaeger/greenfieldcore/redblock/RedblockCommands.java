@@ -5,6 +5,7 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.redblock.flags.*;
 import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.pdk.command.PDKCommand;
 import com.njdaeger.pdk.command.TabContext;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.command.flag.OptionalFlag;
@@ -27,6 +28,8 @@ import static org.bukkit.ChatColor.*;
 
 public class RedblockCommands {
 
+    private final PDKCommand createCommand;
+
     private final RedblockModule module;
     private final RedblockStorage storage;
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT);
@@ -35,16 +38,35 @@ public class RedblockCommands {
         this.module = module;
         this.storage = storage;
 
+//        CommandBuilder.of("rb", "redblock")
+//                .description("Redblock Commands")
+//                .usage("/rb [create <content>|delete|deny|list|approve|complete|edit <content>]")
+//                .permissions(
+//                        "greenfieldcore.redblock.create",
+//                        "greenfieldcore.redblock.approve",
+//                        "greenfieldcore.redblock.list",
+//                        "greenfieldcore.redblock.deny.self",
+//                        "greenfieldcore.redblock.deny.others",
+//                        "greenfieldcore.redblock.edit",
+//                        "greenfieldcore.redblock.delete",
+//                        "greenfieldcore.redblock.goto",
+//                        "greenfieldcore.redblock.complete")
+//                .executor(this::redblockCommand)
+//                .flag(new UUIDFlag("The user to assign this redblock to", "-assign <playerName>", "assign", tabContext -> tabContext.first().equalsIgnoreCase("create")))
+//                .register(plugin);
+
         //redblock create command
-        CommandBuilder.of("rbcreate", "rbc")
+        createCommand = CommandBuilder.of("rbcreate", "rbc")
                 .description("Create a new redblock")
                 .usage("/rbc <content>")
                 .permissions("greenfieldcore.redblock.create")
                 .min(1)
                 .executor(this::create)
                 .flag(new UUIDFlag("The user to assign this redblock to", "-assign <playerName>", "assign"))
-                .flag(new RankFlag())
-                .register(plugin);
+                .flag(new RankFlag()).build();
+
+        createCommand.register(plugin);
+//                .register(plugin);
 
         //redblock approve command
         CommandBuilder.of("rbapprove", "rba")
@@ -131,6 +153,15 @@ public class RedblockCommands {
                 .executor(this::complete)
                 .register(plugin);
     }
+
+//    private void redblockCommand(CommandContext context) throws PDKCommandException {
+//          //todo do this all later
+//        if (context.first().equalsIgnoreCase("create")) {
+//            create(new CommandContext(context.getPlugin(), createCommand, context.getSender(), "rbc", context.getRawCommandString().substring(6).split(" ")));
+//        } else if (context.first().equalsIgnoreCase("list")) {
+//            list(new CommandContext(context.getPlugin(), createCommand, context.getSender(), "rblist", context.getRawCommandString().split(" ")));
+//        }
+//    }
 
     // /rbcreate <content...>
     // flags: [-assign <player>] [-rank <rank>] [-id <id>]
@@ -347,19 +378,30 @@ public class RedblockCommands {
 
     private void getRedblockLine(Redblock redblock, Location locationOfSender, Text.TextSection rootText) {
         Supplier<Text.TextSection> hoverText = () -> {
+            var createdByName = Bukkit.getOfflinePlayer(redblock.getCreatedBy()).getName();
+            if (createdByName == null) Bukkit.getLogger().info("Could not resolve createdBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCreatedBy());
             var text = Text.of("Status: ").setColor(GRAY).append(redblock.getStatus().name()).setColor(BLUE).append("\n")
-                    .append("Created by: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(redblock.getCreatedBy()).getName()).setColor(BLUE).append("\n")
+                    .append("Created by: ").setColor(GRAY).append(createdByName == null ? "null" : createdByName).setColor(BLUE).append("\n")
                     .append("Created at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getCreatedOn())))).setColor(BLUE).append("\n");
 
-            if (redblock.getCompletedBy() != null)
-                text.append("Completed by: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(redblock.getCompletedBy()).getName()).setColor(BLUE).append("\n")
-                    .append("Completed at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getCompletedOn())))).setColor(BLUE).append("\n");
-            if (redblock.getApprovedBy() != null)
-                text.append("Approved by: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(redblock.getApprovedBy()).getName()).setColor(BLUE).append("\n")
-                    .append("Approved at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getApprovedOn())))).setColor(BLUE).append("\n");
-            if (redblock.getAssignedTo() != null)
-                text.append("Assigned to: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(redblock.getAssignedTo()).getName()).setColor(BLUE).append("\n")
-                    .append("Assigned at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getAssignedOn())))).setColor(BLUE).append("\n");
+            if (redblock.getCompletedBy() != null) {
+                var completedByName = Bukkit.getOfflinePlayer(redblock.getCompletedBy()).getName();
+                if (completedByName == null) Bukkit.getLogger().info("Could not resolve completedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
+                text.append("Completed by: ").setColor(GRAY).append(completedByName == null ? "null" : completedByName).setColor(BLUE).append("\n")
+                        .append("Completed at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getCompletedOn())))).setColor(BLUE).append("\n");
+            }
+            if (redblock.getApprovedBy() != null) {
+                var approvedByName = Bukkit.getOfflinePlayer(redblock.getApprovedBy()).getName();
+                if (approvedByName == null) Bukkit.getLogger().info("Could not resolve approvedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
+                text.append("Approved by: ").setColor(GRAY).append(approvedByName == null ? "null" : approvedByName).setColor(BLUE).append("\n")
+                        .append("Approved at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getApprovedOn())))).setColor(BLUE).append("\n");
+            }
+            if (redblock.getAssignedTo() != null) {
+                var assignedToName = Bukkit.getOfflinePlayer(redblock.getAssignedTo()).getName();
+                if (assignedToName == null) Bukkit.getLogger().info("Could not resolve assignedTo playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
+                text.append("Assigned to: ").setColor(GRAY).append(assignedToName == null ? "null" : assignedToName).setColor(BLUE).append("\n")
+                        .append("Assigned at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getAssignedOn())))).setColor(BLUE).append("\n");
+            }
             if (redblock.getMinRank() != null)
                 text.append("Minimum Rank: ").setColor(GRAY).append(redblock.getMinRank()).setColor(BLUE).append("\n");
             text.append("Distance: ").setColor(GRAY).append(String.format("%.2f", locationOfSender.distance(redblock.getLocation()))).setColor(BLUE).append("\n");

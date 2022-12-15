@@ -11,7 +11,10 @@ import org.dynmap.markers.MarkerSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.CodeSource;
 import java.util.Enumeration;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -37,32 +40,24 @@ public class HotspotModule extends Module {
         loadHotspotsToDynmap();
     }
 
-    public void loadHotspotsToDynmap() {
-
-        //Loading possible icons from the jar file
-        ZipFile zipFile;
-        try {
-            zipFile = new ZipFile(new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()));
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (!entry.isDirectory() && entry.getName().endsWith(".png")) {
-                    MarkerIcon icon = markerApi.getMarkerIcon(entry.getName().split("\\.")[0]);
-                    if (icon == null) {
-                        markerApi.createMarkerIcon(entry.getName().split("\\.")[0], entry.getName().split("\\.")[0], zipFile.getInputStream(entry));
-                    } else {
-                        icon.setMarkerIconImage(zipFile.getInputStream(entry));
-                    }
-                }
+    private MarkerIcon createOrGetMarkerIcon(String iconName) {
+        MarkerIcon icon = markerApi.getMarkerIcon(iconName);
+        InputStream stream = plugin.getResource(iconName + ".png");
+        if (icon != null) {
+            if (stream != null) icon.setMarkerIconImage(stream);
+        } else {
+            if (stream == null) {
+                plugin.getLogger().warning("Unable to find the icon " + iconName + ".png");
+                return null;
             }
-            zipFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            icon = markerApi.createMarkerIcon(iconName, iconName, stream);
         }
+        return icon;
+    }
 
+    public void loadHotspotsToDynmap() {
         storage.getCategories().forEach((id, category) -> {
-
-            MarkerIcon icon = markerApi.getMarkerIcon(category.getMarker().endsWith(".png") ? category.getMarker().split("\\.")[0] : category.getMarker());
+            MarkerIcon icon = createOrGetMarkerIcon(category.getMarker());
             if (icon == null) {
                 Bukkit.getLogger().warning("Unable to load marker " + category.getMarker() + ". Category " + id + " will not be loaded.");
                 return;

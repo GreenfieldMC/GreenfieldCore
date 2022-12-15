@@ -1,13 +1,17 @@
 package com.njdaeger.greenfieldcore;
 
 import com.njdaeger.authenticationhub.ApplicationRegistry;
+import com.njdaeger.authenticationhub.discord.DiscordApplication;
 import com.njdaeger.authenticationhub.patreon.PatreonApplication;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -80,6 +84,52 @@ public class AuthHubIntegration extends Module implements Listener {
                 plugin.getLogger().info("Prefix not set for player " + player.getName() + " because their pledge is less than " + patreon.getRequiredPledge() + " cents. [" + cached + "]");
             }
         });
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerJoin_discordIntg(PlayerLoginEvent e) {
+        if (appReg == null) return;
+        boolean whitelist = Bukkit.hasWhitelist();
+        var reg = appReg.getProvider();
+        var discord = reg.getApplication(DiscordApplication.class);
+        var id = e.getPlayer().getUniqueId();
+
+        var user = discord.getConnection(id);
+        if (whitelist && Bukkit.getServer().getWhitelistedPlayers().stream().anyMatch(op -> op.getUniqueId().equals(id))) {
+            if (e.getPlayer().hasPermission("greenfieldcore.discord.exempt")) {
+                Bukkit.getLogger().info("User " + e.getPlayer().getName() + " is exempted from having a linked discord profile.");
+                return;
+            }
+            if (user == null) e.disallow(PlayerLoginEvent.Result.KICK_OTHER, discord.getAppConfig().getString("messages.notConnected", "null"));
+            else if (user.isExpired()) {
+                e.disallow(PlayerLoginEvent.Result.KICK_OTHER, discord.getAppConfig().getString("messages.expiredUser", "null"));
+                discord.removeConnection(id);
+            } else if (discord.isRefreshingUserToken(id)) {
+                e.disallow(PlayerLoginEvent.Result.KICK_OTHER, discord.getAppConfig().getString("messages.refreshingUserToken", "null"));
+            } else if (discord.isGettingDiscordUserProfile(id)) {
+                e.disallow(PlayerLoginEvent.Result.KICK_OTHER, discord.getAppConfig().getString("messages.gettingDiscordProfile", "null"));
+            } else if (user.isAlmostExpired()) {
+                Bukkit.getLogger().info(user.getTimeUntilExpiration());
+                discord.refreshUserToken(id, user);
+            } else discord.getDiscordUserAsync(id, user);
+            return;
+        }
+
+        //any moment after this means either the user is not whitelisted (meaning they arent required to have a discord account)
+        //or the whitelist is disabled. in which case if they have an account associated with their account, we update it, if not,
+        //not a big deal, we just remove the connection
+        if (user == null) return;
+
+        if (user.isExpired()) {
+            e.getPlayer().sendMessage(discord.getAppConfig().getString("messages.expiredUser", "null"));
+            discord.removeConnection(id);
+        }
+
+        if (user.isAlmostExpired()) {
+            Bukkit.getLogger().info(user.getTimeUntilExpiration());
+            discord.refreshUserToken(id, user);
+        }
+
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

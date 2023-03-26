@@ -133,9 +133,10 @@ public class HotspotCommands {
         if (!context.hasPermission("greenfieldcore.hotspots.list")) context.noPermission();
         Category category = storage.getCategory(context.joinArgs(1));
         List<Hotspot> hotspots;
+        var senderWorldUid = context.asPlayer().getWorld().getUID();
         int page = context.hasFlag("page") ? context.getFlag("page") : 1;
-        if (category != null) hotspots = storage.getHotspots().values().stream().filter(h -> h.getCategory().equals(category)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
-        else hotspots = storage.getHotspots().values().stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
+        if (category != null) hotspots = storage.getHotspots().values().stream().filter(h -> h.getCategory().equals(category) && h.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
+        else hotspots = storage.getHotspots().values().stream().filter(hs -> hs.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
         printHotspotList(1, page, hotspots, context);
     }
 

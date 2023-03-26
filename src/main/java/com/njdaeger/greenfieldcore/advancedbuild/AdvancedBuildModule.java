@@ -138,6 +138,7 @@ public class AdvancedBuildModule extends Module implements Listener {
             //todo if it has a block below it, minecraft adds a candle so stop that somehow
             //todo lighting rod place facing down if placed on top of block and if placed on/beside another lightning rod, do opposite of its direction
             c.setCandles(c.getCandles() == c.getMaximumCandles() ? 1 : c.getCandles() + 1);
+            if (!CandleHandler.CANDLE_SESSIONS.containsKey(e.getPlayer().getUniqueId())) CandleHandler.CANDLE_SESSIONS.put(e.getPlayer().getUniqueId(), new CandleHandler.CandleSession());
             CandleHandler.CANDLE_SESSIONS.get(e.getPlayer().getUniqueId()).updateCandle(e.getClickedBlock().getType(), c);
             Block clickedBlock = e.getClickedBlock();
             if (clickedBlock == null) return;

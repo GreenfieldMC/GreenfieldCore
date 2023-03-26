@@ -75,6 +75,10 @@ public class AuthHubIntegration extends Module implements Listener {
                 plugin.getLogger().info("Setting prefix of player " + player.getName());
                 if (chat != null) {
                     var currentPrefix = chat.getPlayerPrefix(player) == null ? "" : chat.getPlayerPrefix(player);
+                    if (currentPrefix.contains("[$]")) {
+                        plugin.getLogger().info("Prefix is already set for player");
+                        return;
+                    }
                     patreonUsersPrefixes.put(player.getUniqueId(), currentPrefix);
                     chat.setPlayerPrefix(player, "&3[$] " + currentPrefix + chat.getGroupPrefix(player.getWorld(), chat.getPrimaryGroup(player)));
                 }

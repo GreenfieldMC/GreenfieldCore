@@ -104,7 +104,7 @@ public class CandleHandler extends BlockHandler {
         //FALSE indicates East/West Orientation
         private final Map<Boolean, Candle> cyanCandleData;
 
-        private CandleSession() {
+        public CandleSession() {
             dataMap = new HashMap<>();
             cyanCandleData = new HashMap<>();
         }

@@ -37,7 +37,7 @@ public class RedblockListener implements Listener {
             if (block.getType() == Material.RED_WOOL || block.getType() == Material.LIME_WOOL || block.getType() == Material.OAK_SIGN) {
                 List<Redblock> possible = new ArrayList<>();
                 for (Redblock rb : storage.getRedblocksFiltered(rb -> !rb.isDeleted() && !rb.isApproved())) {
-                    if (rb.getLocation().distanceSquared(location) <= 12) possible.add(rb);
+                    if (rb.getLocation().getWorld().getUID().equals(location.getWorld().getUID()) && rb.getLocation().distanceSquared(location) <= 12) possible.add(rb);
                 }
                 var found = possible.stream().filter(rb -> rb.isPartOfRedblock(location)).findFirst();
                 if (found.isPresent()) {

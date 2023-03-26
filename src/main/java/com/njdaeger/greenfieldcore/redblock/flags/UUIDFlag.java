@@ -6,18 +6,12 @@ import com.njdaeger.pdk.command.TabContext;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.command.flag.Flag;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 
-import java.util.Objects;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class UUIDFlag extends Flag<UUID> {
-
-    private static final Stream<String> players = Bukkit.getWhitelistedPlayers().stream()
-            .map(OfflinePlayer::getName)
-            .filter(Objects::nonNull);
 
     public UUIDFlag(String description, String usage, String aliases) {
         super(UUID.class, description, usage, aliases);
@@ -32,9 +26,17 @@ public class UUIDFlag extends Flag<UUID> {
         final UUID[] uuid = new UUID[1];
         if (argument == null || argument.isEmpty()) return null;
         //find the argument in the list of whitelisted players and return the UUID of that player
-        players.filter(name -> name.equalsIgnoreCase(argument))
+
+        for (Map.Entry<UUID, String> entry : RedblockUtils.userNameMap.entrySet()) {
+            UUID id = entry.getKey();
+            String name = entry.getValue();
+            if (name.equalsIgnoreCase(argument)) return id;
+        }
+
+        Bukkit.getWhitelistedPlayers().stream()
+                .filter(op -> op.getName() != null && op.getName().equalsIgnoreCase(argument))
                 .findFirst()
-                .ifPresent(name -> uuid[0] = Bukkit.getOfflinePlayer(name).getUniqueId());
+                .ifPresent(op -> uuid[0] = op.getUniqueId());
         if (uuid[0] == null) return null;
         return uuid[0];
     }

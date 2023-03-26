@@ -167,7 +167,7 @@
         <dependency>
             <groupId>com.njdaeger</groupId>
             <artifactId>PluginDevelopmentKit</artifactId>
-            <version>0.0.5</version>
+            <version>0.0.7</version>
             <scope>compile</scope>
         </dependency>
 

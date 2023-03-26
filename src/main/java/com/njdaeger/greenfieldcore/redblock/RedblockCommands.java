@@ -295,8 +295,10 @@ public class RedblockCommands {
         int radius = context.hasFlag("radius") ? context.getFlag("radius") : -1;
 
         int page = context.hasFlag("page") ? context.getFlag("page") : 1;
+        var senderWorldUid = context.asPlayer().getWorld().getUID();
 
         var filtered = storage.getRedblocks().stream()
+                .filter(rb -> rb.getLocation().getWorld().getUID().equals(senderWorldUid))
                 //sort redblocks by closest to player to furthest from player
                 .sorted(Comparator.comparingDouble(h ->
                         h.getLocation().distanceSquared(context.getLocation())))

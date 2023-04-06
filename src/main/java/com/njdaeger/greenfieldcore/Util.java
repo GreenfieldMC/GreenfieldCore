@@ -3,6 +3,7 @@ package com.njdaeger.greenfieldcore;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.map.MinecraftFont;
 
 import java.util.Random;
 
@@ -27,6 +28,15 @@ public final class Util {
 
     public static void notAllowed(Entity entity) {
         entity.sendMessage(LIGHT_PURPLE + "[OpenServer] " + GRAY + "You cannot do that when the server is locked.");
+    }
+
+    public static int getSubstringIndex(int maxPixelWidth, String text) {
+        int currentWidth = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (currentWidth >= maxPixelWidth) return i - 1;
+            else currentWidth += MinecraftFont.Font.getChar(text.charAt(i)).getWidth();
+        }
+        return text.length();
     }
 
 }

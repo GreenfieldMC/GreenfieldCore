@@ -94,6 +94,8 @@ public class RedblockStorage extends Configuration {
         Redblock redblock = new Redblock(redblockIndex++, content, Redblock.Status.INCOMPLETE, location, createdBy.getUniqueId(), System.currentTimeMillis(), null, 0, null, 0, assignedTo, assignedTo != null ? System.currentTimeMillis() : 0, minRank, armorstands);
         redblocks.put(redblock.getId(), redblock);
         module.updateRedblock(redblock, false);
+        saveRedblock(redblock);
+        super.save();
         return redblock;
     }
 
@@ -102,6 +104,8 @@ public class RedblockStorage extends Configuration {
         redblock.setArmorstands(removeArmorstands(redblock.getArmorstands()));
         createCube(Material.AIR, redblock.getLocation());
         module.updateRedblock(redblock, false);
+        saveRedblock(redblock);
+        super.save();
     }
 
     public void editRedblock(Redblock redblock, String content, UUID assignedTo, String minRank) {
@@ -135,6 +139,8 @@ public class RedblockStorage extends Configuration {
         redblock.setCompletedOn(System.currentTimeMillis());
         createCube(Material.LIME_WOOL, redblock.getLocation(), GREEN + "Left click for", GREEN + "" + BOLD + "[APPROVE]", RED + "Right click for", RED + "" + BOLD + "[DENY]");
         module.updateRedblock(redblock, false);
+        saveRedblock(redblock);
+        super.save();
     }
 
     public void denyRedblock(Redblock redblock) {
@@ -143,6 +149,8 @@ public class RedblockStorage extends Configuration {
         redblock.setCompletedOn(0);
         createCube(Material.RED_WOOL, redblock.getLocation(), null, DARK_BLUE.toString() + UNDERLINE + BOLD + "[CLICK THIS]", DARK_BLUE.toString() + UNDERLINE + BOLD + "[IF COMPLETED]", null);
         module.updateRedblock(redblock, false);
+        saveRedblock(redblock);
+        super.save();
     }
 
     public void approveRedblock(Redblock redblock, Player approvedBy) {

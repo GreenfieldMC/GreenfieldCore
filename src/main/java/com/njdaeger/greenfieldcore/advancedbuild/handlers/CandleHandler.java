@@ -54,15 +54,13 @@ public class CandleHandler extends BlockHandler {
                 } else data = candleSessionData;
             }
             case CYAN_CANDLE -> {
-                boolean northSouth;
-                if (clickedFace == BlockFace.UP || clickedFace == BlockFace.DOWN)
-                    northSouth = (player.getFacing() == BlockFace.NORTH || player.getFacing() == BlockFace.SOUTH);
-                else northSouth = (clickedFace == BlockFace.NORTH || clickedFace == BlockFace.SOUTH);
+                boolean northSouth = (player.getFacing() == BlockFace.NORTH || player.getFacing() == BlockFace.SOUTH);
                 candleSessionData = session.getCandleData(placeMaterial, northSouth);
                 if (candleSessionData == null) {
                     data.setLit(true);
                 } else data = candleSessionData;
-                data.setCandles(northSouth ? 1 : 2);
+                int candles = data.getCandles();
+                data.setCandles((northSouth ? 1 : 2) + (candles == 3 || candles == 4 ? 2 : 0));
             }
             case LIME_CANDLE, PINK_CANDLE, GRAY_CANDLE, RED_CANDLE, PURPLE_CANDLE, LIGHT_GRAY_CANDLE -> {
                 candleSessionData = session.getCandleData(placeMaterial, false);
@@ -110,13 +108,15 @@ public class CandleHandler extends BlockHandler {
         }
 
         public Candle getCandleData(Material material, boolean northSouth) {
-            if (material == Material.CYAN_CANDLE) return cyanCandleData.get(northSouth);
-            else return dataMap.get(material);
+//            if (material == Material.CYAN_CANDLE) return cyanCandleData.get(northSouth);
+//            else return dataMap.get(material);
+            return dataMap.get(material);
         }
 
         public void updateCandle(Material candleMaterial, Candle candleData) {
-            if (candleMaterial == Material.CYAN_CANDLE) cyanCandleData.put(candleData.getCandles() % 2 == 1, candleData);
-            else dataMap.put(candleMaterial, candleData);
+//            if (candleMaterial == Material.CYAN_CANDLE) cyanCandleData.put(candleData.getCandles() % 2 == 1, candleData);
+//            else dataMap.put(candleMaterial, candleData);
+            dataMap.put(candleMaterial, candleData);
         }
 
     }

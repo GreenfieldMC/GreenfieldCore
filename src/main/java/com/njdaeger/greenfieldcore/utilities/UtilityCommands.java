@@ -1,7 +1,6 @@
 package com.njdaeger.greenfieldcore.utilities;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
-import com.njdaeger.greenfieldcore.Util;
 import com.njdaeger.greenfieldcore.testresult.PlayerParser;
 import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
@@ -17,19 +16,6 @@ import java.util.stream.Stream;
 import static org.bukkit.ChatColor.*;
 
 public class UtilityCommands {
-
-    /*
-    TODO
-    /redblock <issues...>
-    /getredblocks, listredblocks, redblocks
-    /removeredblock <id>
-
-    [GOTO] [INCOMPLETE|PENDING] [X] These are the issues.
-    Teleport to location
-    <user> is requesting completion approval
-    Mark as completed and remove
-
-     */
 
     private final UtilitiesModule module;
 

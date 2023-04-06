@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore;
 
 import com.njdaeger.authenticationhub.AuthenticationHub;
 import com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule;
+import com.njdaeger.greenfieldcore.chatformat.ChatFormatModule;
 import com.njdaeger.greenfieldcore.codes.CodesModule;
 import com.njdaeger.greenfieldcore.commandstore.CommandStoreModule;
 import com.njdaeger.greenfieldcore.hotspots.HotspotModule;
@@ -32,6 +33,7 @@ public final class GreenfieldCore extends JavaPlugin {
     private final PowerShovelModule powerShovelModule = new PowerShovelModule(this);
     private final AdvancedBuildModule advancedBuildModule = new AdvancedBuildModule(this);
     private final RedblockModule redblockModule = new RedblockModule(this);
+    private final ChatFormatModule chatFormatModule = new ChatFormatModule(this);
 
     @Override
     public void onEnable() {
@@ -55,6 +57,7 @@ public final class GreenfieldCore extends JavaPlugin {
         powerShovelModule.onEnable();
         advancedBuildModule.onEnable();
         redblockModule.onEnable();
+        chatFormatModule.onEnable();
     }
 
     @Override
@@ -67,6 +70,7 @@ public final class GreenfieldCore extends JavaPlugin {
         powerShovelModule.onDisable();
         advancedBuildModule.onDisable();
         redblockModule.onDisable();
+        chatFormatModule.onDisable();
     }
 
     public CoreProtectAPI getCoreApi() {

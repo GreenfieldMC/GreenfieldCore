@@ -1,6 +1,8 @@
 package com.njdaeger.greenfieldcore.redblock;
 
-import com.njdaeger.pdk.utils.Text;
+import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.pdk.utils.text.click.ClickAction;
+import com.njdaeger.pdk.utils.text.click.ClickString;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -70,13 +72,13 @@ public class RedblockListener implements Listener {
         List<Redblock> redblocks = storage.getRedblocksFiltered(rb -> rb.getAssignedTo() != null && rb.getAssignedTo().equals(player.getUniqueId()) && rb.isIncomplete());
         if (redblocks.size() > 0) {
             var text = Text.of("[Redblocks] ").setColor(ChatColor.LIGHT_PURPLE)
-                    .append("You have ").setColor(ChatColor.GRAY)
-                    .append(redblocks.size() + "").setColor(ChatColor.LIGHT_PURPLE)
-                    .append(" redblocks assigned to you. ").setColor(ChatColor.GRAY)
-                    .append("\n[Click this to view them]").setColor(ChatColor.LIGHT_PURPLE).setUnderlined(true)
-                    .clickEvent(Text.ClickAction.RUN_COMMAND, "/rbl -mine -incomplete");
+                    .appendRoot("You have ").setColor(ChatColor.GRAY)
+                    .appendRoot(redblocks.size() + "").setColor(ChatColor.LIGHT_PURPLE)
+                    .appendRoot(" redblocks assigned to you. ").setColor(ChatColor.GRAY)
+                    .appendRoot("\n[Click this to view them]").setColor(ChatColor.LIGHT_PURPLE).setUnderlined(true)
+                    .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/rbl -mine -incomplete"));
             Bukkit.getScheduler().runTaskLater(storage.getPlugin(), () -> {
-                Text.sendTo(text, player);
+                text.sendTo(player);
             }, 100);
         }
     }

@@ -9,14 +9,7 @@ import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.CodeSource;
-import java.util.Enumeration;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class HotspotModule extends Module {
 

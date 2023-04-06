@@ -7,6 +7,7 @@ import com.njdaeger.pdk.command.CommandBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -117,7 +118,14 @@ public class AdvancedBuildModule extends Module implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void interact(PlayerInteractEvent e) {
-        if (e.getHand() == EquipmentSlot.OFF_HAND || !config.isEnabledFor(e.getPlayer())) return;
+        if (e.getHand() == EquipmentSlot.OFF_HAND || !config.isEnabledFor(e.getPlayer())) {
+            if (e.getClickedBlock() != null && e.getClickedBlock().getBlockData() instanceof Candle && e.getPlayer().getInventory().getItemInMainHand().getType() == Material.AIR && config.isEnabledFor(e.getPlayer())) {
+                e.setCancelled(true);
+                e.setUseInteractedBlock(Event.Result.DENY);
+                e.setUseItemInHand(Event.Result.DENY);
+            }
+            return;
+        }
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getPlayer().isSneaking()) {
 
             BlockFace face = e.getBlockFace();
@@ -133,18 +141,30 @@ public class AdvancedBuildModule extends Module implements Listener {
                 e.setUseItemInHand(Event.Result.DENY);
             }
         } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && !e.getPlayer().isSneaking() && e.getClickedBlock() != null && e.getClickedBlock().getBlockData() instanceof Candle c) {
-//            if (!(e.getClickedBlock().getBlockData() instanceof Candle c)) return;
             //todo right click on rail to rotate
             //todo if it has a block below it, minecraft adds a candle so stop that somehow
             //todo lighting rod place facing down if placed on top of block and if placed on/beside another lightning rod, do opposite of its direction
-            c.setCandles(c.getCandles() == c.getMaximumCandles() ? 1 : c.getCandles() + 1);
+
+            if (e.getPlayer().getInventory().getItemInMainHand().getType() == Material.AIR && e.getHand() == EquipmentSlot.HAND) {
+                if (!c.isLit()) { //minecraft already handles the unlighting of candles
+                    c.setLit(true);
+                    e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.BLOCK_CAKE_ADD_CANDLE, 1, 1);
+                } else {
+                    c.setLit(false);
+                    e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.BLOCK_CANDLE_EXTINGUISH, 1, 1);
+                }
+            } else c.setCandles(c.getCandles() == c.getMaximumCandles() ? 1 : c.getCandles() + 1);
             if (!CandleHandler.CANDLE_SESSIONS.containsKey(e.getPlayer().getUniqueId())) CandleHandler.CANDLE_SESSIONS.put(e.getPlayer().getUniqueId(), new CandleHandler.CandleSession());
+
             CandleHandler.CANDLE_SESSIONS.get(e.getPlayer().getUniqueId()).updateCandle(e.getClickedBlock().getType(), c);
             Block clickedBlock = e.getClickedBlock();
             if (clickedBlock == null) return;
             if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logRemoval(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
             clickedBlock.setBlockData(c, false);
             if (plugin.isCoreProtectEnabled()) plugin.getCoreApi().logPlacement(e.getPlayer().getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+            e.setCancelled(true);
+            e.setUseInteractedBlock(Event.Result.DENY);
+            e.setUseItemInHand(Event.Result.DENY);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getPlayer().isSneaking()) {
             Block clickedBlock = e.getClickedBlock();
             if (clickedBlock == null) return;

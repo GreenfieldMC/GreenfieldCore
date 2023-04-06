@@ -10,11 +10,7 @@ import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Map;
-import java.util.UUID;
 
 public class RedblockModule extends Module {
 

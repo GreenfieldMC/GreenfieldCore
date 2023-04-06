@@ -7,24 +7,6 @@ import java.util.UUID;
 
 public class Redblock {
 
-    /*
-
-    Upon creation, the following fields must be set
-    - id
-    - content
-    - status
-    - location
-    - createdBy
-    - createdOn
-    - armorstands
-
-    - minrank is optional upon creation
-    - assignedTo is optional upon creation
-    - assignedOn is optional upon creation
-
-    everything else should be null or 0 upon creation
-     */
-
     private String content;
     private final int id;
     private Status status;

@@ -7,23 +7,47 @@ import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.command.TabContext;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
-import com.njdaeger.pdk.utils.Text;
+import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.pdk.utils.text.click.ClickAction;
+import com.njdaeger.pdk.utils.text.click.ClickString;
+import com.njdaeger.pdk.utils.text.hover.HoverAction;
+import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import com.njdaeger.pdk.utils.text.pager.ComponentPosition;
+import com.njdaeger.pdk.utils.text.pager.components.PageNavigationComponent;
+import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
 import org.bukkit.map.MinecraftFont;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.njdaeger.greenfieldcore.Util.getSubstringIndex;
 import static org.bukkit.ChatColor.*;
 
 public class HotspotCommands {
 
     private final HotspotModule module;
     private final HotspotStorage storage;
+    private final ChatPaginator<Hotspot, CommandContext> paginator;
 
     public HotspotCommands(HotspotModule module, HotspotStorage storage, GreenfieldCore plugin) {
         this.storage = storage;
         this.module = module;
+
+        this.paginator = ChatPaginator.builder(this::lineGenerator)
+                .addComponent((ctx, paginator, results, pg) -> {
+                    if (ctx.first().equalsIgnoreCase("delete")) return Text.of("Delete Options").setColor(LIGHT_PURPLE);
+                    else if (ctx.first().equalsIgnoreCase("teleport")) return Text.of("Teleport Options").setColor(LIGHT_PURPLE);
+                    else return Text.of("Hotspot List").setColor(LIGHT_PURPLE);
+                }, ComponentPosition.TOP_CENTER)
+                .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
+                .addComponent(new PageNavigationComponent<>(
+                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
+                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg - 1),
+                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg + 1),
+                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + ((int) Math.ceil(res.size() / 8.0))
+                ), ComponentPosition.BOTTOM_CENTER)
+                .build();
 
         CommandBuilder.of("hotspot", "hotspots", "hs")
                 .flag(new PageFlag(module))
@@ -86,7 +110,7 @@ public class HotspotCommands {
             context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully teleported to " + hotspots.get(0).getName());
         } else {
             int page = context.hasFlag("page") ? context.getFlag("page") : 1;
-            printHotspotList(0, page, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList()), context);
+            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
         }
     }
 
@@ -124,7 +148,7 @@ public class HotspotCommands {
             context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully deleted " + hotspots.get(0).getName());
         } else {
             int page = context.hasFlag("page") ? context.getFlag("page") : 1;
-            printHotspotList(-1, page, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList()), context);
+            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
         }
     }
 
@@ -137,87 +161,48 @@ public class HotspotCommands {
         int page = context.hasFlag("page") ? context.getFlag("page") : 1;
         if (category != null) hotspots = storage.getHotspots().values().stream().filter(h -> h.getCategory().equals(category) && h.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
         else hotspots = storage.getHotspots().values().stream().filter(hs -> hs.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
-        printHotspotList(1, page, hotspots, context);
+        paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
     }
 
-    private void printHotspotList(int mode, int page, List<Hotspot> hotspots, CommandContext context) throws PDKCommandException {
+    private Text.Section lineGenerator(Hotspot hs, CommandContext ctx) {
+        int mode = 0;
+        if (ctx.first().equalsIgnoreCase("delete")) mode = -1;
+        else if (ctx.first().equalsIgnoreCase("teleport")) mode = 1;
 
-        int maxPage = (int) Math.ceil(hotspots.size()/8.);
-        if (page < 1 || maxPage < page) context.error(RED + "There are no more pages to display.");
-        hotspots = hotspots.stream().skip((page - 1) * 8).limit(8).collect(Collectors.toList());
+        var deleteButton = Text.of("[D]")
+                .setBold(true)
+                .setColor(RED)
+                .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Delete this Hotspot").setColor(GRAY))
+                .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/hotspot delete " + hs.getId()));
 
-        Text.TextSection text = Text.of("========= ").setColor(GRAY)
-                .append("Hotspots").setColor(LIGHT_PURPLE)
-                .append(" --- ").setColor(GRAY);
+        var teleportButton = Text.of("[T]")
+                .setBold(true)
+                .setColor(GREEN)
+                .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Teleport to this Hotspot").setColor(GRAY))
+                .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/hotspot goto " + hs.getId()));
 
-        if (mode == -1) { //Delete mode
-            text.append("Delete Options").setColor(LIGHT_PURPLE).append(" ===============");
-            for (Hotspot hs : hotspots) {
-                text.append("\n[D]").setColor(RED).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Delete this Hotspot").setColor(GRAY)).clickEvent(Text.ClickAction.RUN_COMMAND, "/hotspot delete " + hs.getId()).setBold(true);
-                appendHotspotText(context, text, hs);
-            }
-        }
-        else if (mode == 0) { //Teleport mode
-            text.append("Teleport Options").setColor(LIGHT_PURPLE).append(" ===============");
-            for (Hotspot hs : hotspots) {
-                text.append("\n[T]").setColor(GREEN).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Teleport to this Hotspot").setColor(GRAY)).clickEvent(Text.ClickAction.RUN_COMMAND, "/hotspot goto " + hs.getId()).setBold(true);
-                appendHotspotText(context, text, hs);
-            }
-        } else { //List mode
-            text.append("Hotspot List").setColor(LIGHT_PURPLE).append(" ===============");
-            for (Hotspot hs : hotspots) {
-                text.append("\n[D]").setColor(RED).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Delete this Hotspot").setColor(GRAY)).clickEvent(Text.ClickAction.RUN_COMMAND, "/hotspot delete " + hs.getId()).setBold(true);
-                text.append("[T]").setColor(GREEN).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Teleport to this Hotspot").setColor(GRAY)).clickEvent(Text.ClickAction.RUN_COMMAND, "/hotspot goto " + hs.getId()).setBold(true);
-                appendHotspotText(context, text, hs);
-            }
+        var big = MinecraftFont.Font.getWidth(hs.getName()) > 200;
+        var name = big ? hs.getName().substring(0, getSubstringIndex(200, hs.getName())) : hs.getName();
+
+        var text = Text.of(" | ").setColor(GRAY);
+
+        if (mode == -1) text = deleteButton.appendRoot(text);
+        else if (mode == 1) text = teleportButton.appendRoot(text);
+        else {
+            if (ctx.hasPermission("greenfieldcore.hotspots.goto")) text = teleportButton.appendRoot(text);
+            if (ctx.hasPermission("greenfieldcore.hotspots.delete")) text = deleteButton.appendRoot(text);
         }
 
-        text.append("\n========= ").setColor(GRAY);
+        text.appendRoot(name)
+                .setColor(GRAY)
+                .setHoverEvent(HoverAction.SHOW_TEXT,
+                        Text.of("Distance: " + String.format("%.2f", ctx.asPlayer().getLocation().distance(hs.getLocation()))).setColor(GRAY)
+                                .append("\nCategory: " + hs.getCategory().getId())
+                                .append("\nMarker: " + (hs.getCustomMarker() == null ? hs.getCategory().getMarker() : hs.getCustomMarker()))
+                                .append("\nID: #" + hs.getId()));
 
-        String command;
-        if (mode == -1) command = "/hotspot delete " + context.joinArgs(1) + " -page ";
-        else if (mode == 0) command = "/hotspot goto " + context.joinArgs(1) + " -page ";
-        else command = "/hotspot list " + context.joinArgs(1) + " -page ";
+        if (big) text.appendRoot("...").setColor(GRAY).setBold(true).setHoverEvent(HoverAction.SHOW_TEXT, Text.of(hs.getName()).setColor(GRAY));
 
-        if (page > 1) text.append("|<--").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, command + 1).append(" ").append("<-").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, command + (page - 1));
-        else text.append("|<--").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, command + 0).append(" ").append("<-").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, command + 0);
-
-        text.append(" ==== ").setColor(GRAY);
-        text.append(" [" + String.format("%-4d/%4d", page, maxPage) + "] ").setColor(LIGHT_PURPLE);
-        text.append(" ==== ").setColor(GRAY);
-
-        if (maxPage <= page) text.append("->").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, command + 0).append(" ").append("-->|").setColor(RED).clickEvent(Text.ClickAction.RUN_COMMAND, command + 0);
-        else text.append("->").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, command + (page + 1)).append(" ").append("-->|").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, command + maxPage);
-
-        text.append(" =========");
-        Text.sendTo(text, context.asPlayer());
+        return text;
     }
-
-    private void appendHotspotText(CommandContext context, Text.TextSection text, Hotspot hs) {
-        text.append(" | ");
-
-        if (MinecraftFont.Font.getWidth(hs.getName()) > 250) text.append(hs.getName().substring(0, getSubstringIndex(250, hs.getName())) + "...").setColor(GRAY).hoverEvent(Text.HoverAction.SHOW_TEXT,
-                Text.of("Distance: " + String.format("%.2f", context.asPlayer().getLocation().distance(hs.getLocation()))).setColor(GRAY)
-                        .append("\nCategory: " + hs.getCategory().getId()).setColor(GRAY)
-                        .append("\nMarker: " + (hs.getCustomMarker() == null ? hs.getCategory().getMarker() : hs.getCustomMarker()))
-                        .append("\nID: #" + hs.getId()).setColor(GRAY)
-        );
-        else text.append(hs.getName()).setColor(GRAY).hoverEvent(Text.HoverAction.SHOW_TEXT,
-                Text.of("Distance: " + String.format("%.2f", context.asPlayer().getLocation().distance(hs.getLocation()))).setColor(GRAY)
-                        .append("\nCategory: " + hs.getCategory().getId()).setColor(GRAY)
-                        .append("\nMarker: " + (hs.getCustomMarker() == null ? hs.getCategory().getMarker() : hs.getCustomMarker()))
-                        .append("\nID: #" + hs.getId()).setColor(GRAY)
-        );
-    }
-
-    private int getSubstringIndex(int maxPixelWidth, String text) {
-        int currentWidth = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (currentWidth >= maxPixelWidth) return i - 1;
-            else currentWidth += MinecraftFont.Font.getChar(text.charAt(i)).getWidth();
-        }
-        return text.length();
-    }
-
-
 }

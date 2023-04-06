@@ -1,7 +1,10 @@
 package com.njdaeger.greenfieldcore.codes;
 
 import com.google.common.base.Strings;
-import com.njdaeger.pdk.utils.Text;
+import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.pdk.utils.text.click.ClickAction;
+import com.njdaeger.pdk.utils.text.click.ClickEvent;
+import com.njdaeger.pdk.utils.text.click.ClickString;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
@@ -46,14 +49,14 @@ public class Codes {
             else sender.sendMessage("   " + Strings.repeat(" ", padding) + line);
         }
         if (sender instanceof Player) {
-            Text.ClickEvent<String> outOfRange = new Text.ClickEvent<>(Text.ClickAction.RUN_COMMAND, "/codes -1");
+            var outOfRange = new ClickEvent<>(ClickAction.RUN_COMMAND, ClickString.of("/codes -1"));
             Text.of("===== ").setColor(GRAY)
-                .append(page <= 1 ? "|X|" : "<<").setColor(LIGHT_PURPLE).setBold(true)
-                .clickEvent(page <= 1 ? outOfRange : new Text.ClickEvent<>(Text.ClickAction.RUN_COMMAND, "/codes " + (page - 1)))
-                .append(" ========================== ").setColor(GRAY)
-                .append(page >= chatPage.getTotalPages() ? "|X|" : ">>").setColor(LIGHT_PURPLE).setBold(true)
-                .clickEvent(page >= chatPage.getTotalPages() ? outOfRange : new Text.ClickEvent<>(Text.ClickAction.RUN_COMMAND, "/codes " + (page + 1)))
-                .append(" =====").setColor(GRAY).sendTo((Player) sender);
+                .appendRoot(page <= 1 ? "|X|" : "<<").setColor(LIGHT_PURPLE).setBold(true)
+                .setClickEvent(page <= 1 ? outOfRange : new ClickEvent<>(ClickAction.RUN_COMMAND, ClickString.of("/codes " + (page - 1))))
+                .appendRoot(" ========================== ").setColor(GRAY)
+                .appendRoot(page >= chatPage.getTotalPages() ? "|X|" : ">>").setColor(LIGHT_PURPLE).setBold(true)
+                .setClickEvent(page >= chatPage.getTotalPages() ? outOfRange : new ClickEvent<>(ClickAction.RUN_COMMAND, ClickString.of("/codes " + (page + 1))))
+                .appendRoot(" =====").setColor(GRAY).sendTo(sender);
         }
     }
 

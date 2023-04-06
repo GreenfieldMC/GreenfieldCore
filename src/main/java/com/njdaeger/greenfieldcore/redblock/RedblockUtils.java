@@ -168,4 +168,9 @@ Fi     * @param id The id of the redblock
         return nearestRedblock;
     }
 
+    static String getOfflinePlayer(UUID uuid) {
+        if (userNameMap.containsKey(uuid)) return userNameMap.get(uuid);
+        else return Bukkit.getOfflinePlayer(uuid).getName();
+    }
+
 }

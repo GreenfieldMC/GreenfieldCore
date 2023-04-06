@@ -5,68 +5,52 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.redblock.flags.*;
 import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
-import com.njdaeger.pdk.command.PDKCommand;
-import com.njdaeger.pdk.command.TabContext;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.command.flag.OptionalFlag;
-import com.njdaeger.pdk.utils.Text;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.map.MinecraftFont;
+import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import com.njdaeger.pdk.utils.text.pager.ComponentPosition;
+import com.njdaeger.pdk.utils.text.pager.components.PageNavigationComponent;
+import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static com.njdaeger.greenfieldcore.redblock.RedblockUtils.getNearestRedblock;
 import static org.bukkit.ChatColor.*;
 
 public class RedblockCommands {
 
-    private final PDKCommand createCommand;
-
+    private final ChatPaginator<Redblock, CommandContext> paginator;
     private final RedblockModule module;
     private final RedblockStorage storage;
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT);
 
     public RedblockCommands(RedblockModule module, RedblockStorage storage, GreenfieldCore plugin) {
         this.module = module;
         this.storage = storage;
 
-//        CommandBuilder.of("rb", "redblock")
-//                .description("Redblock Commands")
-//                .usage("/rb [create <content>|delete|deny|list|approve|complete|edit <content>]")
-//                .permissions(
-//                        "greenfieldcore.redblock.create",
-//                        "greenfieldcore.redblock.approve",
-//                        "greenfieldcore.redblock.list",
-//                        "greenfieldcore.redblock.deny.self",
-//                        "greenfieldcore.redblock.deny.others",
-//                        "greenfieldcore.redblock.edit",
-//                        "greenfieldcore.redblock.delete",
-//                        "greenfieldcore.redblock.goto",
-//                        "greenfieldcore.redblock.complete")
-//                .executor(this::redblockCommand)
-//                .flag(new UUIDFlag("The user to assign this redblock to", "-assign <playerName>", "assign", tabContext -> tabContext.first().equalsIgnoreCase("create")))
-//                .register(plugin);
+        this.paginator = ChatPaginator.builder(RedblockLineGenerator::getRedblockLine)
+                .addComponent(Text.of("Redblock List").setColor(LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
+                .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
+                .addComponent(new PageNavigationComponent<>(
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + 1,
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + (pg - 1),
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + (pg + 1),
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + ((int) Math.ceil(res.size() / 8.0))
+                ), ComponentPosition.BOTTOM_CENTER)
+                .addComponent(new RedblockFilterComponent(), ComponentPosition.TOP_RIGHT)
+                .build();
 
         //redblock create command
-        createCommand = CommandBuilder.of("rbcreate", "rbc")
+        CommandBuilder.of("rbcreate", "rbc")
                 .description("Create a new redblock")
                 .usage("/rbc <content>")
                 .permissions("greenfieldcore.redblock.create")
                 .min(1)
                 .executor(this::create)
                 .flag(new UUIDFlag("The user to assign this redblock to", "-assign <playerName>", "assign"))
-                .flag(new RankFlag()).build();
-
-        createCommand.register(plugin);
-//                .register(plugin);
+                .flag(new RankFlag())
+                .register(plugin);
 
         //redblock approve command
         CommandBuilder.of("rbapprove", "rba")
@@ -316,135 +300,6 @@ public class RedblockCommands {
                 .filter(rb -> approvedBy == null || rb.getApprovedBy() != null && rb.getApprovedBy().equals(approvedBy))
                 .toList();
 
-        Supplier<Text.TextSection> hoverText = () -> {
-            var text = Text.of("Status Shown: ").setColor(GRAY);
-            if (!deleted && !incomplete && !pending && !approved) text = text.append("ALL").setColor(BLUE);
-            else {
-                if (deleted) text = text.append("\n- DELETED").setColor(BLUE);
-                if (incomplete) text = text.append("\n- INCOMPLETE").setColor(BLUE);
-                if (pending) text = text.append("\n- PENDING").setColor(BLUE);
-                if (approved) text = text.append("\n- APPROVED").setColor(BLUE);
-            }
-            if (assignedTo != null) text = text.append("\nAssigned to: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(assignedTo).getName()).setColor(BLUE);
-            if (createdBy != null) text = text.append("\nCreated by: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(createdBy).getName()).setColor(BLUE);
-            if (completedBy != null) text = text.append("\nCompleted by: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(completedBy).getName()).setColor(BLUE);
-            if (approvedBy != null) text = text.append("\nApproved by: ").setColor(GRAY).append(Bukkit.getOfflinePlayer(approvedBy).getName()).setColor(BLUE);
-            if (radius != -1) text = text.append("\nRadius: ").setColor(GRAY).append(String.valueOf(radius)).setColor(BLUE);
-            return text;
-        };
-
-        var textHeader = Text.of("== ").setColor(GRAY)
-                .append(String.format("%-5d", filtered.size())).setColor(LIGHT_PURPLE)
-                .append(" Matches =======").setColor(GRAY)
-                .append(" Redblock List ").setColor(LIGHT_PURPLE)
-                .append("======= ").setColor(GRAY)
-                .append("Filter").setColor(LIGHT_PURPLE).setUnderlined(true).hoverEvent(Text.HoverAction.SHOW_TEXT, hoverText.get())
-                .append(" ==").setColor(GRAY).clearEvents().clearFormatting();
-
-        printRedblocks(page, filtered, context, textHeader);
-    }
-
-    private void printRedblocks(int page, List<Redblock> redblocks, CommandContext context, Text.TextSection header) throws PDKCommandException {
-
-        int maxPage = (int) Math.ceil(redblocks.size() / 8.0);
-        if (page < 1 || page > maxPage) context.error(RED + "No more results to show.");
-        redblocks = redblocks.stream().skip((page - 1) * 8L).limit(8).toList();
-
-        redblocks.forEach(rb -> getRedblockLine(rb, context.getLocation(), header));
-        header.append("\n== ").setColor(GRAY);
-        if (page > 1) {
-            header.append("|<--").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, "/rblist " + context.getRawCommandString().replace("-page " + page, "") + " -page " + 1).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Go to first page").setColor(GRAY));
-            header.append(" ").setColor(GRAY).clearEvents();
-            header.append("<-").setColor(GRAY).clickEvent(Text.ClickAction.RUN_COMMAND, "/rblist " + context.getRawCommandString().replace("-page " + page, "") + " -page " + (page - 1)).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Go to previous page").setColor(GRAY));
-        } else {
-            header.append("|<--").setColor(RED).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("You are on the first page.").setColor(GRAY));
-            header.append(" ").setColor(GRAY).clearEvents();
-            header.append("<-").setColor(RED).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("There are no previous pages.").setColor(GRAY));
-        }
-        header.append(" ========== ").setColor(GRAY).clearEvents();
-        header.append(" [" + String.format("%-4d/%4d", page, maxPage) + "] ").setColor(LIGHT_PURPLE);
-        header.append(" =========== ").setColor(GRAY);
-
-        if (page < maxPage) {
-            header.append("->").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, "/rblist " + context.getRawCommandString().replace("-page " + page, "") + " -page " + (page + 1)).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Go to next page").setColor(GRAY));
-            header.append(" ").setColor(GRAY).clearEvents();
-            header.append("-->|").setColor(LIGHT_PURPLE).clickEvent(Text.ClickAction.RUN_COMMAND, "/rblist " + context.getRawCommandString().replace("-page " + page, "") + " -page " + maxPage).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Go to last page").setColor(GRAY));
-        } else {
-            header.append("->").setColor(RED).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("There are no more pages.").setColor(GRAY));
-            header.append(" ").setColor(GRAY).clearEvents();
-            header.append("-->|").setColor(RED).hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("You are on the last page.").setColor(GRAY));
-        }
-        header.append(" ==").setColor(GRAY).clearEvents();
-        Text.sendTo(header, context.asPlayer());
-    }
-
-    private void getRedblockLine(Redblock redblock, Location locationOfSender, Text.TextSection rootText) {
-        Supplier<Text.TextSection> hoverText = () -> {
-            var createdByName = Bukkit.getOfflinePlayer(redblock.getCreatedBy()).getName();
-            if (createdByName == null) Bukkit.getLogger().info("Could not resolve createdBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCreatedBy());
-            var text = Text.of("Status: ").setColor(GRAY).append(redblock.getStatus().name()).setColor(BLUE).append("\n")
-                    .append("Created by: ").setColor(GRAY).append(createdByName == null ? "null" : createdByName).setColor(BLUE).append("\n")
-                    .append("Created at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getCreatedOn())))).setColor(BLUE).append("\n");
-
-            if (redblock.getCompletedBy() != null) {
-                var completedByName = Bukkit.getOfflinePlayer(redblock.getCompletedBy()).getName();
-                if (completedByName == null) Bukkit.getLogger().info("Could not resolve completedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
-                text.append("Completed by: ").setColor(GRAY).append(completedByName == null ? "null" : completedByName).setColor(BLUE).append("\n")
-                        .append("Completed at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getCompletedOn())))).setColor(BLUE).append("\n");
-            }
-            if (redblock.getApprovedBy() != null) {
-                var approvedByName = Bukkit.getOfflinePlayer(redblock.getApprovedBy()).getName();
-                if (approvedByName == null) Bukkit.getLogger().info("Could not resolve approvedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
-                text.append("Approved by: ").setColor(GRAY).append(approvedByName == null ? "null" : approvedByName).setColor(BLUE).append("\n")
-                        .append("Approved at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getApprovedOn())))).setColor(BLUE).append("\n");
-            }
-            if (redblock.getAssignedTo() != null) {
-                var assignedToName = Bukkit.getOfflinePlayer(redblock.getAssignedTo()).getName();
-                if (assignedToName == null) Bukkit.getLogger().info("Could not resolve assignedTo playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
-                text.append("Assigned to: ").setColor(GRAY).append(assignedToName == null ? "null" : assignedToName).setColor(BLUE).append("\n")
-                        .append("Assigned at: ").setColor(GRAY).append(DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(redblock.getAssignedOn())))).setColor(BLUE).append("\n");
-            }
-            if (redblock.getMinRank() != null)
-                text.append("Minimum Rank: ").setColor(GRAY).append(redblock.getMinRank()).setColor(BLUE).append("\n");
-            text.append("Distance: ").setColor(GRAY).append(String.format("%.2f", locationOfSender.distance(redblock.getLocation()))).setColor(BLUE).append("\n");
-            text.append("ID: ").setColor(GRAY).append(redblock.getId() + "").setColor(BLUE);
-            return text;
-        };
-
-        rootText.append("\n?")
-                .setColor(
-                    switch (redblock.getStatus()) {
-                        case DELETED -> DARK_RED;
-                        case INCOMPLETE -> RED;
-                        case PENDING -> GOLD;
-                        case APPROVED -> GREEN;
-                    })
-                .setBold(true)
-                .hoverEvent(Text.HoverAction.SHOW_TEXT, hoverText.get());
-
-        rootText.append(" ").clearEvents();
-        rootText.append("[T]")
-                .setColor(BLUE)
-                .setBold(true)
-                .clickEvent(Text.ClickAction.RUN_COMMAND, "/rbtp -id " + redblock.getId())
-                .hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of("Teleport to this redblock").setColor(GRAY));
-
-        rootText.append(" - ").setColor(GRAY).clearFormatting().clearEvents();
-
-        if (MinecraftFont.Font.getWidth(redblock.getContent()) > 200) {
-            rootText.append(redblock.getContent().substring(0, getSubstringIndex(200, redblock.getContent())) + "...")
-                    .setBold(false)
-                    .setColor(GRAY)
-                    .hoverEvent(Text.HoverAction.SHOW_TEXT, Text.of(redblock.getContent()).setColor(GRAY));
-        } else rootText.append(redblock.getContent()).setColor(GRAY).setBold(false).clearEvents();
-    }
-
-    private int getSubstringIndex(int maxPixelWidth, String text) {
-        int currentWidth = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (currentWidth >= maxPixelWidth) return i - 1;
-            else currentWidth += MinecraftFont.Font.getChar(text.charAt(i)).getWidth();
-        }
-        return text.length();
+        paginator.generatePage(context, filtered, page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
     }
 }

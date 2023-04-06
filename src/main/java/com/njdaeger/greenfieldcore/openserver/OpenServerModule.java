@@ -2,7 +2,6 @@ package com.njdaeger.greenfieldcore.openserver;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
-import org.bukkit.Bukkit;
 
 public final class OpenServerModule extends Module {
 

@@ -22,7 +22,7 @@ public class UtilitiesModule extends Module implements Listener {
 
     private boolean badBlue = false;
     private boolean worldeditPerfSet = false;
-    private Set<UUID> overriddenPerfs = new HashSet<>();
+    private final Set<UUID> overriddenPerfs = new HashSet<>();
 
     public UtilitiesModule(GreenfieldCore plugin) {
         super(plugin);

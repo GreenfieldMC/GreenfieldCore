@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.map.MinecraftFont;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -41,10 +42,10 @@ public class CommandStoreCommands {
                     return Text.of("User CommandStorage").setColor(LIGHT_PURPLE);
                 }, ComponentPosition.TOP_CENTER)
                 .addComponent(new PageNavigationComponent<>(
-                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + 1,
-                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + (pg - 1),
-                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + (pg + 1),
-                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + ((int) Math.ceil(res.size() / 8.0))
+                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
+                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg - 1),
+                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg + 1),
+                        (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + ((int) Math.ceil(res.size() / 8.0))
                 ), ComponentPosition.BOTTOM_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent((ctx, paginator, results, pg) -> {
@@ -243,12 +244,12 @@ public class CommandStoreCommands {
         AbstractCommandStorage storage = context.hasFlag("server") || context.isConsole() ? module.getServerStorage() : module.getUserStorage(context.asPlayer().getUniqueId());
         if (context.hasFlag("server") && !context.hasPermission("greenfieldcore.commandstorage.list.server")) context.noPermission();
         int page = context.getFlag("page", 1);
-        int maxPage = (int)Math.ceil(storage.getCommands().size()/8.);
-        if (page < 1 || maxPage < page) context.error(RED + "There are no more pages to display.");
+//        int maxPage = (int)Math.ceil(storage.getCommands().size()/8.);
+//        if (page < 1 || maxPage < page) context.error(RED + "There are no more pages to display.");
 
         List<AbstractCommandStorage.Command> commands;
-        if (context.hasFlag("frequency")) commands = storage.getCommands().stream().sorted(Comparator.comparingInt(AbstractCommandStorage.Command::getUsed).reversed()).skip((page-1)*8L).limit(8).collect(Collectors.toList());
-        else commands = storage.getCommands().stream().skip((page-1)*8L).limit(8).collect(Collectors.toList());
+        if (context.hasFlag("frequency")) commands = storage.getCommands().stream().sorted(Comparator.comparingInt(AbstractCommandStorage.Command::getUsed).reversed()).collect(Collectors.toList());
+        else commands = new ArrayList<>(storage.getCommands());
 
         paginator.generatePage(context, commands, page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
     }

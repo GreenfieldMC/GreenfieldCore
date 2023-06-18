@@ -33,10 +33,10 @@ public class RedblockCommands {
                 .addComponent(Text.of("Redblock List").setColor(LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent(new PageNavigationComponent<>(
-                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + 1,
-                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + (pg - 1),
-                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + (pg + 1),
-                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + "-page " + ((int) Math.ceil(res.size() / 8.0))
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg - 1),
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg + 1),
+                        (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + ((int) Math.ceil(res.size() / 8.0))
                 ), ComponentPosition.BOTTOM_CENTER)
                 .addComponent(new RedblockFilterComponent(), ComponentPosition.TOP_RIGHT)
                 .build();

@@ -33,7 +33,7 @@ public class UtilitiesModule extends Module implements Listener {
         new UtilityCommands(this, plugin);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         if (Bukkit.getPluginManager().getPlugin("worldedit") != null) worldeditPerfSet = true;
-        else Bukkit.getLogger().info("WorldEdit was not found. Perf settings will not be automatically set.");
+        else plugin.getLogger().info("WorldEdit was not found. Perf settings will not be automatically set.");
     }
 
     @Override

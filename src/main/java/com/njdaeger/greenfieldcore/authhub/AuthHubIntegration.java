@@ -28,10 +28,15 @@ public class AuthHubIntegration extends Module implements Listener {
 
     public static final ConnectionRequirement DISCORD_CONNECTION_REQUIREMENT = new ConnectionRequirement("DISCORD_REQUIREMENT", (p) -> {
         if (p.hasPermission("greenfieldcore.discord.exempt")) {
-            Bukkit.getLogger().info("User " + p.getName() + " is exempted from having a linked discord profile.");
+            GreenfieldCore.logger().info("User " + p.getName() + " is exempted from having a linked discord profile.");
             return false;
         }
-        return true;
+        else if (p.isWhitelisted() && !p.isBanned()) {
+            GreenfieldCore.logger().info("User " + p.getName() + " must have a linked discord profile.");
+            return true;
+        }
+        GreenfieldCore.logger().info("User " + p.getName() + " does not need a linked discord profile - they were not found in the whitelist or they are a banned member.");
+        return false;
     });
 
     public AuthHubIntegration(GreenfieldCore plugin) {
@@ -73,6 +78,11 @@ public class AuthHubIntegration extends Module implements Listener {
         var chat = rsp == null ? null : rsp.getProvider();
         var patreon = reg.getApplication(PatreonApplication.class);
 
+        if (patreon == null) {
+            plugin.getLogger().warning("Patreon application not enabled. Patreon integration will not work.");
+            return;
+        }
+
         //the patreon listener in the authentication hub kicks the user if we dont have a cached value, a connected account, or if the value is being refreshed.
         //so at this point, if that listener doesnt disallow the connection, we definitely have their information cached, so we should be alright.
         if (e.getResult() == PlayerLoginEvent.Result.ALLOWED && patreon.getConnectionRequirement().isRequired(e.getPlayer())) {
@@ -82,7 +92,7 @@ public class AuthHubIntegration extends Module implements Listener {
                 e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "Your patron account currently pledges " + cached + " cents, which is less than the required " + config.getRequiredPatreonPledge() + " cents. Please upgrade your patronage to continue.");
             } else {
                 if (chat != null) {
-                    Bukkit.getLogger().info("Setting prefix of player " + e.getPlayer().getName());
+                    plugin.getLogger().info("Setting prefix of player " + e.getPlayer().getName());
                     //no reason to worry about previous prefix, they are a patron and should only ever have the dollar sign prefix
                     chat.setPlayerPrefix(e.getPlayer(), "&3[$] " + chat.getGroupPrefix(e.getPlayer().getWorld(), chat.getPrimaryGroup(e.getPlayer())));
                     prefixedUsers.add(e.getPlayer().getUniqueId());

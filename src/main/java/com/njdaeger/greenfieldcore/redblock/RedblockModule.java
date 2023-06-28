@@ -14,6 +14,7 @@ import java.io.InputStream;
 
 public class RedblockModule extends Module {
 
+    private boolean isEnabled = false;
     private RedblockStorage storage;
     private MarkerAPI markerApi;
 
@@ -27,9 +28,11 @@ public class RedblockModule extends Module {
     @Override
     public void onEnable() {
         if (Bukkit.getPluginManager().getPlugin("Vault") == null || Bukkit.getPluginManager().getPlugin("Essentials") == null) {
-            Bukkit.getLogger().warning("Unable to start RedblockModule. Vault or Essentials was not found.");
+            plugin.getLogger().warning("Unable to start RedblockModule. Vault or Essentials was not found.");
+            this.isEnabled = false;
             return;
         }
+        this.isEnabled = true;
         this.storage = new RedblockStorage(plugin, this);
         new RedblockCommands(this, this.storage, plugin);
         Bukkit.getPluginManager().registerEvents(new RedblockListener(storage), plugin);
@@ -153,6 +156,7 @@ public class RedblockModule extends Module {
 
     @Override
     public void onDisable() {
+        if (!isEnabled) return;
         if (markerApi != null) {
             var set = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET);
             if (set != null) set.deleteMarkerSet();

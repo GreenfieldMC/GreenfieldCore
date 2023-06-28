@@ -18,9 +18,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Logger;
+
 public final class GreenfieldCore extends JavaPlugin {
 
     private CoreProtectAPI coreApi;
+    private static GreenfieldCore instance;
 
     private final ModuleConfig moduleConfig = new ModuleConfig(this);
 
@@ -39,6 +42,7 @@ public final class GreenfieldCore extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        GreenfieldCore.instance = this;
         coreApi = initializeCoreProtect();
         if (coreApi == null) {
             getLogger().warning("Unable to find an installation of CoreProtect. CoreProtect integration will be disabled.");
@@ -89,6 +93,10 @@ public final class GreenfieldCore extends JavaPlugin {
         CoreProtect cp = (CoreProtect)plugin;
         if (!cp.getAPI().isEnabled() || cp.getAPI().APIVersion() < 6) return null;
         else return cp.getAPI();
+    }
+
+    public static Logger logger() {
+        return instance.getLogger();
     }
 
 }

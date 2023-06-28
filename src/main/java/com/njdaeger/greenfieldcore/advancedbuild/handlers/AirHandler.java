@@ -29,7 +29,7 @@ public class AirHandler extends BlockHandler {
                 clickedBlockLocation.getBlock().setBlockData(c, false);
                 log(true, player, clickedBlockLocation.getBlock());
                 playSoundFor(true, player, clickedBlockLocation.getBlock().getType());
-                CandleHandler.CANDLE_SESSIONS.get(player.getUniqueId()).updateCandle(clickedBlockLocation.getBlock().getType(), c);
+//                CandleHandler.CANDLE_SESSIONS.get(player.getUniqueId()).updateCandle(clickedBlockLocation.getBlock().getType(), c);
             }, 1);
             return true;
         }

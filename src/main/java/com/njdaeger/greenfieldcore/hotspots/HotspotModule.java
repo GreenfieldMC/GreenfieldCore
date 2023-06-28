@@ -23,7 +23,7 @@ public class HotspotModule extends Module {
     @Override
     public void onEnable() {
         if (Bukkit.getPluginManager().getPlugin("dynmap") == null || Bukkit.getPluginManager().getPlugin("essentials") == null) {
-            Bukkit.getLogger().warning("Unable to start HotspotModule. Dynmap or Essentials was not found.");
+            plugin.getLogger().warning("Unable to start HotspotModule. Dynmap or Essentials was not found.");
             return;
         }
         this.markerApi = ((DynmapAPI)Bukkit.getPluginManager().getPlugin("dynmap")).getMarkerAPI();
@@ -52,7 +52,7 @@ public class HotspotModule extends Module {
         storage.getCategories().forEach((id, category) -> {
             MarkerIcon icon = createOrGetMarkerIcon(category.getMarker());
             if (icon == null) {
-                Bukkit.getLogger().warning("Unable to load marker " + category.getMarker() + ". Category " + id + " will not be loaded.");
+                plugin.getLogger().warning("Unable to load marker " + category.getMarker() + ". Category " + id + " will not be loaded.");
                 return;
             }
 
@@ -76,7 +76,7 @@ public class HotspotModule extends Module {
             if (hs.getCustomMarker() != null) {
                 icon = markerApi.getMarkerIcon(hs.getCustomMarker().endsWith(".png") ? hs.getCustomMarker().split("\\.")[0] : hs.getCustomMarker());
                 if (icon == null) {
-                    Bukkit.getLogger().warning("Unable to hotspot #" + hs.getId() + ". Could not find icon " + hs.getCustomMarker());
+                    plugin.getLogger().warning("Unable to hotspot #" + hs.getId() + ". Could not find icon " + hs.getCustomMarker());
                     return;
                 }
             } else icon = markerApi.getMarkerIcon(hs.getCategory().getMarker().endsWith(".png") ? hs.getCategory().getMarker().split("\\.")[0] : hs.getCategory().getMarker());

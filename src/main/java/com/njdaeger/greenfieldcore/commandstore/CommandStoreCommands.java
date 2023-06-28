@@ -265,7 +265,7 @@ public class CommandStoreCommands {
         AbstractCommandStorage.Command command = storage.getCommand(context.integerAt(0));
         if (command == null) context.error(RED + "Command ID #" + context.argAt(0) + " does not exist.");
         command.incrementUsage();
-        Bukkit.getLogger().info(context.getSender().getName() + " issued server command: " + command.getCommand());
+        GreenfieldCore.logger().info(context.getSender().getName() + " issued server command: " + command.getCommand());
         context.asPlayer().performCommand(command.getCommand().substring(1));
     }
     

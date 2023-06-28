@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.redblock;
 
+import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.utils.text.Text;
 import com.njdaeger.pdk.utils.text.click.ClickAction;
@@ -23,7 +24,7 @@ public class RedblockLineGenerator {
         var locationOfSender = context.getLocation();
 
         var createdByName = RedblockUtils.getOfflinePlayer(redblock.getCreatedBy());
-        if (createdByName == null) Bukkit.getLogger().info("Could not resolve createdBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCreatedBy());
+        if (createdByName == null) GreenfieldCore.logger().info("Could not resolve createdBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCreatedBy());
         var text = Text.of("Status: ").setColor(GRAY)
                 .appendRoot(redblock.getStatus().name()).setColor(BLUE)
                 .appendRoot("\n")
@@ -36,7 +37,7 @@ public class RedblockLineGenerator {
 
         if (redblock.getCompletedBy() != null) {
             var completedByName = RedblockUtils.getOfflinePlayer(redblock.getCompletedBy());
-            if (completedByName == null) Bukkit.getLogger().info("Could not resolve completedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
+            if (completedByName == null) GreenfieldCore.logger().info("Could not resolve completedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
 
             text.appendRoot("Completed by: ").setColor(GRAY)
                     .appendRoot(completedByName == null ? "null" : completedByName).setColor(BLUE)
@@ -47,7 +48,7 @@ public class RedblockLineGenerator {
         }
         if (redblock.getApprovedBy() != null) {
             var approvedByName = RedblockUtils.getOfflinePlayer(redblock.getApprovedBy());
-            if (approvedByName == null) Bukkit.getLogger().info("Could not resolve approvedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
+            if (approvedByName == null) GreenfieldCore.logger().info("Could not resolve approvedBy playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
 
             text.appendRoot("Approved by: ").setColor(GRAY)
                     .appendRoot(approvedByName == null ? "null" : approvedByName).setColor(BLUE)
@@ -58,7 +59,7 @@ public class RedblockLineGenerator {
         }
         if (redblock.getAssignedTo() != null) {
             var assignedToName = RedblockUtils.getOfflinePlayer(redblock.getAssignedTo());
-            if (assignedToName == null) Bukkit.getLogger().info("Could not resolve assignedTo playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
+            if (assignedToName == null) GreenfieldCore.logger().info("Could not resolve assignedTo playername for redblock " + redblock.getId() + ". UUID: " + redblock.getCompletedBy());
 
             text.appendRoot("Assigned to: ").setColor(GRAY)
                     .appendRoot(assignedToName == null ? "null" : assignedToName).setColor(BLUE)

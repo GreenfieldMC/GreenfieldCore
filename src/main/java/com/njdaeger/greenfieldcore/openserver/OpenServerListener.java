@@ -121,7 +121,7 @@ public class OpenServerListener implements Listener {
 
     @EventHandler
     public void entityCombustByEntity(EntityCombustByEntityEvent event) {
-        if (event.getCombuster() instanceof Player) cancel(event, (Player) event.getEntity());
+        if (event.getCombuster() instanceof Player) cancel(event, (Player) event.getCombuster());
     }
 
     @EventHandler

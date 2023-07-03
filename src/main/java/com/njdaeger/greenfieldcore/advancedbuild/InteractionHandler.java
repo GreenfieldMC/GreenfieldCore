@@ -5,6 +5,7 @@ import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -75,13 +76,16 @@ public abstract class InteractionHandler {
      * @return The materials this interaction handler handles as a text section.
      */
     public Text.Section getMaterialListText() {
-        var base = Text.of("");
-        AtomicReference<Text.Section> last = new AtomicReference<>();
-        materials.forEach(m -> last.set(base.appendRoot(m.getKey().getKey()).setColor(LIGHT_BLUE.getRed(), LIGHT_BLUE.getGreen(), LIGHT_BLUE.getBlue()).appendRoot(", ").setColor(ChatColor.BLUE)));
-        last.get().setText("").appendRoot("]").setColor(ChatColor.GRAY);
+        var base = Text.of("[").setColor(ChatColor.GRAY);
+        for (int i = 0; i < materials.size(); i++) {
+            var mat = materials.get(i);
+            base.appendRoot(mat.getKey().getKey()).setColor(LIGHT_BLUE.getRed(), LIGHT_BLUE.getGreen(), LIGHT_BLUE.getBlue());
+            if (i != materials.size() - 1) base.appendRoot(", ").setColor(ChatColor.BLUE);
+        }
+        base.appendRoot("]").setColor(ChatColor.GRAY);
         return materials.isEmpty()
                 ? Text.of("No materials specified.").setColor(ChatColor.RED)
-                : Text.of("[").setColor(ChatColor.GRAY).append(base);
+                : base;
     }
 
     /**
@@ -189,6 +193,14 @@ public abstract class InteractionHandler {
     public final Location getPlaceableLocation(PlayerInteractEvent event) {
         var location = getPlaceableLocation(event.getClickedBlock().getLocation(), event.getBlockFace());
         return canPlaceAt(location) ? location : null;
+    }
+
+    public final void placeBlockAt(Player player, Location location, Material material, BlockData blockData, Sound sound) {
+        log(false, player, location.getBlock());
+        location.getBlock().setType(material, false);
+        location.getBlock().setBlockData(blockData, false);
+        if (sound != null) player.playSound(player.getLocation(), sound, 1f, 1f);
+        log(true, player, location.getBlock());
     }
 
     public final void placeBlockAt(Player player, Location location, Material material, BlockData blockData) {

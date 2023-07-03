@@ -94,7 +94,9 @@ public class AdvancedBuildModule extends Module implements Listener {
                 new MangroveRootsInteraction(),
                 new DirectionalInteraction(),
                 new PitcherPodInteraction(),
-                new VineInteraction()
+                new VineInteraction(),
+                new CommandBlockInteraction(),
+                new SherdInteraction()
                 //dripstone handler
                 //coral handler
                 //command block handler

@@ -37,6 +37,10 @@
             <id>coreprotect</id>
             <url>https://maven.playpro.com/</url>
         </repository>
+        <repository>
+            <id>CodeMC</id>
+            <url>https://repo.codemc.org/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <build>
@@ -99,6 +103,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>io.github.bananapuncher714</groupId>
+            <artifactId>nbteditor</artifactId>
+            <version>7.18.5</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>net.essentialsx</groupId>
             <artifactId>EssentialsX</artifactId>

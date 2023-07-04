@@ -1,9 +1,11 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
 
@@ -26,37 +28,45 @@ public class DoorInteraction extends InteractionHandler {
     }
 
     @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allows the unnatural placement of doors.");
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("Shift and right click to place a door against/on the blockface you clicked.");
+    }
+
+    @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
         if (event.getPlayer().isSneaking()) {
             var clickedFace = event.getBlockFace();
             var playerDirection = event.getPlayer().getFacing();
-            var placementLocation = getPlaceableLocation(event.getClickedBlock().getLocation(), clickedFace);
+            var placementLocation = getPlaceableLocation(event);
+            if (placementLocation == null) return;
 
             var direction = getRequiredDirection(event.getClickedPosition(), playerDirection, clickedFace);
             var hinge = getRequiredHinge(event.getClickedPosition(), playerDirection, direction);
 
-            if (canPlaceAt(placementLocation)) {
-                var otherPlacementHalf = clickedFace == BlockFace.DOWN ? placementLocation.clone().subtract(0, 1, 0) : placementLocation.clone().add(0, 1, 0);
-                if (!canPlaceAt(otherPlacementHalf)) return;
-                var dataBottom = (Door) getHandMat(event).createBlockData();
-                dataBottom.setHinge(hinge);
-                dataBottom.setFacing(direction);
-                dataBottom.setHalf(clickedFace == BlockFace.DOWN ? Door.Half.TOP : Door.Half.BOTTOM);
-                log(false, event.getPlayer(), placementLocation.getBlock());
-                placementLocation.getBlock().setType(getHandMat(event), false);
-                placementLocation.getBlock().setBlockData(dataBottom, false);
-                log(true, event.getPlayer(), placementLocation.getBlock());
+            var otherPlacementHalf = clickedFace == BlockFace.DOWN ? placementLocation.clone().subtract(0, 1, 0) : placementLocation.clone().add(0, 1, 0);
+            if (!canPlaceAt(otherPlacementHalf)) return;
+
+            event.setCancelled(true);
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
+
+            var dataBottom = (Door) getHandMat(event).createBlockData();
+            dataBottom.setHinge(hinge);
+            dataBottom.setFacing(direction);
+            dataBottom.setHalf(clickedFace == BlockFace.DOWN ? Door.Half.TOP : Door.Half.BOTTOM);
+            placeBlockAt(event.getPlayer(), placementLocation, getHandMat(event), dataBottom);
 
 
-                var dataTop = (Door) getHandMat(event).createBlockData();
-                dataTop.setHinge(hinge);
-                dataTop.setFacing(direction);
-                dataTop.setHalf(clickedFace == BlockFace.DOWN ? Door.Half.BOTTOM : Door.Half.TOP);
-                log(false, event.getPlayer(), otherPlacementHalf.getBlock());
-                otherPlacementHalf.getBlock().setType(getHandMat(event), false);
-                otherPlacementHalf.getBlock().setBlockData(dataTop, false);
-                log(true, event.getPlayer(), otherPlacementHalf.getBlock());
-            }
+            var dataTop = (Door) getHandMat(event).createBlockData();
+            dataTop.setHinge(hinge);
+            dataTop.setFacing(direction);
+            dataTop.setHalf(clickedFace == BlockFace.DOWN ? Door.Half.BOTTOM : Door.Half.TOP);
+            placeBlockAt(event.getPlayer(), otherPlacementHalf, getHandMat(event), dataTop);
         }
     }
 

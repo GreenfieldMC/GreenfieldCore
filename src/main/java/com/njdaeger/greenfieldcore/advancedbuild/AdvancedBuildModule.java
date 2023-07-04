@@ -14,10 +14,7 @@ import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.ComponentPosition;
 import com.njdaeger.pdk.utils.text.pager.components.PageNavigationComponent;
 import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Candle;
 import org.bukkit.event.Event;
@@ -29,7 +26,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-import java.awt.*;
 import java.util.List;
 
 import static org.bukkit.ChatColor.GRAY;
@@ -37,7 +33,8 @@ import static org.bukkit.ChatColor.LIGHT_PURPLE;
 
 public class AdvancedBuildModule extends Module implements Listener {
 
-    public static final Color LIGHT_BLUE = ChatColor.BLUE.asBungee().getColor().brighter().brighter();
+    private static final java.awt.Color temp = ChatColor.BLUE.asBungee().getColor().brighter().brighter();
+    public static final Color LIGHT_BLUE = Color.fromRGB(temp.getRed(), temp.getGreen(), temp.getBlue());
     private final ChatPaginator<InteractionHandler, CommandContext> paginator;
     private AdvBuildConfig config;
 
@@ -60,7 +57,7 @@ public class AdvancedBuildModule extends Module implements Listener {
 
     private Text.Section lineGenerator(InteractionHandler handler, CommandContext context) {
         var text = Text.of("?")
-                .setColor(LIGHT_BLUE.getRed(), LIGHT_BLUE.getGreen(), LIGHT_BLUE.getBlue())
+                .setColor(LIGHT_BLUE)
                 .setBold(true)
                 .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/avb " + handler.getInteractionName()))
                 .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Click to view detailed information about this interaction handler.").setColor(GRAY));
@@ -115,15 +112,15 @@ public class AdvancedBuildModule extends Module implements Listener {
                         } else {
                             var h = interactionHandlers.stream().filter(handler -> handler.getInteractionName().equalsIgnoreCase(context.argAt(0))).findFirst();
                             if (h.isPresent()) {
-                                var text = Text.of(" == Handler: ").setColor(GRAY);
+                                var text = Text.of(" ======== Handler: ").setColor(GRAY);
                                 text.appendRoot("[" + h.get().getInteractionName() + "]").setColor(ChatColor.BLUE);
-                                text.appendRoot(" ==").setColor(GRAY);
+                                text.appendRoot(" ========").setColor(GRAY);
                                 text.appendRoot("\nDescription:").setColor(GRAY).setUnderlined(true).setBold(true).appendRoot(" ");
-                                text.appendRoot(h.get().getInteractionDescription().setColor(LIGHT_BLUE.getRed(), LIGHT_BLUE.getGreen(), LIGHT_BLUE.getBlue()));
+                                text.appendRoot(h.get().getInteractionDescription().setColor(LIGHT_BLUE));
                                 text.appendRoot("\nUsage:").setColor(GRAY).setUnderlined(true).setBold(true).appendRoot(" ");
-                                text.appendRoot(h.get().getInteractionUsage().setColor(LIGHT_BLUE.getRed(), LIGHT_BLUE.getGreen(), LIGHT_BLUE.getBlue()));
+                                text.appendRoot(h.get().getInteractionUsage().setColor(LIGHT_BLUE));
                                 text.appendRoot("\nMaterials:").setColor(GRAY).setUnderlined(true).setBold(true).appendRoot(" ");
-                                text.appendRoot(h.get().getMaterialListText().setColor(LIGHT_BLUE.getRed(), LIGHT_BLUE.getGreen(), LIGHT_BLUE.getBlue()));
+                                text.appendRoot(h.get().getMaterialListText().setColor(LIGHT_BLUE));
                                 text.sendTo(context.asPlayer());
                             } else context.error("Unknown interaction handler '" + context.argAt(0) + "'. Do /avb help for a list of Interaction Handlers.");
                         }

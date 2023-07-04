@@ -1,7 +1,9 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Material;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class PlantInteraction extends InteractionHandler {
@@ -55,10 +57,23 @@ public class PlantInteraction extends InteractionHandler {
     }
 
     @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allow the unusual placement of plants.");
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("Shift right click a plant to place it in an unusual location.");
+    }
+
+    @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
         if (event.getPlayer().isSneaking()) {
             var placementLocation = getPlaceableLocation(event);
             if (placementLocation == null) return;
+            event.setCancelled(true);
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
             placeBlockAt(event.getPlayer(), placementLocation, getHandMat(event));
         }
     }

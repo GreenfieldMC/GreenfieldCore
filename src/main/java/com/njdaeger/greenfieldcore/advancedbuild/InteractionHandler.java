@@ -77,11 +77,12 @@ public abstract class InteractionHandler {
      * @return The materials this interaction handler handles as a text section.
      */
     public Text.Section getMaterialListText() {
-        var base = Text.of("[").setColor(ChatColor.GRAY);
+        var base = Text.of("");
+        base.appendRoot("[").setColor(ChatColor.GRAY);
         for (int i = 0; i < materials.size(); i++) {
             var mat = materials.get(i);
-            base.appendRoot(mat.getKey().getKey()).setColor(LIGHT_BLUE.getRed(), LIGHT_BLUE.getGreen(), LIGHT_BLUE.getBlue());
-            if (i != materials.size() - 1) base.appendRoot(", ").setColor(ChatColor.BLUE);
+            base.appendRoot(mat.getKey().getKey()).setColor(LIGHT_BLUE);
+            if (i != materials.size() - 1) base.appendRoot(", ").setColor(ChatColor.BLUE).setBold(true);
         }
         base.appendRoot("]").setColor(ChatColor.GRAY);
         return materials.isEmpty()

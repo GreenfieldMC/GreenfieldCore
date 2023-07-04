@@ -1,8 +1,8 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import com.njdaeger.pdk.utils.text.Text;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
@@ -13,6 +13,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
 
 public class CandleInteraction extends InteractionHandler {
 
@@ -49,6 +51,20 @@ public class CandleInteraction extends InteractionHandler {
     }
 
     @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allow the placement of candles on any block face.");
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("If hand is empty: right click a candle toggles the \"lit\" state of the candle.").setColor(LIGHT_BLUE)
+                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
+                .appendRoot("If hand is not empty: right clicking a candle cycles the candle amount of that candle.").setColor(LIGHT_BLUE)
+                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
+                .appendRoot("If hand is holding a candle and shifting: right clicking will place a candle in the desired location.").setColor(LIGHT_BLUE);
+    }
+
+    @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
         var clicked = event.getClickedBlock();
         if (clicked == null) throw new IllegalStateException("Clicked block was null");
@@ -76,12 +92,11 @@ public class CandleInteraction extends InteractionHandler {
 
             getSession(event.getPlayer().getUniqueId()).updateCandle(event.getClickedBlock().getType(), candle);
 
-            log(false, event.getPlayer(), clicked);
-            clicked.setBlockData(candle, false);
-            log(true, event.getPlayer(), clicked);
             event.setCancelled(true);
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
+
+            placeBlockAt(event.getPlayer(), event.getClickedBlock().getLocation(), candle.getMaterial(), candle);
 
             //if the user is sneaking
         } else if (canPlaceAt(placeableLocation)){
@@ -128,11 +143,11 @@ public class CandleInteraction extends InteractionHandler {
                 }
             }
 
-            log(false, event.getPlayer(), placeableLocation.getBlock());
-            placeableLocation.getBlock().setType(handMat, false);
-            placeableLocation.getBlock().setBlockData(data, false);
-            log(true, event.getPlayer(), placeableLocation.getBlock());
-            playSoundFor(true, event.getPlayer(), handMat);
+            event.setCancelled(true);
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
+
+            placeBlockAt(event.getPlayer(), placeableLocation, handMat, data);
         }
     }
 

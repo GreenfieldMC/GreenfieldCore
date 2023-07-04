@@ -1,10 +1,15 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.pdk.utils.text.Text;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.PitcherCrop;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
 
 public class PitcherPodInteraction extends InteractionHandler {
 
@@ -13,7 +18,22 @@ public class PitcherPodInteraction extends InteractionHandler {
     }
 
     @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allows the unnatural placement of pitcher crops.");
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("If not shifting, and block clicked is a pitcher crop: Cycle the \"age\" property").setColor(LIGHT_BLUE)
+                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
+                .appendRoot("If shifting: place the pitcher crop").setColor(LIGHT_BLUE);
+    }
+
+    @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
+        event.setCancelled(true);
+        event.setUseInteractedBlock(Event.Result.DENY);
+        event.setUseItemInHand(Event.Result.DENY);
         if (!event.getPlayer().isSneaking()) {
             if (event.getClickedBlock().getBlockData() instanceof PitcherCrop crop) {
                 crop.setAge(crop.getMaximumAge() == crop.getAge() ? 0 : crop.getAge() + 1);

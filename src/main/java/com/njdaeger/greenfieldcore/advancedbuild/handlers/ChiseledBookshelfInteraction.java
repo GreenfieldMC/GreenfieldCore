@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.AdvBuildConfig;
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
 import static java.lang.Math.*;
 
 public class ChiseledBookshelfInteraction extends InteractionHandler implements Listener {
@@ -41,6 +43,22 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
         this.sessions = new HashMap<>();
         this.config = config;
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allows the placement of chiseled bookshelves on any block face without the need to use the debug stick to set the block data.");
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("If hand is empty: right click a bookshelf toggles your ").setColor(LIGHT_BLUE).append("selecting shelf").setUnderlined(true).appendParent(" status.")
+                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
+                .appendRoot("If a bookshelf is selected (aka 'selecting shelf'): The scroll wheel will allow the traversal of all bookshelf options in that color.").setColor(LIGHT_BLUE)
+                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
+                .appendRoot("If hand is holding a bookshelf and NOT shifting: clicking on the front or back of the bookshelf will toggle between the available colors").setColor(LIGHT_BLUE)
+                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
+                .appendRoot("If hand is holding a bookshelf and shifting: right clicking will place a bookshelf in the desired location with the last placed book amount.").setColor(LIGHT_BLUE);
     }
 
     @Override

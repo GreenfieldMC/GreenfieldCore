@@ -1,6 +1,7 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Material;
 import org.bukkit.block.data.Brushable;
 import org.bukkit.event.Event;
@@ -21,24 +22,39 @@ public class BrushableInteraction extends InteractionHandler {
                     return mainHand != Material.AIR &&
                             event.getClickedBlock() != null &&
                             mainHand.isBlock() && mainHand.createBlockData() instanceof Brushable;
-                }
-        );
+                },
+                Material.SUSPICIOUS_GRAVEL,
+                Material.SUSPICIOUS_SAND);
+    }
+
+    @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allows the placement and modification of Suspicious Sand and Gravel.");
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("Shift right click to place the block at the desired location. Right click the sand/gravel (when holding the same material) to change how brushed it is.");
     }
 
     @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
         var handMat = getHandMat(event);
-        event.setCancelled(true);
-        event.setUseInteractedBlock(Event.Result.DENY);
-        event.setUseItemInHand(Event.Result.DENY);
+        var placementLocation = getPlaceableLocation(event);
+        if (placementLocation == null) return;
+
         if (!event.getPlayer().isSneaking() && handMat.createBlockData() instanceof Brushable block) {
-            var placementLocation = getPlaceableLocation(event);
-            if (placementLocation == null) return;
+            event.setCancelled(true);
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
             var lastBrush = brushesMap.getOrDefault(event.getPlayer().getUniqueId(), 0);
             block.setDusted(lastBrush);
             placeBlockAt(event.getPlayer(), placementLocation, handMat, block);
             brushesMap.put(event.getPlayer().getUniqueId(), lastBrush);
-        } else if (event.getPlayer().isSneaking() && handMat.createBlockData() instanceof Brushable && event.getClickedBlock().getBlockData() instanceof Brushable block) {
+        } else if (event.getPlayer().isSneaking() && event.getClickedBlock().getBlockData() instanceof Brushable block) {
+            event.setCancelled(true);
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
             var nextBrush = block.getDusted() == block.getMaximumDusted() ? 0 : block.getDusted() + 1;
             block.setDusted(nextBrush);
             placeBlockAt(event.getPlayer(), event.getClickedBlock().getLocation(), handMat, block);

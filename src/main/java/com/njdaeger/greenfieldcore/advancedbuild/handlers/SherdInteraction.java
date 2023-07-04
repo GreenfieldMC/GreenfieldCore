@@ -1,6 +1,7 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.pdk.utils.text.Text;
 import io.github.bananapuncher714.nbteditor.NBTEditor;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -8,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.data.type.DecoratedPot;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.lang.reflect.InvocationTargetException;
@@ -45,27 +47,38 @@ public class SherdInteraction extends InteractionHandler {
     }
 
     @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allow the placement of pottery sherds. (Automatically places the decorated_pot with the proper sherds on all sides)");
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("Shift and right click to place a pottery sherd against the blockface you clicked.");
+    }
+
+    @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
-        if (!event.getPlayer().isSneaking()) {
+        if (event.getPlayer().isSneaking()) {
             var last = lastPlaced.get(event.getPlayer().getUniqueId());
             if (last != null && System.currentTimeMillis() - last < 50) return;
             var placementLocation = getPlaceableLocation(event);
             if (placementLocation == null) return;
+
+            event.setCancelled(true);
+            event.setUseInteractedBlock(Event.Result.DENY);
+            event.setUseItemInHand(Event.Result.DENY);
+
             var sherdMat = Material.DECORATED_POT;
             var data = (DecoratedPot) sherdMat.createBlockData();
             data.setWaterlogged(false);
             data.setFacing(event.getPlayer().getFacing());
             placeBlockAt(event.getPlayer(), placementLocation, sherdMat, data, Sound.BLOCK_DECORATED_POT_PLACE);
-            try {
-                setShard(getHandMat(event), placementLocation);
-            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | NoSuchFieldException e) {
-                throw new RuntimeException(e);
-            }
+            setShard(getHandMat(event), placementLocation);
             lastPlaced.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
     }
 
-    private static void setShard(Material material, Location location) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    private static void setShard(Material material, Location location) {
         var list = new NBTTagList();
         list.add(NBTTagString.a(material.getKey().getKey()));
         list.add(NBTTagString.a(material.getKey().getKey()));

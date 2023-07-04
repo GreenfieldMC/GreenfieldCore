@@ -1,6 +1,7 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Rail;
@@ -16,6 +17,16 @@ public class RailInteraction extends InteractionHandler {
                 Material.DETECTOR_RAIL,
                 Material.POWERED_RAIL
         );
+    }
+
+    @Override
+    public Text.Section getInteractionDescription() {
+        return Text.of("Allow the unusual placement of rails.").appendRoot(" NOTE: the breaking of rails that utilize redstone does not work. It is a minecraft bug. It WILL update surrounding things. To work around this, place a block below the rail, remove the desired rail, and then remove the block below.").setItalic(true);
+    }
+
+    @Override
+    public Text.Section getInteractionUsage() {
+        return Text.of("Shift and right click to place a rail against the blockface you clicked. Clicking on the top or bottom of a block will make the rail ascending in the direction you were facing when you clicked the block.");
     }
 
     @Override
@@ -45,7 +56,7 @@ public class RailInteraction extends InteractionHandler {
                 event.setUseInteractedBlock(PlayerInteractEvent.Result.DENY);
                 event.setUseItemInHand(PlayerInteractEvent.Result.DENY);
                 rail.setPowered(!rail.isPowered());
-                placeBlockAt(event.getPlayer(), event.getClickedBlock().getLocation(), mat, rail);
+                placeBlockNatively(event.getPlayer(), event.getClickedBlock().getLocation(), rail);
             }
         }
     }

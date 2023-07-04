@@ -2,10 +2,11 @@ package com.njdaeger.greenfieldcore.advancedbuild;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.pdk.utils.text.Text;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.util.SideEffectSet;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -111,11 +112,11 @@ public abstract class InteractionHandler {
      */
     public void onLeftClickBlock(PlayerInteractEvent event) {
         if (!event.getPlayer().isSneaking() || event.getClickedBlock() == null) return;
-        var clicked = event.getClickedBlock();
-        placeBlockAt(event.getPlayer(), clicked.getLocation(), Material.AIR);
         event.setCancelled(true);
         event.setUseInteractedBlock(PlayerInteractEvent.Result.DENY);
         event.setUseItemInHand(PlayerInteractEvent.Result.DENY);
+        var clicked = event.getClickedBlock();
+        placeBlockAt(event.getPlayer(), clicked.getLocation(), Material.AIR);
     }
 
     /**
@@ -213,6 +214,24 @@ public abstract class InteractionHandler {
 
     public final void placeBlockAt(Player player, Location location, Material material) {
         placeBlockAt(player, location, material, material.createBlockData());
+    }
+
+    public void placeBlockNatively(Player player, Location location, Material material) {
+        placeBlockNatively(player, location, material.createBlockData());
+    }
+
+    public void placeBlockNatively(Player player, Location location, BlockData data) {
+        log(false, player, location.getBlock());
+        WorldEditPlugin worldedit = (WorldEditPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
+        var world = worldedit.getWorldEdit().getPlatformManager().getWorldForEditing(BukkitAdapter.adapt(location.getWorld()));
+        var blockstate = BukkitAdapter.adapt(data);
+
+        try {
+            world.setBlock(BukkitAdapter.asBlockVector(location), blockstate.toBaseBlock(), SideEffectSet.none());
+        } catch (WorldEditException e) {
+            throw new RuntimeException(e);
+        }
+        log(true, player, location.getBlock());
     }
 
 }

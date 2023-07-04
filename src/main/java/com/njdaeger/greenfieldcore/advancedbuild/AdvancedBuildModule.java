@@ -96,12 +96,12 @@ public class AdvancedBuildModule extends Module implements Listener {
                 new PitcherPodInteraction(),
                 new VineInteraction(),
                 new CommandBlockInteraction(),
-                new SherdInteraction()
-                //dripstone handler
-                //coral handler
-                //command block handler
-                //torch handler
-                //decorated pot handler
+                new SherdInteraction(),
+                new TorchInteraction(),
+                new SwitchInteraction(),
+                new CoralInteraction(),
+                new RailInteraction(),
+                new BrushableInteraction()
                 //sus sand and gravel handler
         );
 

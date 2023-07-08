@@ -61,6 +61,18 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
                 .appendRoot("If hand is holding a bookshelf and shifting: right clicking will place a bookshelf in the desired location with the last placed book amount.").setColor(LIGHT_BLUE);
     }
 
+    @EventHandler
+    public void onRightClickWithBook(PlayerInteractEvent e) {
+        if (e.getClickedBlock() != null && e.getClickedBlock() instanceof ChiseledBookshelf) {
+            var mainhand = e.getPlayer().getInventory().getItemInMainHand();
+            var offhand = e.getPlayer().getInventory().getItemInOffHand();
+            if (mainhand.getType() == Material.BOOK || mainhand.getType() == Material.WRITTEN_BOOK || offhand.getType() == Material.BOOK || offhand.getType() == Material.WRITTEN_BOOK) {
+                e.setUseItemInHand(org.bukkit.event.Event.Result.DENY);
+                e.setUseInteractedBlock(org.bukkit.event.Event.Result.DENY);
+            }
+        }
+    }
+
     @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
         var session = getSession(event.getPlayer().getUniqueId());

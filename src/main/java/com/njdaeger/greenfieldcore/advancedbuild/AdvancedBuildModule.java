@@ -98,7 +98,8 @@ public class AdvancedBuildModule extends Module implements Listener {
                 new SwitchInteraction(),
                 new CoralInteraction(),
                 new RailInteraction(),
-                new BrushableInteraction()
+                new BrushableInteraction(),
+                new NetherWartInteraction()
                 //sus sand and gravel handler
         );
 

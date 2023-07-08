@@ -5,6 +5,7 @@ import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -16,7 +17,9 @@ public class BisectedInteraction extends InteractionHandler {
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand != Material.AIR &&
                             event.getClickedBlock() != null &&
-                            mainHand.isBlock() && mainHand.createBlockData() instanceof Bisected;
+                            mainHand.isBlock() &&
+                            !(mainHand.createBlockData() instanceof TrapDoor) &&
+                            mainHand.createBlockData() instanceof Bisected;
                 }
         );
     }
@@ -33,7 +36,7 @@ public class BisectedInteraction extends InteractionHandler {
 
     @Override
     public Text.Section getMaterialListText() {
-        return Text.of("Any block that has a \"half\" property. (Except doors, handled separately)");
+        return Text.of("Any block that has a \"half\" property. (Except doors (handled separately) and trapdoors)");
     }
 
     @Override

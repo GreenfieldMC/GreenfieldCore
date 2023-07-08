@@ -46,7 +46,6 @@ public class PlantInteraction extends InteractionHandler {
                 Material.LILY_PAD,
                 Material.SPORE_BLOSSOM,
                 Material.HANGING_ROOTS,
-                Material.NETHER_WART,
                 Material.TWISTING_VINES,
                 Material.AZALEA,
                 Material.FLOWERING_AZALEA,

@@ -11,6 +11,7 @@ import org.bukkit.block.data.type.ChiseledBookshelf;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -63,7 +64,7 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
 
     @EventHandler
     public void onRightClickWithBook(PlayerInteractEvent e) {
-        if (e.getClickedBlock() != null && e.getClickedBlock() instanceof ChiseledBookshelf) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null && e.getClickedBlock().getBlockData() instanceof ChiseledBookshelf) {
             var mainhand = e.getPlayer().getInventory().getItemInMainHand();
             var offhand = e.getPlayer().getInventory().getItemInOffHand();
             if (mainhand.getType() == Material.BOOK || mainhand.getType() == Material.WRITTEN_BOOK || offhand.getType() == Material.BOOK || offhand.getType() == Material.WRITTEN_BOOK) {

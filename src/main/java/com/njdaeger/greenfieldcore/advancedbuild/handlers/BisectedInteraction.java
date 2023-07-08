@@ -5,6 +5,7 @@ import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -19,6 +20,7 @@ public class BisectedInteraction extends InteractionHandler {
                             event.getClickedBlock() != null &&
                             mainHand.isBlock() &&
                             !(mainHand.createBlockData() instanceof TrapDoor) &&
+                            !(mainHand.createBlockData() instanceof Stairs) &&
                             mainHand.createBlockData() instanceof Bisected;
                 }
         );

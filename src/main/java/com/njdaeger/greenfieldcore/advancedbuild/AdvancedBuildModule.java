@@ -99,7 +99,8 @@ public class AdvancedBuildModule extends Module implements Listener {
                 new CoralInteraction(),
                 new RailInteraction(),
                 new BrushableInteraction(),
-                new NetherWartInteraction()
+                new NetherWartInteraction(),
+                new CocoaBeanInteraction()
                 //sus sand and gravel handler
         );
 

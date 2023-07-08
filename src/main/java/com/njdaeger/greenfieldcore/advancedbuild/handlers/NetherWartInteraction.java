@@ -30,12 +30,11 @@ public class NetherWartInteraction extends InteractionHandler {
 
     @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
-        if (event.getClickedBlock().getType() != Material.NETHER_WART) return;
         event.setCancelled(true);
         event.setUseInteractedBlock(Event.Result.DENY);
         event.setUseItemInHand(Event.Result.DENY);
         if (!event.getPlayer().isSneaking()) {
-            if (event.getClickedBlock().getBlockData() instanceof Ageable crop) {
+            if (event.getClickedBlock().getBlockData() instanceof Ageable crop && event.getClickedBlock().getType() == Material.NETHER_WART) {
                 crop.setAge(crop.getMaximumAge() == crop.getAge() ? 0 : crop.getAge() + 1);
                 placeBlockAt(event.getPlayer(), event.getClickedBlock().getLocation(), Material.NETHER_WART, crop);
             }

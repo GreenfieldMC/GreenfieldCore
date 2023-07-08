@@ -106,7 +106,7 @@ public class CandleInteraction extends InteractionHandler {
             Candle candleSessionData;
 
             switch (handMat) {
-                case CANDLE, WHITE_CANDLE, MAGENTA_CANDLE, LIGHT_BLUE_CANDLE, ORANGE_CANDLE, BROWN_CANDLE, GREEN_CANDLE, BLACK_CANDLE, BLUE_CANDLE -> {
+                case CANDLE, WHITE_CANDLE, MAGENTA_CANDLE, LIGHT_BLUE_CANDLE, ORANGE_CANDLE, BROWN_CANDLE, GREEN_CANDLE, BLACK_CANDLE, BLUE_CANDLE, YELLOW_CANDLE -> {
                     candleSessionData = session.getCandleData(handMat, false);
                     if (candleSessionData == null) {
                         data.setLit(true);

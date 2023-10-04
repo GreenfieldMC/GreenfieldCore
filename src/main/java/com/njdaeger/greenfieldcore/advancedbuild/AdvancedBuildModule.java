@@ -100,7 +100,8 @@ public class AdvancedBuildModule extends Module implements Listener {
                 new RailInteraction(),
                 new BrushableInteraction(),
                 new NetherWartInteraction(),
-                new CocoaBeanInteraction()
+                new CocoaBeanInteraction(),
+                new LightningRodInteraction()
                 //sus sand and gravel handler
         );
 
@@ -204,6 +205,10 @@ public class AdvancedBuildModule extends Module implements Listener {
             return;
         }
         if (e.getHand() == EquipmentSlot.OFF_HAND || e.getAction() == Action.PHYSICAL || !config.isEnabledFor(e.getPlayer())) return;
+
+        var mainHand = e.getPlayer().getInventory().getItemInMainHand();
+        //if hand is worldedit wand, ignore
+        if (mainHand.getType() == Material.WOODEN_AXE && (e.getAction() == Action.LEFT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_BLOCK)) return;
 
         InteractionHandler handler = interactionHandlers.stream().filter(h -> h.handles(e)).findFirst().orElse(interactionHandlers.get(0));
 

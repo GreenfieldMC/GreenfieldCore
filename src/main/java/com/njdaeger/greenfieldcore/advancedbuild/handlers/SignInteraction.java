@@ -4,6 +4,9 @@ import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Rotatable;
+import org.bukkit.block.data.type.HangingSign;
+import org.bukkit.block.data.type.WallHangingSign;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -22,7 +25,18 @@ public class SignInteraction extends InteractionHandler {
                 Material.SPRUCE_SIGN,
                 Material.WARPED_SIGN,
                 Material.CHERRY_SIGN,
-                Material.MANGROVE_SIGN
+                Material.MANGROVE_SIGN,
+                Material.ACACIA_HANGING_SIGN,
+                Material.BAMBOO_HANGING_SIGN,
+                Material.BIRCH_HANGING_SIGN,
+                Material.CRIMSON_HANGING_SIGN,
+                Material.DARK_OAK_HANGING_SIGN,
+                Material.JUNGLE_HANGING_SIGN,
+                Material.OAK_HANGING_SIGN,
+                Material.SPRUCE_HANGING_SIGN,
+                Material.WARPED_HANGING_SIGN,
+                Material.CHERRY_HANGING_SIGN,
+                Material.MANGROVE_HANGING_SIGN
         );
     }
 
@@ -39,6 +53,7 @@ public class SignInteraction extends InteractionHandler {
     @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
         var mat = getHandMat(event);
+        var handData = mat.createBlockData();
         if (event.getPlayer().isSneaking()) {
             var placementLocation = getPlaceableLocation(event);
             if (placementLocation == null) return;
@@ -46,6 +61,17 @@ public class SignInteraction extends InteractionHandler {
             event.setCancelled(true);
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
+
+            if (handData instanceof HangingSign) {
+                var data = (Rotatable) handData;
+                var clickedFace = event.getBlockFace();
+                data.setRotation(event.getPlayer().getFacing().getOppositeFace());
+                if (clickedFace == BlockFace.UP || clickedFace == BlockFace.DOWN) {
+                    mat = Material.valueOf(mat.name().replace("_HANGING_SIGN", "_WALL_HANGING_SIGN"));
+                }
+                placeBlockAt(event.getPlayer(), placementLocation, mat, data);
+                return;
+            }
 
             var clickedFace = event.getBlockFace();
             if (clickedFace == BlockFace.UP || clickedFace == BlockFace.DOWN) return;

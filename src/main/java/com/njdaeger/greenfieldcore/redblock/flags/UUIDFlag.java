@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.redblock.flags;
 
+import com.njdaeger.greenfieldcore.Util;
 import com.njdaeger.greenfieldcore.redblock.RedblockUtils;
 import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.command.TabContext;
@@ -27,7 +28,7 @@ public class UUIDFlag extends Flag<UUID> {
         if (argument == null || argument.isEmpty()) return null;
         //find the argument in the list of whitelisted players and return the UUID of that player
 
-        for (Map.Entry<UUID, String> entry : RedblockUtils.userNameMap.entrySet()) {
+        for (Map.Entry<UUID, String> entry : Util.userNameMap.entrySet()) {
             UUID id = entry.getKey();
             String name = entry.getValue();
             if (name.equalsIgnoreCase(argument)) return id;
@@ -43,7 +44,7 @@ public class UUIDFlag extends Flag<UUID> {
 
     @Override
     public void complete(TabContext context) throws PDKCommandException {
-        context.completion(RedblockUtils.userNameMap.values().toArray(String[]::new));
+        context.completion(Util.userNameMap.values().toArray(String[]::new));
 //        context.completion(Bukkit.getWhitelistedPlayers().stream()
 //                .map(OfflinePlayer::getName)
 //                .filter(Objects::nonNull)

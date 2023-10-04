@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.redblock;
 
+import com.earth2me.essentials.Essentials;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import org.bukkit.Bukkit;
@@ -42,11 +43,6 @@ public class RedblockModule extends Module {
             this.markerApi = ((DynmapAPI)dynmap).getMarkerAPI();
             loadRedblocksToDynmap();
         }
-
-        //TODO enable this for 1.18+
-        Bukkit.getWhitelistedPlayers().forEach(op -> op.getPlayerProfile().update().thenAcceptAsync(result -> {
-            if (result.isComplete()) RedblockUtils.userNameMap.put(result.getUniqueId(), result.getName());
-        }));
     }
 
     private MarkerIcon createOrGetMarkerIcon(String iconName) {

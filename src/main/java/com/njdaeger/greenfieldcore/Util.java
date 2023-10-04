@@ -5,14 +5,17 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MinecraftFont;
 
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.bukkit.ChatColor.LIGHT_PURPLE;
 import static org.bukkit.ChatColor.GRAY;
 
 public final class Util {
 
-    public static final Random RANDOM = new Random();
+    public static Map<UUID, String> userNameMap = new ConcurrentHashMap<>();
 
     /**
      * Broadcasts a message to the players on the server if they have permission to see the message.

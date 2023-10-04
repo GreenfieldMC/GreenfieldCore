@@ -1,8 +1,9 @@
 package com.njdaeger.greenfieldcore.authhub;
 
 import com.njdaeger.authenticationhub.ApplicationRegistry;
-import com.njdaeger.authenticationhub.ConnectionRequirement;
+import com.njdaeger.authenticationhub.discord.DiscordUserLoginEvent;
 import com.njdaeger.authenticationhub.patreon.PatreonApplication;
+import com.njdaeger.authenticationhub.patreon.PatreonUserLoginEvent;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import net.milkbowl.vault.chat.Chat;
@@ -25,19 +26,6 @@ public class AuthHubIntegration extends Module implements Listener {
     private RegisteredServiceProvider<Chat> rsp;
     private RegisteredServiceProvider<ApplicationRegistry> appReg;
     private List<UUID> prefixedUsers;
-
-    public static final ConnectionRequirement DISCORD_CONNECTION_REQUIREMENT = new ConnectionRequirement("DISCORD_REQUIREMENT", (p) -> {
-        if (p.hasPermission("greenfieldcore.discord.exempt")) {
-            GreenfieldCore.logger().info("User " + p.getName() + " is exempted from having a linked discord profile.");
-            return false;
-        }
-        else if (p.isWhitelisted() && !p.isBanned()) {
-            GreenfieldCore.logger().info("User " + p.getName() + " must have a linked discord profile.");
-            return true;
-        }
-        GreenfieldCore.logger().info("User " + p.getName() + " does not need a linked discord profile - they were not found in the whitelist or they are a banned member.");
-        return false;
-    });
 
     public AuthHubIntegration(GreenfieldCore plugin) {
         super(plugin);
@@ -71,36 +59,74 @@ public class AuthHubIntegration extends Module implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerLogin_patreonIntg(PlayerLoginEvent e) {
-        if (appReg == null) return;
-        var reg = appReg.getProvider();
-        var chat = rsp == null ? null : rsp.getProvider();
-        var patreon = reg.getApplication(PatreonApplication.class);
+    @EventHandler
+    public void onDiscordLogin(DiscordUserLoginEvent e) {
+        e.allow();
+    }
 
-        if (patreon == null) {
-            plugin.getLogger().warning("Patreon application not enabled. Patreon integration will not work.");
-            return;
-        }
-
-        //the patreon listener in the authentication hub kicks the user if we dont have a cached value, a connected account, or if the value is being refreshed.
-        //so at this point, if that listener doesnt disallow the connection, we definitely have their information cached, so we should be alright.
-        if (e.getResult() == PlayerLoginEvent.Result.ALLOWED && patreon.getConnectionRequirement().isRequired(e.getPlayer())) {
-
-            int cached = patreon.getPledgingAmountCached(e.getPlayer().getUniqueId());
-            if (cached < config.getRequiredPatreonPledge()) {
-                e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "Your patron account currently pledges " + cached + " cents, which is less than the required " + config.getRequiredPatreonPledge() + " cents. Please upgrade your patronage to continue.");
-            } else {
-                if (chat != null) {
-                    plugin.getLogger().info("Setting prefix of player " + e.getPlayer().getName());
-                    //no reason to worry about previous prefix, they are a patron and should only ever have the dollar sign prefix
-                    chat.setPlayerPrefix(e.getPlayer(), "&3[$] " + chat.getGroupPrefix(e.getPlayer().getWorld(), chat.getPrimaryGroup(e.getPlayer())));
-                    prefixedUsers.add(e.getPlayer().getUniqueId());
+    @EventHandler
+    public void onPatreonLogin(PatreonUserLoginEvent e) {
+        if (e.getUser().getPledgingAmount() < config.getRequiredPatreonPledge() && e.getApplication().getConnectionRequirement().isRequired(e.getPlayer())) {
+            e.disallow("Your patron account currently pledges " + e.getUser().getPledgingAmount() + " cents, which is less than the required " + config.getRequiredPatreonPledge() + " cents. Please upgrade your patronage to continue.");
+        } else {
+            e.allow();
+            if (rsp != null) {
+                var chat = rsp.getProvider();
+                var player = e.getPlayer();
+                var currentPrefix = chat.getPlayerPrefix(player) == null ? "" : chat.getPlayerPrefix(player);
+                if (currentPrefix.contains("[$]")) {
+                    plugin.getLogger().info("Prefix is already set for player");
+                    return;
                 }
-            }
+                chat.setPlayerPrefix(player, "&3[$] " + currentPrefix + chat.getGroupPrefix(player.getWorld(), chat.getPrimaryGroup(player)));
+                prefixedUsers.add(player.getUniqueId());
+            } else plugin.getLogger().warning("Chat provider is null. Prefixes will not be added.");
         }
     }
 
+//    @EventHandler(priority = EventPriority.NORMAL)
+//    public void onPlayerLogin_patreonIntg(PlayerLoginEvent e) {
+//        if (appReg == null) return;
+//        var reg = appReg.getProvider();
+//        var chat = rsp == null ? null : rsp.getProvider();
+//        var patreon = reg.getApplication(PatreonApplication.class);
+//
+//        if (patreon == null) {
+//            plugin.getLogger().warning("Patreon application not enabled. Patreon integration will not work.");
+//            return;
+//        }
+//
+//        //the patreon listener in the authentication hub kicks the user if we dont have a cached value, a connected account, or if the value is being refreshed.
+//        //so at this point, if that listener doesnt disallow the connection, we definitely have their information cached, so we should be alright.
+//        if (patreon.getConnectionRequirement().isRequired(e.getPlayer())) {
+//            System.out.println("test1");
+//            int cached = patreon.getPledgingAmountCached(e.getPlayer().getUniqueId());
+//            System.out.println("test2");
+//            if (!patreon.isPledgingAmountCached(e.getPlayer().getUniqueId()) || patreon.isGettingPledgeStatus(e.getPlayer().getUniqueId()) || patreon.isRefreshingUserToken(e.getPlayer().getUniqueId())) return;
+//            System.out.println("test3");
+//            if (cached < config.getRequiredPatreonPledge()) {
+//                e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "Your patron account currently pledges " + cached + " cents, which is less than the required " + config.getRequiredPatreonPledge() + " cents. Please upgrade your patronage to continue.");
+//            } else {
+//                e.setResult(PlayerLoginEvent.Result.ALLOWED);
+//                if (chat != null) {
+//                    plugin.getLogger().info("Setting prefix of player " + e.getPlayer().getName());
+//                    //no reason to worry about previous prefix, they are a patron and should only ever have the dollar sign prefix
+//                    chat.setPlayerPrefix(e.getPlayer(), "&3[$] " + chat.getGroupPrefix(e.getPlayer().getWorld(), chat.getPrimaryGroup(e.getPlayer())));
+//                    prefixedUsers.add(e.getPlayer().getUniqueId());
+//                } else plugin.getLogger().warning("Chat provider is null. Prefixes will not be added.");
+//            }
+//        }
+//    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onLeave(PlayerQuitEvent e) {
+        if (rsp != null && prefixedUsers.contains(e.getPlayer().getUniqueId())) {
+            var chat = rsp == null ? null : rsp.getProvider();
+            if (chat == null) return;
+            chat.setPlayerPrefix(e.getPlayer(), null);
+            prefixedUsers.remove(e.getPlayer().getUniqueId());
+        }
+    }
 //    @EventHandler(priority = EventPriority.MONITOR)
 //    public void onPlayerJoin_patreonIntg(PlayerJoinEvent e) {
 //        if (appReg == null) return;
@@ -178,14 +204,6 @@ public class AuthHubIntegration extends Module implements Listener {
 //
 //    }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onLeave(PlayerQuitEvent e) {
-        if (rsp != null && prefixedUsers.contains(e.getPlayer().getUniqueId())) {
-            var chat = rsp == null ? null : rsp.getProvider();
-            if (chat == null) return;
-            chat.setPlayerPrefix(e.getPlayer(), null);
-            prefixedUsers.remove(e.getPlayer().getUniqueId());
-        }
-    }
+
 
 }

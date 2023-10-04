@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Cocoa;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -29,7 +30,12 @@ public class CocoaBeanInteraction extends InteractionHandler {
             var data = (Cocoa) Material.COCOA.createBlockData();
             lastAge.putIfAbsent(event.getPlayer().getUniqueId(), 0);
             data.setAge(lastAge.get(event.getPlayer().getUniqueId()));
-            data.setFacing(event.getBlockFace().getOppositeFace());
+            var facing = event.getBlockFace();
+            if (facing == BlockFace.DOWN || facing == BlockFace.UP) {
+                data.setFacing(event.getPlayer().getFacing());
+            } else {
+                data.setFacing(facing.getOppositeFace());
+            }
             placeBlockAt(event.getPlayer(), placeableLocation, Material.COCOA, data);
         } else if (event.getClickedBlock().getType() == Material.COCOA && event.getClickedBlock().getBlockData() instanceof Cocoa c) {
             event.setCancelled(true);

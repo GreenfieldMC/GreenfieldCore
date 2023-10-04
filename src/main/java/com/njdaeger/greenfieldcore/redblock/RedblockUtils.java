@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.redblock;
 
+import com.njdaeger.greenfieldcore.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -12,8 +13,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RedblockUtils {
-
-    public static Map<UUID, String> userNameMap = new ConcurrentHashMap<>();
 
     /**
      * Takes a content string and splits it up into lines that can be used to display the Redblock content with armorstands.
@@ -147,7 +146,7 @@ Fi     * @param id The id of the redblock
         }
     }
 
-    /**'
+    /**
      * Search through the list of redblocks and return the one that is closest to the given location.
      * @param redblocks The list of redblocks to search through
      * @param location The location to search around
@@ -159,6 +158,7 @@ Fi     * @param id The id of the redblock
         Redblock nearestRedblock = null;
         double nearestDistance = Double.MAX_VALUE;
         for (Redblock redblock : redblocks) {
+            if (!redblock.getLocation().getWorld().getUID().equals(location.getWorld().getUID())) continue;
             double distance = redblock.getLocation().distance(location);
             if (distance < nearestDistance && (searchRadius == -1 || distance <= searchRadius)) {
                 nearestRedblock = redblock;
@@ -169,7 +169,7 @@ Fi     * @param id The id of the redblock
     }
 
     static String getOfflinePlayer(UUID uuid) {
-        if (userNameMap.containsKey(uuid)) return userNameMap.get(uuid);
+        if (Util.userNameMap.containsKey(uuid)) return Util.userNameMap.get(uuid);
         else return Bukkit.getOfflinePlayer(uuid).getName();
     }
 

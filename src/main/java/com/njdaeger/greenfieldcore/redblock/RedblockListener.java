@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.redblock;
 
+import com.njdaeger.greenfieldcore.Util;
 import com.njdaeger.pdk.utils.text.Text;
 import com.njdaeger.pdk.utils.text.click.ClickAction;
 import com.njdaeger.pdk.utils.text.click.ClickString;
@@ -68,7 +69,7 @@ public class RedblockListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        RedblockUtils.userNameMap.put(player.getUniqueId(), player.getName());
+        Util.userNameMap.put(player.getUniqueId(), player.getName());
         List<Redblock> redblocks = storage.getRedblocksFiltered(rb -> rb.getAssignedTo() != null && rb.getAssignedTo().equals(player.getUniqueId()) && rb.isIncomplete());
         if (redblocks.size() > 0) {
             var text = Text.of("[Redblocks] ").setColor(ChatColor.LIGHT_PURPLE)

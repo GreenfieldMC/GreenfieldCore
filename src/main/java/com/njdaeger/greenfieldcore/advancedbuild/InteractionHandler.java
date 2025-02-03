@@ -6,6 +6,10 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.util.SideEffectSet;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -16,7 +20,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
@@ -58,36 +61,38 @@ public abstract class InteractionHandler {
 
     /**
      * Get the description of this interaction handler.
+     *
      * @return The description of this interaction handler.
      */
-    public Text.Section getInteractionDescription() {
-        return Text.of("No description provided.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("No description provided.");
     }
 
     /**
      * Get the usage of this interaction handler.
+     *
      * @return The usage of this interaction handler.
      */
-    public Text.Section getInteractionUsage() {
-        return Text.of("No usage provided.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("No usage provided.");
     }
 
     /**
      * Get the materials this interaction handler handles as a text section.
      * @return The materials this interaction handler handles as a text section.
      */
-    public Text.Section getMaterialListText() {
-        var base = Text.of("");
-        base.appendRoot("[").setColor(ChatColor.GRAY);
+    public TextComponent getMaterialListText() {
+        var base2 = Component.text("[", NamedTextColor.GRAY).toBuilder();
+
         for (int i = 0; i < materials.size(); i++) {
             var mat = materials.get(i);
-            base.appendRoot(mat.getKey().getKey()).setColor(LIGHT_BLUE);
-            if (i != materials.size() - 1) base.appendRoot(", ").setColor(ChatColor.BLUE).setBold(true);
+            base2.append(Component.text(mat.getKey().getKey(), LIGHT_BLUE));
+            if (i != materials.size() - 1) base2.append(Component.text(", ", NamedTextColor.BLUE, TextDecoration.BOLD));
         }
-        base.appendRoot("]").setColor(ChatColor.GRAY);
+        base2.append(Component.text("]", NamedTextColor.GRAY));
         return materials.isEmpty()
-                ? Text.of("No materials specified.").setColor(ChatColor.RED)
-                : base;
+                ? Component.text("No materials specified.", NamedTextColor.RED)
+                : base2.build();
     }
 
     /**

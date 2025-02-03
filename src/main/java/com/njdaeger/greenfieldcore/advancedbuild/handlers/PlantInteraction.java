@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -17,7 +19,7 @@ public class PlantInteraction extends InteractionHandler {
                 Material.ACACIA_SAPLING,
                 Material.DARK_OAK_SAPLING,
                 Material.CHERRY_SAPLING,
-                Material.GRASS,
+                Material.SHORT_GRASS,
                 Material.FERN,
                 Material.DEAD_BUSH,
                 Material.DANDELION,
@@ -56,13 +58,13 @@ public class PlantInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allow the unusual placement of plants.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allow the unusual placement of plants.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift right click a plant to place it in an unusual location.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift right click a plant to place it in an unusual location.");
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.data.MultipleFacing;
 import org.bukkit.event.Event;
@@ -21,13 +23,13 @@ public class MultipleFacingInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the modifying and setting of states for blocks that can face multiple directions at one time.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the modifying and setting of states for blocks that can face multiple directions at one time.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift right clicking a block that is multiple facing will toggle the face you clicked on and off.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift right clicking a block that is multiple facing will toggle the face you clicked on and off.");
     }
 
     @Override

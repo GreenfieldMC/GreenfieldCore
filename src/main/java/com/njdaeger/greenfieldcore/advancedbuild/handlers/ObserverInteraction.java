@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.Observer;
 import org.bukkit.event.Event;
@@ -16,12 +18,12 @@ public class ObserverInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the unnatural placement of observers.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the unnatural placement of observers.");
     }
 
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift and right click to place an observer against the blockface you clicked. It flips it 180 degrees from its default position.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift and right click to place an observer against the blockface you clicked. It flips it 180 degrees from its default position.");
     }
 
     @Override

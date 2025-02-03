@@ -14,8 +14,14 @@ import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.ComponentPosition;
 import com.njdaeger.pdk.utils.text.pager.components.PageNavigationComponent;
 import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.map.MinecraftFont;
 
 import java.util.ArrayList;
@@ -38,8 +44,8 @@ public class CommandStoreCommands {
 
         this.paginator = ChatPaginator.builder(this::lineGenerator)
                 .addComponent((ctx, paginator, results, pg) -> {
-                    if (ctx.hasFlag("server")) return Text.of("Server CommandStorage").setColor(LIGHT_PURPLE);
-                    return Text.of("User CommandStorage").setColor(LIGHT_PURPLE);
+                    if (ctx.hasFlag("server")) return Component.text("Server CommandStorage", NamedTextColor.LIGHT_PURPLE);
+                    return Component.text("User CommandStorage", NamedTextColor.LIGHT_PURPLE);
                 }, ComponentPosition.TOP_CENTER)
                 .addComponent(new PageNavigationComponent<>(
                         (ctx, res, pg) -> "/" + ctx.getAlias() + " " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
@@ -49,16 +55,17 @@ public class CommandStoreCommands {
                 ), ComponentPosition.BOTTOM_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent((ctx, paginator, results, pg) -> {
-                    if (ctx.getCommand().getName().equalsIgnoreCase("fcmd")) return Text.of("Query").setColor(LIGHT_PURPLE).setUnderlined(true).setHoverEvent(HoverAction.SHOW_TEXT, Text.of(ctx.joinArgs()).setColor(GRAY));
+                    if (ctx.getCommand().getName().equalsIgnoreCase("fcmd"))
+                        return Component.text("Query", NamedTextColor.LIGHT_PURPLE).style(Style.style(TextDecoration.UNDERLINED)).hoverEvent(HoverEvent.showText(Component.text(ctx.joinArgs(), NamedTextColor.GRAY)));
                     else return null;
                 }, ComponentPosition.TOP_RIGHT)
                 .addComponent((ctx, paginator, results, pg) -> {
                     var msg = "Search for a command.";
                     if (ctx.getCommand().getName().equalsIgnoreCase("fcmd")) msg = "Search for another command.";
-                    return Text.of("[☀]")
-                            .setColor(LIGHT_PURPLE)
-                            .setHoverEvent(HoverAction.SHOW_TEXT, Text.of(msg).setColor(GRAY))
-                            .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/fcmd " + (ctx.hasFlag("server") ? "-server " : "") + (ctx.hasFlag("command") ? "command" : "")));
+                    return Component.text("[☀]", NamedTextColor.LIGHT_PURPLE).toBuilder()
+                            .hoverEvent(HoverEvent.showText(Component.text(msg, NamedTextColor.GRAY)))
+                            .clickEvent(ClickEvent.suggestCommand("/fcmd " + (ctx.hasFlag("server") ? "-server " : "") + (ctx.hasFlag("command") ? "command" : "")))
+                            .build();
                 }, ComponentPosition.BOTTOM_RIGHT)
                 .build();
     
@@ -251,7 +258,7 @@ public class CommandStoreCommands {
         if (context.hasFlag("frequency")) commands = storage.getCommands().stream().sorted(Comparator.comparingInt(AbstractCommandStorage.Command::getUsed).reversed()).collect(Collectors.toList());
         else commands = new ArrayList<>(storage.getCommands());
 
-        paginator.generatePage(context, commands, page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
+        paginator.generatePage(context, commands, page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
     }
     
     public void listCommandsTab(TabContext context) {
@@ -284,54 +291,47 @@ public class CommandStoreCommands {
             return Math.min(lev, index);
         }).reversed()).skip((page-1)*8L).limit(8).collect(Collectors.toList());
 
-        paginator.generatePage(context, commands, page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
+        paginator.generatePage(context, commands, page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
     }
 
-    private Text.Section lineGenerator(AbstractCommandStorage.Command command, CommandContext context) {
+    private TextComponent lineGenerator(AbstractCommandStorage.Command command, CommandContext context) {
         String svr = context.hasFlag("server") ? "-server " : "";
 
-        var text = Text.of("? ")
-                .setColor(BLUE)
-                .setBold(true)
-                .setHoverEvent(HoverAction.SHOW_TEXT, Text.of(command.getCommand()).setColor(GRAY).append("\nUses: " + command.getUsed()));
+        var text = Component.text("? ", NamedTextColor.BLUE, TextDecoration.BOLD).toBuilder()
+                .hoverEvent(HoverEvent.showText(Component.text(command.getCommand(), NamedTextColor.GRAY).appendNewline().append(Component.text("Uses: " + command.getUsed(), NamedTextColor.GRAY))));
 
         if (svr.isEmpty() || context.hasPermission("greenfieldcore.commandstorage.edit.server"))
-            text.appendRoot("[E]")
-                    .setColor(GOLD)
-                    .setBold(true)
-                    .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Edit this command.").setColor(GRAY))
-                    .setClickEvent(ClickAction.SUGGEST_COMMAND, ClickString.of("/ecmd " + svr + command.getId() + " command " + command.getCommand()));
+            text.append(Component.text("[E]", NamedTextColor.GOLD, TextDecoration.BOLD).toBuilder()
+                            .hoverEvent(HoverEvent.showText(Component.text("Edit this command.", NamedTextColor.GRAY)))
+                            .clickEvent(ClickEvent.suggestCommand("/ecmd " + svr + command.getId() + " command " + command.getCommand()))
+                            .build());
 
         if (svr.isEmpty() || context.hasPermission("greenfieldcore.commandstorage.remove.server"))
-            text.appendRoot("[D]")
-                    .setColor(RED)
-                    .setBold(true)
-                    .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Delete this command.").setColor(GRAY))
-                    .setClickEvent(ClickAction.SUGGEST_COMMAND, ClickString.of("/rcmd " + svr + command.getId()));
+            text.append(Component.text("[D]", NamedTextColor.RED, TextDecoration.BOLD).toBuilder()
+                            .hoverEvent(HoverEvent.showText(Component.text("Delete this command.", NamedTextColor.GRAY)))
+                            .clickEvent(ClickEvent.suggestCommand("/rcmd " + svr + command.getId()))
+                            .build());
 
         if (svr.isEmpty() || context.hasPermission("greenfieldcore.commandstorage.run.server")) {
-            text.appendRoot("[R]")
-                    .setColor(GREEN)
-                    .setBold(true)
-                    .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Run this command.").setColor(GRAY))
-                    .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of(command.getCommand()));
-            text.appendRoot("[C]")
-                    .setColor(DARK_GREEN)
-                    .setBold(true)
-                    .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Copy this command to your clipboard").setColor(GRAY))
-                    .setClickEvent(ClickAction.COPY_TO_CLIPBOARD, ClickString.of(command.getCommand()));
+            text.append(Component.text("[R]", NamedTextColor.GREEN, TextDecoration.BOLD).toBuilder()
+                            .hoverEvent(HoverEvent.showText(Component.text("Run this command.", NamedTextColor.GRAY)))
+                            .clickEvent(ClickEvent.runCommand(command.getCommand()))
+                            .build());
+            text.append(Component.text("[C]", NamedTextColor.DARK_GREEN, TextDecoration.BOLD).toBuilder()
+                            .hoverEvent(HoverEvent.showText(Component.text("Copy this command to your clipboard.", NamedTextColor.GRAY)))
+                            .clickEvent(ClickEvent.copyToClipboard(command.getCommand()))
+                            .build());
         }
 
-        text.appendRoot(" | ").setColor(GRAY);
+        text.append(Component.text(" | ", NamedTextColor.GRAY));
         if (MinecraftFont.Font.getWidth(command.getDescription()) > 170) {
-            text.appendRoot(command.getDescription().substring(0, getSubstringIndex(170, command.getDescription())))
-                    .setColor(GRAY)
-                    .append("...")
-                    .setHoverEvent(HoverAction.SHOW_TEXT, Text.of(command.getDescription()).setColor(GRAY));
+            text.append(Component.text(command.getDescription().substring(0, getSubstringIndex(170, command.getDescription())) + "...")
+                    .color(NamedTextColor.GRAY)
+                    .hoverEvent(HoverEvent.showText(Component.text(command.getDescription(), NamedTextColor.GRAY))));
         } else {
-            text.appendRoot(command.getDescription()).setColor(GRAY);
+            text.append(Component.text(command.getDescription(), NamedTextColor.GRAY));
         }
-        return text;
+        return text.build();
     }
     
 }

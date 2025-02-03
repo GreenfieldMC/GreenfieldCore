@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.event.Event;
@@ -16,13 +18,13 @@ public class MangroveRootsInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Toggle the waterlogged state of mangrove roots.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Toggle the waterlogged state of mangrove roots.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Right click a mangrove root (when the mangrove root is in hand) to toggle its waterlogged state.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Right click a mangrove root (when the mangrove root is in hand) to toggle its waterlogged state.");
     }
 
     @Override

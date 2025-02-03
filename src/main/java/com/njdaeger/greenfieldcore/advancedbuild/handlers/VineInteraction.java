@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.data.MultipleFacing;
 import org.bukkit.event.Event;
@@ -17,13 +19,13 @@ public class VineInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the unnatural placement of vines.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the unnatural placement of vines.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift and right click to place a vine against the blockface you clicked.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift and right click to place a vine against the blockface you clicked.");
     }
 
     @Override

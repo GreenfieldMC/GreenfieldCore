@@ -15,7 +15,7 @@ public class PowerShovel extends ItemStack {
         ItemMeta meta = getItemMeta();
         if (meta == null) throw new IllegalStateException("ItemMeta was null. Please contact the developer.");
         meta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + "Power Shovel");
-        meta.addEnchant(Enchantment.DURABILITY, 1, true);
+        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
         meta.setUnbreakable(true);
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -33,7 +33,7 @@ public class PowerShovel extends ItemStack {
                     objMeta != null &&
                     meta != null &&
                     objMeta.getDisplayName().equals(meta.getDisplayName()) &&
-                    objMeta.hasEnchant(Enchantment.DURABILITY) &&
+                    objMeta.hasEnchant(Enchantment.UNBREAKING) &&
                     objMeta.hasItemFlag(ItemFlag.HIDE_UNBREAKABLE) &&
                     objMeta.hasItemFlag(ItemFlag.HIDE_ENCHANTS) &&
                     objMeta.isUnbreakable();

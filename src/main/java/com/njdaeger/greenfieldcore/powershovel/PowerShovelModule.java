@@ -6,7 +6,6 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
-import org.apache.commons.codec.binary.Base64;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,6 +22,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.lang.reflect.Field;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -36,7 +36,7 @@ public class PowerShovelModule extends Module implements Listener {
     private static final Map<UUID, Long> TIMEOUTS = new HashMap<>();
 
     static {
-        PROFILE.getProperties().put("textures", new Property("textures", new String(Base64.encodeBase64(String.format("{textures:{SKIN:{url:\"%s\"}}}", "http://textures.minecraft.net/texture/633c0bb37ebe1193ee4618103460a7f129277a8c7fd081b6aedb34a92bd5").getBytes()))));
+        PROFILE.getProperties().put("textures", new Property("textures", new String(Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", "http://textures.minecraft.net/texture/633c0bb37ebe1193ee4618103460a7f129277a8c7fd081b6aedb34a92bd5").getBytes()))));
     }
 
     public PowerShovelModule(GreenfieldCore plugin) {

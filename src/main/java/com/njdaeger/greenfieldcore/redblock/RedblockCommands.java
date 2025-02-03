@@ -12,6 +12,8 @@ import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.ComponentPosition;
 import com.njdaeger.pdk.utils.text.pager.components.PageNavigationComponent;
 import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Comparator;
 import java.util.UUID;
@@ -30,7 +32,7 @@ public class RedblockCommands {
         this.storage = storage;
 
         this.paginator = ChatPaginator.builder(RedblockLineGenerator::getRedblockLine)
-                .addComponent(Text.of("Redblock List").setColor(LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
+                .addComponent(Component.text("Redblock List", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent(new PageNavigationComponent<>(
                         (ctx, res, pg) -> "/rblist " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
@@ -300,6 +302,6 @@ public class RedblockCommands {
                 .filter(rb -> approvedBy == null || rb.getApprovedBy() != null && rb.getApprovedBy().equals(approvedBy))
                 .toList();
 
-        paginator.generatePage(context, filtered, page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
+        paginator.generatePage(context, filtered, page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
     }
 }

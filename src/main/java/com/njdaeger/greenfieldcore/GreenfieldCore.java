@@ -15,6 +15,7 @@ import com.njdaeger.greenfieldcore.powershovel.PowerShovelModule;
 import com.njdaeger.greenfieldcore.redblock.RedblockModule;
 import com.njdaeger.greenfieldcore.testresult.TestResultModule;
 import com.njdaeger.greenfieldcore.utilities.UtilitiesModule;
+import io.papermc.paper.ban.BanListType;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.BanList;
@@ -49,7 +50,7 @@ public final class GreenfieldCore extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        ProfileBanList pbl = Bukkit.getBanList(BanList.Type.PROFILE);
+        ProfileBanList pbl = Bukkit.getBanList(BanListType.PROFILE);
         new ConnectionRequirement("DISCORD_REQUIREMENT", (p) -> {
             if (p.hasPermission("greenfieldcore.discord.exempt")) {
                 GreenfieldCore.logger().info("User " + p.getName() + " is exempted from having a linked discord profile.");

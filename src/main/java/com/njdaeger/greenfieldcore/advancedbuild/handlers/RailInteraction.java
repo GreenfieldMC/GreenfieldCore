@@ -2,6 +2,10 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Rail;
@@ -20,13 +24,13 @@ public class RailInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allow the unusual placement of rails.").appendRoot(" NOTE: the breaking of rails that utilize redstone does not work. It is a minecraft bug. It WILL update surrounding things. To work around this, place a block below the rail, remove the desired rail, and then remove the block below.").setItalic(true);
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allow the unusual placement of rails.").append(Component.text(" NOTE: the breaking of rails that utilize redstone does not work. It is a minecraft bug. It WILL update surrounding things. To work around this, place a block below the rail, remove the desired rail, and then remove the block below.", NamedTextColor.GRAY, TextDecoration.ITALIC));
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift and right click to place a rail against the blockface you clicked. Clicking on the top or bottom of a block will make the rail ascending in the direction you were facing when you clicked the block.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift and right click to place a rail against the blockface you clicked. Clicking on the top or bottom of a block will make the rail ascending in the direction you were facing when you clicked the block.");
     }
 
     @Override

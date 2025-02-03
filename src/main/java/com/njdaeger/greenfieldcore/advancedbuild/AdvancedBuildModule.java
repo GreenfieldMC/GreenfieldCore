@@ -14,6 +14,13 @@ import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.ComponentPosition;
 import com.njdaeger.pdk.utils.text.pager.components.PageNavigationComponent;
 import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Candle;
@@ -34,7 +41,8 @@ import static org.bukkit.ChatColor.LIGHT_PURPLE;
 public class AdvancedBuildModule extends Module implements Listener {
 
     private static final java.awt.Color temp = ChatColor.BLUE.asBungee().getColor().brighter().brighter();
-    public static final Color LIGHT_BLUE = Color.fromRGB(temp.getRed(), temp.getGreen(), temp.getBlue());
+//    public static final Color LIGHT_BLUE = Color.fromRGB(temp.getRed(), temp.getGreen(), temp.getBlue());
+    public static final TextColor LIGHT_BLUE = TextColor.color(temp.getRed(), temp.getGreen(), temp.getBlue());
     private final ChatPaginator<InteractionHandler, CommandContext> paginator;
     private AdvBuildConfig config;
 
@@ -44,7 +52,7 @@ public class AdvancedBuildModule extends Module implements Listener {
         super(plugin);
 
         this.paginator = ChatPaginator.builder(this::lineGenerator)
-                .addComponent(Text.of("Advanced Build Mode Handler List").setColor(LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
+                .addComponent(Component.text("Advanced Build Mode Handler List", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent(new PageNavigationComponent<>(
                         (ctx, res, pg) -> "/avb " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
@@ -55,17 +63,16 @@ public class AdvancedBuildModule extends Module implements Listener {
                 .build();
     }
 
-    private Text.Section lineGenerator(InteractionHandler handler, CommandContext context) {
-        var text = Text.of("?")
-                .setColor(LIGHT_BLUE)
-                .setBold(true)
-                .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/avb " + handler.getInteractionName()))
-                .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Click to view detailed information about this interaction handler.").setColor(GRAY));
-        text.appendRoot(" | ").setColor(ChatColor.GRAY);
-        text.appendRoot(handler.getInteractionName())
-                .setColor(ChatColor.BLUE)
-                .setHoverEvent(HoverAction.SHOW_TEXT, handler.getInteractionDescription().setColor(GRAY));
-        return text;
+    private TextComponent lineGenerator(InteractionHandler handler, CommandContext context) {
+        var text = Component.text("?", LIGHT_BLUE, TextDecoration.BOLD).toBuilder()
+                .clickEvent(ClickEvent.runCommand("/avb " + handler.getInteractionName()))
+                .hoverEvent(HoverEvent.showText(Component.text("Click to view detailed information about this interaction handler.", NamedTextColor.GRAY)));
+        text.append(Component.text(" | ", NamedTextColor.GRAY));
+
+        text.append(Component.text(handler.getInteractionName(), NamedTextColor.BLUE).toBuilder()
+                        .hoverEvent(HoverEvent.showText(handler.getInteractionDescription().color(NamedTextColor.GRAY))));
+
+        return text.build();
     }
 
     @Override
@@ -111,20 +118,26 @@ public class AdvancedBuildModule extends Module implements Listener {
                     if (context.hasArgAt(0)) {
                         if (context.argAt(0).equalsIgnoreCase("help")) {
                             int page = context.getFlag("page", 1);
-                            paginator.generatePage(context, interactionHandlers, page).sendTo(Text.of("Page does not exist.").setColor(ChatColor.RED), context.asPlayer());
+                            paginator.generatePage(context, interactionHandlers, page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
                         } else {
                             var h = interactionHandlers.stream().filter(handler -> handler.getInteractionName().equalsIgnoreCase(context.argAt(0))).findFirst();
                             if (h.isPresent()) {
-                                var text = Text.of(" ======== Handler: ").setColor(GRAY);
-                                text.appendRoot("[" + h.get().getInteractionName() + "]").setColor(ChatColor.BLUE);
-                                text.appendRoot(" ========").setColor(GRAY);
-                                text.appendRoot("\nDescription:").setColor(GRAY).setUnderlined(true).setBold(true).appendRoot(" ");
-                                text.appendRoot(h.get().getInteractionDescription().setColor(LIGHT_BLUE));
-                                text.appendRoot("\nUsage:").setColor(GRAY).setUnderlined(true).setBold(true).appendRoot(" ");
-                                text.appendRoot(h.get().getInteractionUsage().setColor(LIGHT_BLUE));
-                                text.appendRoot("\nMaterials:").setColor(GRAY).setUnderlined(true).setBold(true).appendRoot(" ");
-                                text.appendRoot(h.get().getMaterialListText().setColor(LIGHT_BLUE));
-                                text.sendTo(context.asPlayer());
+                                var text = Component.text(" ======== Handler: ", NamedTextColor.GRAY).toBuilder()
+                                        .append(Component.text("[" + h.get().getInteractionName() + "]", NamedTextColor.BLUE))
+                                        .append(Component.text(" ========", NamedTextColor.GRAY))
+                                        .appendNewline()
+                                        .append(Component.text("Description:", NamedTextColor.GRAY, TextDecoration.UNDERLINED, TextDecoration.BOLD))
+                                        .appendSpace()
+                                        .append(h.get().getInteractionDescription().color(LIGHT_BLUE))
+                                        .appendNewline()
+                                        .append(Component.text("Usage:", NamedTextColor.GRAY, TextDecoration.UNDERLINED, TextDecoration.BOLD))
+                                        .appendSpace()
+                                        .append(h.get().getInteractionUsage().color(LIGHT_BLUE))
+                                        .appendNewline()
+                                        .append(Component.text("Materials:", NamedTextColor.GRAY, TextDecoration.UNDERLINED, TextDecoration.BOLD))
+                                        .appendSpace()
+                                        .append(h.get().getMaterialListText().color(LIGHT_BLUE));
+                                context.asPlayer().sendMessage(text.build());
                             } else context.error("Unknown interaction handler '" + context.argAt(0) + "'. Do /avb help for a list of Interaction Handlers.");
                         }
                         return;

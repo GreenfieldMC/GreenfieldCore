@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
@@ -27,18 +29,18 @@ public class BisectedInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the unnatural placement of blocks that are bisected (normally take 2 blocks of space) vertically.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the unnatural placement of blocks that are bisected (normally take 2 blocks of space) vertically.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift and right click to place a bisected block against the blockface you clicked.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift and right click to place a bisected block against the blockface you clicked.");
     }
 
     @Override
-    public Text.Section getMaterialListText() {
-        return Text.of("Any block that has a \"half\" property. (Except doors (handled separately) and trapdoors)");
+    public TextComponent getMaterialListText() {
+        return Component.text("Any block that has a \"half\" property. (Except doors (handled separately) and trapdoors)");
     }
 
     @Override

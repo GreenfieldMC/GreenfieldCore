@@ -1,7 +1,8 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
-import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.CommandBlock;
@@ -20,13 +21,13 @@ public class CommandBlockInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the placement of command blocks.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the placement of command blocks.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift right click to place a command block against the blockface you clicked, if not shifting, right clicking a command block will toggle the \"conditional\" property.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift right click to place a command block against the blockface you clicked, if not shifting, right clicking a command block will toggle the \"conditional\" property.");
     }
 
     @Override

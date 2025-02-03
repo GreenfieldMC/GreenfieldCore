@@ -2,17 +2,14 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
-import io.github.bananapuncher714.nbteditor.NBTEditor;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import org.bukkit.Location;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.data.type.DecoratedPot;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -47,13 +44,13 @@ public class SherdInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allow the placement of pottery sherds. (Automatically places the decorated_pot with the proper sherds on all sides)");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allow the placement of pottery sherds. (Automatically places the decorated_pot with the proper sherds on all sides)");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift and right click to place a pottery sherd against the blockface you clicked.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift and right click to place a pottery sherd against the blockface you clicked.");
     }
 
     @Override
@@ -73,18 +70,18 @@ public class SherdInteraction extends InteractionHandler {
             data.setWaterlogged(false);
             data.setFacing(event.getPlayer().getFacing());
             placeBlockAt(event.getPlayer(), placementLocation, sherdMat, data, Sound.BLOCK_DECORATED_POT_PLACE);
-            setShard(getHandMat(event), placementLocation);
+//            setShard(getHandMat(event), placementLocation);
             lastPlaced.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
     }
 
-    private static void setShard(Material material, Location location) {
-        var list = new NBTTagList();
-        list.add(NBTTagString.a(material.getKey().getKey()));
-        list.add(NBTTagString.a(material.getKey().getKey()));
-        list.add(NBTTagString.a(material.getKey().getKey()));
-        list.add(NBTTagString.a(material.getKey().getKey()));
-        NBTEditor.set(location.getBlock(), list, "sherds");
-    }
+//    private static void setShard(Material material, Location location) {
+//        var list = new NBTTagList();
+//        list.add(NBTTagString.a(material.getKey().getKey()));
+//        list.add(NBTTagString.a(material.getKey().getKey()));
+//        list.add(NBTTagString.a(material.getKey().getKey()));
+//        list.add(NBTTagString.a(material.getKey().getKey()));
+//        NBTEditor.set(location.getBlock(), list, "sherds");
+//    }
 
 }

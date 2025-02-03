@@ -2,6 +2,9 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
@@ -17,15 +20,15 @@ public class NetherWartInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the unusual placement of nether warts.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the unusual placement of nether warts.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("If not shifting, and a block clicked is a nether wart: Cycle the \"age\" property").setColor(LIGHT_BLUE)
-                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
-                .appendRoot("If shifting: place the nether wart").setColor(LIGHT_BLUE);
+    public TextComponent getInteractionUsage() {
+        return Component.text("If not shifting, and a block clicked is a nether wart: Cycle the \"age\" property", LIGHT_BLUE)
+                .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
+                .append(Component.text("If shifting: place the nether wart", LIGHT_BLUE));
     }
 
     @Override

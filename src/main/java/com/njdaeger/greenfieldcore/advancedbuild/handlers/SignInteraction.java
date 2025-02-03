@@ -2,11 +2,12 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.block.data.type.HangingSign;
-import org.bukkit.block.data.type.WallHangingSign;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -41,13 +42,13 @@ public class SignInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allow the unusual placement of signs");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allow the unusual placement of signs");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift right click to place the sign.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift right click to place the sign.");
     }
 
     @Override

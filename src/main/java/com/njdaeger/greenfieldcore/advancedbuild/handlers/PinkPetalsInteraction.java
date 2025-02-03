@@ -2,6 +2,9 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.PinkPetals;
@@ -32,15 +35,15 @@ public class PinkPetalsInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the natural placement and modification of pink petals.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the natural placement and modification of pink petals.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("If hand is empty or is holding pink petals: right clicking pink petals cycles the petal amount.").setColor(LIGHT_BLUE)
-                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
-                .appendRoot("If hand is holding pink petals and shifting: pink petals will be placed with the last petal amount you used.").setColor(LIGHT_BLUE);
+    public TextComponent getInteractionUsage() {
+        return Component.text("If hand is empty or is holding pink petals: right clicking pink petals cycles the petal amount.", LIGHT_BLUE)
+                .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY)
+                .append(Component.text("If hand is holding pink petals and shifting: pink petals will be placed with the last petal amount you used.", LIGHT_BLUE)));
     }
 
     @Override

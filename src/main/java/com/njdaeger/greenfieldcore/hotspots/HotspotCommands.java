@@ -15,6 +15,12 @@ import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.ComponentPosition;
 import com.njdaeger.pdk.utils.text.pager.components.PageNavigationComponent;
 import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.map.MinecraftFont;
 
 import java.util.Comparator;
@@ -36,9 +42,9 @@ public class HotspotCommands {
 
         this.paginator = ChatPaginator.builder(this::lineGenerator)
                 .addComponent((ctx, paginator, results, pg) -> {
-                    if (ctx.first().equalsIgnoreCase("delete")) return Text.of("Delete Options").setColor(LIGHT_PURPLE);
-                    else if (ctx.first().equalsIgnoreCase("teleport")) return Text.of("Teleport Options").setColor(LIGHT_PURPLE);
-                    else return Text.of("Hotspot List").setColor(LIGHT_PURPLE);
+                    if (ctx.first().equalsIgnoreCase("delete")) return Component.text("Delete Options", NamedTextColor.LIGHT_PURPLE);
+                    else if (ctx.first().equalsIgnoreCase("teleport")) return Component.text("Teleport Options", NamedTextColor.LIGHT_PURPLE);
+                    else return Component.text("Hotspot List", NamedTextColor.LIGHT_PURPLE);
                 }, ComponentPosition.TOP_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent(new PageNavigationComponent<>(
@@ -110,7 +116,7 @@ public class HotspotCommands {
             context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully teleported to " + hotspots.get(0).getName());
         } else {
             int page = context.hasFlag("page") ? context.getFlag("page") : 1;
-            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
+            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
         }
     }
 
@@ -148,7 +154,7 @@ public class HotspotCommands {
             context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully deleted " + hotspots.get(0).getName());
         } else {
             int page = context.hasFlag("page") ? context.getFlag("page") : 1;
-            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
+            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
         }
     }
 
@@ -161,48 +167,51 @@ public class HotspotCommands {
         int page = context.getFlag("page", 1);
         if (category != null) hotspots = storage.getHotspots().values().stream().filter(h -> h.getCategory().equals(category) && h.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
         else hotspots = storage.getHotspots().values().stream().filter(hs -> hs.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
-        paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Text.of("Page does not exist.").setColor(RED), context.asPlayer());
+        paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
     }
 
-    private Text.Section lineGenerator(Hotspot hs, CommandContext ctx) {
+    private TextComponent lineGenerator(Hotspot hs, CommandContext ctx) {
         int mode = 0;
         if (ctx.first().equalsIgnoreCase("delete")) mode = -1;
         else if (ctx.first().equalsIgnoreCase("teleport")) mode = 1;
 
-        var deleteButton = Text.of("[D]")
-                .setBold(true)
-                .setColor(RED)
-                .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Delete this Hotspot").setColor(GRAY))
-                .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/hotspot delete " + hs.getId()));
+        var deleteButton = Component.text("[D]", NamedTextColor.RED, TextDecoration.BOLD)
+                .hoverEvent(HoverEvent.showText(Component.text("Delete this Hotspot", NamedTextColor.GRAY)))
+                .clickEvent(ClickEvent.runCommand("/hotspot delete " + hs.getId()));
 
-        var teleportButton = Text.of("[T]")
-                .setBold(true)
-                .setColor(GREEN)
-                .setHoverEvent(HoverAction.SHOW_TEXT, Text.of("Teleport to this Hotspot").setColor(GRAY))
-                .setClickEvent(ClickAction.RUN_COMMAND, ClickString.of("/hotspot goto " + hs.getId()));
+        var teleportButton = Component.text("[T]", NamedTextColor.GREEN, TextDecoration.BOLD)
+                .hoverEvent(HoverEvent.showText(Component.text("Teleport to this Hotspot", NamedTextColor.GRAY)))
+                .clickEvent(ClickEvent.runCommand("/hotspot goto " + hs.getId()));
 
         var big = MinecraftFont.Font.getWidth(hs.getName()) > 200;
         var name = big ? hs.getName().substring(0, getSubstringIndex(200, hs.getName())) : hs.getName();
 
-        var text = Text.of(" | ").setColor(GRAY);
+        var text = Component.text(" | ", NamedTextColor.GRAY);
 
-        if (mode == -1) text = deleteButton.appendRoot(text);
-        else if (mode == 1) text = teleportButton.appendRoot(text);
+        if (mode == -1) text = deleteButton.append(text);
+        else if (mode == 1) text = teleportButton.append(text);
         else {
-            if (ctx.hasPermission("greenfieldcore.hotspots.goto")) text = teleportButton.appendRoot(text);
-            if (ctx.hasPermission("greenfieldcore.hotspots.delete")) text = deleteButton.appendRoot(text);
+            if (ctx.hasPermission("greenfieldcore.hotspots.goto")) text = teleportButton.append(text);
+            if (ctx.hasPermission("greenfieldcore.hotspots.delete")) text = deleteButton.append(text);
         }
 
-        text.appendRoot(name)
-                .setColor(GRAY)
-                .setHoverEvent(HoverAction.SHOW_TEXT,
-                        Text.of("Distance: " + String.format("%.2f", ctx.asPlayer().getLocation().distance(hs.getLocation()))).setColor(GRAY)
-                                .append("\nCategory: " + hs.getCategory().getId())
-                                .append("\nMarker: " + (hs.getCustomMarker() == null ? hs.getCategory().getMarker() : hs.getCustomMarker()))
-                                .append("\nID: #" + hs.getId()));
+        var builder = text.toBuilder().append(Component.text(name, NamedTextColor.GRAY).hoverEvent(
+                HoverEvent.showText(Component.text("Distance: " + String.format("%.2f", ctx.asPlayer().getLocation().distance(hs.getLocation())), NamedTextColor.GRAY).toBuilder()
+                        .appendNewline()
+                        .append(Component.text("Category: ", NamedTextColor.GRAY))
+                        .append(Component.text(hs.getCategory().getId(), NamedTextColor.BLUE))
+                        .appendNewline()
+                        .append(Component.text("Marker: ", NamedTextColor.GRAY))
+                        .append(Component.text(hs.getCustomMarker() == null ? hs.getCategory().getMarker() : hs.getCustomMarker(), NamedTextColor.BLUE))
+                        .appendNewline()
+                        .append(Component.text("ID: ", NamedTextColor.GRAY))
+                        .append(Component.text("#" + hs.getId(), NamedTextColor.BLUE))
+                        .build()
+                )
+        ));
 
-        if (big) text.appendRoot("...").setColor(GRAY).setBold(true).setHoverEvent(HoverAction.SHOW_TEXT, Text.of(hs.getName()).setColor(GRAY));
+        if (big) builder.append(Component.text("...", NamedTextColor.GRAY, TextDecoration.BOLD).hoverEvent(HoverEvent.showText(Component.text(hs.getName(), NamedTextColor.GRAY))));
 
-        return text;
+        return builder.build();
     }
 }

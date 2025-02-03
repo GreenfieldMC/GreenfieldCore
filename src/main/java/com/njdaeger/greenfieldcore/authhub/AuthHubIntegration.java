@@ -7,6 +7,7 @@ import com.njdaeger.authenticationhub.patreon.PatreonUserLoginEvent;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import net.milkbowl.vault.chat.Chat;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -61,7 +62,7 @@ public class AuthHubIntegration extends Module implements Listener {
 
     @EventHandler
     public void onDiscordLogin(DiscordUserLoginEvent e) {
-        e.allow();
+        if (!e.getPlayer().isBanned()) e.allow();
     }
 
     @EventHandler
@@ -74,13 +75,30 @@ public class AuthHubIntegration extends Module implements Listener {
                 var chat = rsp.getProvider();
                 var player = e.getPlayer();
                 var currentPrefix = chat.getPlayerPrefix(player) == null ? "" : chat.getPlayerPrefix(player);
-                if (currentPrefix.contains("[$]")) {
-                    plugin.getLogger().info("Prefix is already set for player");
+                if (currentPrefix.contains("&3[$]")) {
+                    plugin.getLogger().info("Prefix is " + currentPrefix + " for player " + player.getName());
+//                    plugin.getLogger().info("Prefix is already set for player");
                     return;
                 }
-                chat.setPlayerPrefix(player, "&3[$] " + currentPrefix + chat.getGroupPrefix(player.getWorld(), chat.getPrimaryGroup(player)));
+                var newPfx = currentPrefix.isEmpty() ? "&3[$]" : "&3[$] " + currentPrefix;
+                chat.setPlayerPrefix(player, newPfx + chat.getGroupPrefix(player.getWorld(), chat.getPrimaryGroup(player)));
                 prefixedUsers.add(player.getUniqueId());
             } else plugin.getLogger().warning("Chat provider is null. Prefixes will not be added.");
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onLeave(PlayerQuitEvent e) {
+        if (rsp != null && prefixedUsers.contains(e.getPlayer().getUniqueId())) {
+            var chat = rsp == null ? null : rsp.getProvider();
+            if (chat == null) return;
+            var pfx = chat.getPlayerPrefix(e.getPlayer());
+            if (pfx == null) return;
+            if (!pfx.contains("&3[$]")) return;
+            var replacement = pfx.replace("&3[$] ", ""); //first attempt to find the prefix with a space after the dollar sign
+            replacement = pfx.replace("&3[$]", ""); //if that fails, try to find the prefix without a space after the dollar sign
+            chat.setPlayerPrefix(e.getPlayer(), replacement.isEmpty() ? null : replacement);
+            prefixedUsers.remove(e.getPlayer().getUniqueId());
         }
     }
 
@@ -117,16 +135,6 @@ public class AuthHubIntegration extends Module implements Listener {
 //            }
 //        }
 //    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onLeave(PlayerQuitEvent e) {
-        if (rsp != null && prefixedUsers.contains(e.getPlayer().getUniqueId())) {
-            var chat = rsp == null ? null : rsp.getProvider();
-            if (chat == null) return;
-            chat.setPlayerPrefix(e.getPlayer(), null);
-            prefixedUsers.remove(e.getPlayer().getUniqueId());
-        }
-    }
 //    @EventHandler(priority = EventPriority.MONITOR)
 //    public void onPlayerJoin_patreonIntg(PlayerJoinEvent e) {
 //        if (appReg == null) return;

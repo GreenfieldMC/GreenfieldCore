@@ -2,6 +2,9 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -51,17 +54,17 @@ public class CandleInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allow the placement of candles on any block face.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allow the placement of candles on any block face.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("If hand is empty: right click a candle toggles the \"lit\" state of the candle.").setColor(LIGHT_BLUE)
-                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
-                .appendRoot("If hand is not empty: right clicking a candle cycles the candle amount of that candle.").setColor(LIGHT_BLUE)
-                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
-                .appendRoot("If hand is holding a candle and shifting: right clicking will place a candle in the desired location.").setColor(LIGHT_BLUE);
+    public TextComponent getInteractionUsage() {
+        return Component.text("If hand is empty: right click a candle toggles the \"lit\" state of the candle.", LIGHT_BLUE)
+                .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
+                .append(Component.text("If hand is not empty: right clicking a candle cycles the candle amount of that candle.", LIGHT_BLUE))
+                .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
+                .append(Component.text("If hand is holding a candle and shifting: right clicking will place a candle in the desired location.", LIGHT_BLUE));
     }
 
     @Override

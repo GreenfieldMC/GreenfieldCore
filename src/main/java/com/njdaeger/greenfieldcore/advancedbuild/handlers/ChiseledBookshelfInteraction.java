@@ -3,6 +3,10 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 import com.njdaeger.greenfieldcore.advancedbuild.AdvBuildConfig;
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -47,19 +51,19 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the placement of chiseled bookshelves on any block face without the need to use the debug stick to set the block data.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the placement of chiseled bookshelves on any block face without the need to use the debug stick to set the block data.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("If hand is empty: right click a bookshelf toggles your ").setColor(LIGHT_BLUE).append("selecting shelf").setUnderlined(true).appendParent(" status.")
-                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
-                .appendRoot("If a bookshelf is selected (aka 'selecting shelf'): The scroll wheel will allow the traversal of all bookshelf options in that color.").setColor(LIGHT_BLUE)
-                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
-                .appendRoot("If hand is holding a bookshelf and NOT shifting: clicking on the front or back of the bookshelf will toggle between the available colors").setColor(LIGHT_BLUE)
-                .appendRoot(" ----- ").setColor(ChatColor.DARK_GRAY)
-                .appendRoot("If hand is holding a bookshelf and shifting: right clicking will place a bookshelf in the desired location with the last placed book amount.").setColor(LIGHT_BLUE);
+    public TextComponent getInteractionUsage() {
+        return Component.text("If hand is empty: right click a bookshelf toggles your ").color(LIGHT_BLUE).append(Component.text("selecting shelf", LIGHT_BLUE, TextDecoration.UNDERLINED)).append(Component.text(" status.", LIGHT_BLUE))
+                .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
+                .append(Component.text("If a bookshelf is selected (aka 'selecting shelf'): The scroll wheel will allow the traversal of all bookshelf options in that color.", LIGHT_BLUE))
+                .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
+                .append(Component.text("If hand is holding a bookshelf and NOT shifting: clicking on the front or back of the bookshelf will toggle between the available colors", LIGHT_BLUE))
+                .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
+                .append(Component.text("If hand is holding a bookshelf and shifting: right clicking will place a bookshelf in the desired location with the last placed book amount.", LIGHT_BLUE));
     }
 
     @EventHandler

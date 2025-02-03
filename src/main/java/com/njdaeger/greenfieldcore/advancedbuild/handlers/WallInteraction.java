@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.Wall;
 import org.bukkit.event.Event;
@@ -21,18 +23,18 @@ public class WallInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the unnatural placement and editing of walls.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the unnatural placement and editing of walls.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift right click with an empty hand on the side of a wall to cycle between that wall's side heights.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift right click with an empty hand on the side of a wall to cycle between that wall's side heights.");
     }
 
     @Override
-    public Text.Section getMaterialListText() {
-        return Text.of("Any block that is a part of the wall group.");
+    public TextComponent getMaterialListText() {
+        return Component.text("Any block that is a part of the wall group.");
     }
 
     @Override

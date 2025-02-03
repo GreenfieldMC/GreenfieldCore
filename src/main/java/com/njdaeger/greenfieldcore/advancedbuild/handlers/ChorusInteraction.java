@@ -2,9 +2,10 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.data.MultipleFacing;
-import org.bukkit.block.data.type.PinkPetals;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class ChorusInteraction extends InteractionHandler {
@@ -17,13 +18,13 @@ public class ChorusInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allows the unusual placement of chorus plants and flowers.");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allows the unusual placement of chorus plants and flowers.");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift and right click to place a chorus plant or flower against the blockface you clicked.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift and right click to place a chorus plant or flower against the blockface you clicked.");
     }
 
     @Override

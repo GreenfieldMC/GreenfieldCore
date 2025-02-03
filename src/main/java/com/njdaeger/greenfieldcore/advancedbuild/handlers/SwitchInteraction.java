@@ -2,6 +2,8 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.pdk.utils.text.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.FaceAttachable;
@@ -23,18 +25,18 @@ public class SwitchInteraction extends InteractionHandler {
     }
 
     @Override
-    public Text.Section getInteractionDescription() {
-        return Text.of("Allow the unnatural placement of blocks that are considered switches. (buttons, levers, etc)");
+    public TextComponent getInteractionDescription() {
+        return Component.text("Allow the unnatural placement of blocks that are considered switches. (buttons, levers, etc)");
     }
 
     @Override
-    public Text.Section getInteractionUsage() {
-        return Text.of("Shift and right click to place a switch type block against the blockface you clicked.");
+    public TextComponent getInteractionUsage() {
+        return Component.text("Shift and right click to place a switch type block against the blockface you clicked.");
     }
 
     @Override
-    public Text.Section getMaterialListText() {
-        return Text.of("Any block that has a \"face\" property and a \"facing\" property.");
+    public TextComponent getMaterialListText() {
+        return Component.text("Any block that has a \"face\" property and a \"facing\" property.");
     }
 
     @Override

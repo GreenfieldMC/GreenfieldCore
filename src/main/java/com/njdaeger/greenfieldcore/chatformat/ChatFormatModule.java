@@ -53,7 +53,6 @@ public class ChatFormatModule extends Module implements Listener {
             .build();
     private static final Function<Map<IUnit, Double>, Style> unitStyle = (conversions) -> Style.style()
             .color(TextColor.color(199, 233, 255))
-            .decorate(TextDecoration.ITALIC)
             .hoverEvent(HoverEvent.showText(() -> {
                 var hover = Component.text("Conversions:").toBuilder();
                 conversions.forEach((u, d) -> hover.appendNewline().append(Component.text(format.format(d) + " " + u.getName(), NamedTextColor.GRAY)));

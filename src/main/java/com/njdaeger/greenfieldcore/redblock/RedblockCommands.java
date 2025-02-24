@@ -31,7 +31,7 @@ public class RedblockCommands {
         this.module = module;
         this.storage = storage;
 
-        this.paginator = ChatPaginator.builder(RedblockLineGenerator::getRedblockLine)
+        this.paginator = ChatPaginator.<Redblock, CommandContext>builder()
                 .addComponent(Component.text("Redblock List", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent(new PageNavigationComponent<>(

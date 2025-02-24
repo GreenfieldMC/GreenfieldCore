@@ -1,8 +1,11 @@
 package com.njdaeger.greenfieldcore.commandstore;
 
+import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.Configuration;
 import com.njdaeger.pdk.config.ISection;
+import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import com.njdaeger.pdk.utils.text.pager.PageItem;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Collection;
@@ -73,7 +76,7 @@ public abstract class AbstractCommandStorage extends Configuration {
         super.save();
     }
     
-    public class Command {
+    public class Command implements PageItem<CommandContext> {
         
         private String command;
         private String description;
@@ -114,7 +117,11 @@ public abstract class AbstractCommandStorage extends Configuration {
         public int getId() {
             return id;
         }
-        
+
+        @Override
+        public String getPlainItemText(ChatPaginator<?, CommandContext> paginator, CommandContext generatorInfo) {
+            return description;
+        }
     }
     
 }

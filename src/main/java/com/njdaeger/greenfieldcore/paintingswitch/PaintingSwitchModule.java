@@ -2,8 +2,9 @@ package com.njdaeger.greenfieldcore.paintingswitch;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Art;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Painting;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.njdaeger.greenfieldcore.ComponentUtils.moduleMessage;
 import static java.lang.Math.*;
 
 public class PaintingSwitchModule extends Module implements Listener {
@@ -51,7 +53,7 @@ public class PaintingSwitchModule extends Module implements Listener {
             if (loc != null && hasMovedFar(event.getPlayer().getLocation(), loc)) {
                 session.setLastArt(session.getSelected().getArt());
                 session.setSwitching(false, null);
-                event.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE + "[PaintingSwitch] " + ChatColor.GRAY + "Painting locked.");
+                event.getPlayer().sendMessage(moduleMessage("PaintingSwitch").append(Component.text("Painting locked.", NamedTextColor.GRAY)));
             }
         }
     }
@@ -70,7 +72,7 @@ public class PaintingSwitchModule extends Module implements Listener {
                 } else {
                     session.setLastArt(session.getSelected().getArt());
                     session.setSwitching(false, null);
-                    player.sendMessage(ChatColor.LIGHT_PURPLE + "[PaintingSwitch] " + ChatColor.GRAY + "Painting locked.");
+                    player.sendMessage(moduleMessage("PaintingSwitch").append(Component.text("Painting locked.", NamedTextColor.GRAY)));
                 }
             }
         }
@@ -86,7 +88,7 @@ public class PaintingSwitchModule extends Module implements Listener {
             if (event.getRightClicked() instanceof Painting && !session.isSwitching()) {
                 session.setSwitching(true, (Painting) event.getRightClicked());
                 session.setJustStarted(true);
-                player.sendMessage(ChatColor.LIGHT_PURPLE + "[PaintingSwitch] " + ChatColor.GRAY + "Scroll to select painting.");
+                player.sendMessage(moduleMessage("PaintingSwitch").append(Component.text("Scroll to select painting.", NamedTextColor.GRAY)));
             }
         }
     }
@@ -112,7 +114,7 @@ public class PaintingSwitchModule extends Module implements Listener {
             if (session.isSwitching()) {
                 session.setLastArt(session.getSelected().getArt());
                 session.setSwitching(false, null);
-                e.getRemover().sendMessage(ChatColor.LIGHT_PURPLE + "[PaintingSwitch] " + ChatColor.GRAY + "Painting removed.");
+                e.getRemover().sendMessage(moduleMessage("PaintingSwitch").append(Component.text("Painting removed.", NamedTextColor.GRAY)));
             }
         }
     }

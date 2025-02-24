@@ -10,16 +10,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class PowerShovel extends ItemStack {
 
     public PowerShovel() {
-        setAmount(1);
-        setType(Material.IRON_SHOVEL);
-        ItemMeta meta = getItemMeta();
-        if (meta == null) throw new IllegalStateException("ItemMeta was null. Please contact the developer.");
-        meta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + "Power Shovel");
-        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
-        meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        setItemMeta(meta);
+//        setAmount(1);
+//        setType(Material.IRON_SHOVEL);
+//        ItemMeta meta = getItemMeta();
+//        if (meta == null) throw new IllegalStateException("ItemMeta was null. Please contact the developer.");
+//        meta.setDisplayName(ChatColor.BLUE + "" + ChatColor.BOLD + "Power Shovel");
+//        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+//        meta.setUnbreakable(true);
+//        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+//        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+//        setItemMeta(meta);
+//        setAmount(1);
+//        withType(Material.IRON_SHOVEL);
     }
 
     @Override

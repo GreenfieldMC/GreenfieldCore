@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ChatConfig extends Configuration {
 
@@ -82,7 +81,7 @@ public class ChatConfig extends Configuration {
         return getUser(player).allowsMentions();
     }
 
-    public class ChatUser {
+    public static class ChatUser {
 
         private final UUID uuid;
         private boolean allowMentions;

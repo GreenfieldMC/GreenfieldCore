@@ -42,7 +42,7 @@ public class CommandStoreCommands {
     public CommandStoreCommands(GreenfieldCore plugin, CommandStoreModule module) {
         this.module = module;
 
-        this.paginator = ChatPaginator.builder(this::lineGenerator)
+        this.paginator = ChatPaginator.<AbstractCommandStorage.Command, CommandContext>builder()
                 .addComponent((ctx, paginator, results, pg) -> {
                     if (ctx.hasFlag("server")) return Component.text("Server CommandStorage", NamedTextColor.LIGHT_PURPLE);
                     return Component.text("User CommandStorage", NamedTextColor.LIGHT_PURPLE);

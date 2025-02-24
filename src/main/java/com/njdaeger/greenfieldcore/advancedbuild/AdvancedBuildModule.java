@@ -51,7 +51,7 @@ public class AdvancedBuildModule extends Module implements Listener {
     public AdvancedBuildModule(GreenfieldCore plugin) {
         super(plugin);
 
-        this.paginator = ChatPaginator.builder(this::lineGenerator)
+        this.paginator = ChatPaginator.<InteractionHandler, CommandContext>builder(/*this::lineGenerator*/)
                 .addComponent(Component.text("Advanced Build Mode Handler List", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
                 .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
                 .addComponent(new PageNavigationComponent<>(

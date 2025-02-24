@@ -10,7 +10,7 @@ import java.util.List;
 
 public class CodesConfig extends Configuration {
 
-    private List<String> codes;
+    private final List<String> codes;
     private final CodesModule module;
 
     public CodesConfig(GreenfieldCore plugin, CodesModule module) {

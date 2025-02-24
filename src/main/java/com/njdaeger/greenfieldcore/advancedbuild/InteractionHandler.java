@@ -1,7 +1,10 @@
 package com.njdaeger.greenfieldcore.advancedbuild;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
+import com.njdaeger.pdk.command.CommandContext;
 import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import com.njdaeger.pdk.utils.text.pager.PageItem;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -24,7 +27,7 @@ import java.util.function.Predicate;
 
 import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
 
-public abstract class InteractionHandler {
+public abstract class InteractionHandler implements PageItem<CommandContext> {
 
     protected final List<Material> materials;
     private final Predicate<PlayerInteractEvent> predicate;
@@ -49,6 +52,11 @@ public abstract class InteractionHandler {
         this.materials = Arrays.asList(materials);
         this.plugin = GreenfieldCore.getPlugin(GreenfieldCore.class);
         this.predicate = predicate;
+    }
+
+    @Override
+    public String getPlainItemText(ChatPaginator<?, CommandContext> paginator, CommandContext generatorInfo) {
+        return getInteractionName();
     }
 
     /**

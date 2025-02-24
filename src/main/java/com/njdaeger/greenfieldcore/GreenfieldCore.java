@@ -1,7 +1,7 @@
 package com.njdaeger.greenfieldcore;
 
 import com.earth2me.essentials.Essentials;
-import com.earth2me.essentials.userstorage.IUserMap;
+//import com.earth2me.essentials.userstorage.IUserMap;
 import com.njdaeger.authenticationhub.ConnectionRequirement;
 import com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule;
 import com.njdaeger.greenfieldcore.authhub.AuthHubIntegration;
@@ -50,19 +50,6 @@ public final class GreenfieldCore extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        ProfileBanList pbl = Bukkit.getBanList(BanListType.PROFILE);
-        new ConnectionRequirement("DISCORD_REQUIREMENT", (p) -> {
-            if (p.hasPermission("greenfieldcore.discord.exempt")) {
-                GreenfieldCore.logger().info("User " + p.getName() + " is exempted from having a linked discord profile.");
-                return false;
-            }
-            else if (p.isWhitelisted() && !pbl.isBanned(p.getPlayerProfile())) {
-                GreenfieldCore.logger().info("User " + p.getName() + " must have a linked discord profile.");
-                return true;
-            }
-            GreenfieldCore.logger().info("User " + p.getName() + " does not need a linked discord profile - they were not found in the whitelist or they are a banned member.");
-            return false;
-        });
 
     }
 
@@ -77,10 +64,10 @@ public final class GreenfieldCore extends JavaPlugin {
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            IUserMap userMap = Essentials.getPlugin(Essentials.class).getUsers();
-            getLogger().info("Loading uuid to username map...");
-            Bukkit.getWhitelistedPlayers().stream().map(OfflinePlayer::getUniqueId).map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));
-            getLogger().info("Loaded " + Util.userNameMap.size() + " uuid to username mappings.");
+//            IUserMap userMap = Essentials.getPlugin(Essentials.class).getUsers();
+//            getLogger().info("Loading uuid to username map...");
+//            Bukkit.getWhitelistedPlayers().stream().map(OfflinePlayer::getUniqueId).map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));
+//            getLogger().info("Loaded " + Util.userNameMap.size() + " uuid to username mappings.");
         });
 
 

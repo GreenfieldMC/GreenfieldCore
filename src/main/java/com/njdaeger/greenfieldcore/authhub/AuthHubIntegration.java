@@ -1,14 +1,17 @@
 package com.njdaeger.greenfieldcore.authhub;
 
 import com.njdaeger.authenticationhub.ApplicationRegistry;
+import com.njdaeger.authenticationhub.ConnectionRequirement;
 import com.njdaeger.authenticationhub.discord.DiscordUserLoginEvent;
 import com.njdaeger.authenticationhub.patreon.PatreonApplication;
 import com.njdaeger.authenticationhub.patreon.PatreonUserLoginEvent;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import io.papermc.paper.ban.BanListType;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.ban.ProfileBanList;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,6 +37,20 @@ public class AuthHubIntegration extends Module implements Listener {
 
     @Override
     public void onEnable() {
+        ProfileBanList pbl = Bukkit.getBanList(BanListType.PROFILE);
+        new ConnectionRequirement("DISCORD_REQUIREMENT", (p) -> {
+            if (p.hasPermission("greenfieldcore.discord.exempt")) {
+                GreenfieldCore.logger().info("User " + p.getName() + " is exempted from having a linked discord profile.");
+                return false;
+            }
+            else if (p.isWhitelisted() && !pbl.isBanned(p.getPlayerProfile())) {
+                GreenfieldCore.logger().info("User " + p.getName() + " must have a linked discord profile.");
+                return true;
+            }
+            GreenfieldCore.logger().info("User " + p.getName() + " does not need a linked discord profile - they were not found in the whitelist or they are a banned member.");
+            return false;
+        });
+
         PluginManager pm = plugin.getServer().getPluginManager();
         if (pm.getPlugin("AuthenticationHub") != null && pm.getPlugin("Vault") != null) {
             plugin.getServer().getPluginManager().registerEvents(this, plugin);

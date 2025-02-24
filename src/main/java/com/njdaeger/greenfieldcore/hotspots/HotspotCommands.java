@@ -40,7 +40,7 @@ public class HotspotCommands {
         this.storage = storage;
         this.module = module;
 
-        this.paginator = ChatPaginator.builder(this::lineGenerator)
+        this.paginator = ChatPaginator.<Hotspot, CommandContext>builder()
                 .addComponent((ctx, paginator, results, pg) -> {
                     if (ctx.first().equalsIgnoreCase("delete")) return Component.text("Delete Options", NamedTextColor.LIGHT_PURPLE);
                     else if (ctx.first().equalsIgnoreCase("teleport")) return Component.text("Teleport Options", NamedTextColor.LIGHT_PURPLE);

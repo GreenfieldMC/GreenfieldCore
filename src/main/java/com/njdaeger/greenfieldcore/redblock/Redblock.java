@@ -1,11 +1,14 @@
 package com.njdaeger.greenfieldcore.redblock;
 
+import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import com.njdaeger.pdk.utils.text.pager.PageItem;
 import org.bukkit.Location;
 
 import java.util.List;
 import java.util.UUID;
 
-public class Redblock {
+public class Redblock implements PageItem<CommandContext> {
 
     private String content;
     private final int id;
@@ -193,6 +196,11 @@ public class Redblock {
                 ", assignedOn=" + assignedOn +
                 ", armorstands={" + armorstands.stream().map(UUID::toString).reduce("", (a, b) -> a + ", " + b) +
                 "}}";
+    }
+
+    @Override
+    public String getPlainItemText(ChatPaginator<?, CommandContext> paginator, CommandContext generatorInfo) {
+        return content;
     }
 
     public enum Status {

@@ -1,9 +1,12 @@
 package com.njdaeger.greenfieldcore.hotspots;
 
+import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import com.njdaeger.pdk.utils.text.pager.PageItem;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-public class Hotspot {
+public class Hotspot implements PageItem<CommandContext> {
 
     private String name;
     private Category category;
@@ -72,6 +75,11 @@ public class Hotspot {
 
     public void setCustomMarker(String customMarker) {
         this.customMarker = customMarker;
+    }
+
+    @Override
+    public String getPlainItemText(ChatPaginator<?, CommandContext> paginator, CommandContext generatorInfo) {
+        return name;
     }
 }
 

@@ -99,6 +99,9 @@ public class ChatFormatModule extends Module implements Listener {
                     var sound = ctx.getTyped("soundChoice", Sound.class);
                     config.setSound(ctx.asPlayer(), sound);
                     ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been set to " + sound.getKey().getKey(), NamedTextColor.GRAY)));
+                }).then("reset").executes(ctx -> {
+                    config.setSound(ctx.asPlayer(), Sound.BLOCK_NOTE_BLOCK_CHIME);
+                    ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been reset to the default.", NamedTextColor.GRAY)));
                 }).end()
                 .register(plugin);
     }

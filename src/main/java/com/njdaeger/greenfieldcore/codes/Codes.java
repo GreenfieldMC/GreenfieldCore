@@ -48,8 +48,8 @@ public class Codes {
 
         @Override
         public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
-            var numberText = Component.text("#" + codeNumber).color(paginator.getHighlightColor());
-            var codeText = Component.text(code).color(paginator.getGrayColor());
+            var numberText = Component.text("#" + codeNumber, paginator.getHighlightColor());
+            var codeText = Component.text(code, paginator.getGrayColor());
             return (TextComponent) numberText.appendSpace().append(codeText);
         }
 

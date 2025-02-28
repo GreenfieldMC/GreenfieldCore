@@ -1,6 +1,5 @@
 package com.njdaeger.greenfieldcore.redblock;
 
-import com.earth2me.essentials.Essentials;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import org.bukkit.Bukkit;
@@ -28,14 +27,15 @@ public class RedblockModule extends Module {
 
     @Override
     public void onEnable() {
-        if (Bukkit.getPluginManager().getPlugin("Vault") == null || Bukkit.getPluginManager().getPlugin("Essentials") == null) {
-            plugin.getLogger().warning("Unable to start RedblockModule. Vault or Essentials was not found.");
-            this.isEnabled = false;
-            return;
-        }
+//        if (Bukkit.getPluginManager().getPlugin("Vault") == null || Bukkit.getPluginManager().getPlugin("Essentials") == null) {
+//            plugin.getLogger().warning("Unable to start RedblockModule. Vault or Essentials was not found.");
+//            this.isEnabled = false;
+//            return;
+//        }
         this.isEnabled = true;
         this.storage = new RedblockStorage(plugin, this);
-        new RedblockCommands(this, this.storage, plugin);
+        new RedblockBrigadierCommands(storage, plugin);
+//        new RedblockCommands(this, this.storage, plugin);
         Bukkit.getPluginManager().registerEvents(new RedblockListener(storage), plugin);
 
         Plugin dynmap;
@@ -124,6 +124,7 @@ public class RedblockModule extends Module {
     }
 
     public void updateRedblock(Redblock updatedRb, boolean isEdit) {
+        if (markerApi == null) return;
         if (isEdit) {
             Marker marker = markerApi.getMarkerSet(PENDING_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
             if (marker == null) marker = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");

@@ -15,12 +15,6 @@ public interface IRedblockStorageService extends IModuleService<IRedblockStorage
     int getNextId();
 
     /**
-     * Gets the next id for a redblock and increments it
-     * @return The next id before incrementing
-     */
-    int getNextAndIncrementId();
-
-    /**
      * Gets a redblock by its id
      * @param id The id of the redblock
      * @return The redblock

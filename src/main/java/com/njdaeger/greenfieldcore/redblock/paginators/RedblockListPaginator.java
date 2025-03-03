@@ -18,10 +18,10 @@ public class RedblockListPaginator extends ChatPaginatorBuilder<Redblock, IComma
         addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT);
         addComponent(new RedblockFilterComponent(), ComponentPosition.TOP_RIGHT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/rblist page 1",
-                (ctx, res, pg) -> "/rblist page " + (pg - 1),
-                (ctx, res, pg) -> "/rblist page " + (pg + 1),
-                (ctx, res, pg) -> "/rblist page " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, res, pg) -> "/rblist -page 1",
+                (ctx, res, pg) -> "/rblist -page " + (pg - 1),
+                (ctx, res, pg) -> "/rblist -page " + (pg + 1),
+                (ctx, res, pg) -> "/rblist -page " + ((int) Math.ceil(res.size() / 8.0))
         ), ComponentPosition.BOTTOM_CENTER);
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
     }

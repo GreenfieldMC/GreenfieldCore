@@ -21,7 +21,7 @@ public abstract class Module {
             return (T) integration;
         } catch (Exception e) {
             if (required) throw new RuntimeException(e);
-            return null;
+            return (T) integration;
         }
     }
 

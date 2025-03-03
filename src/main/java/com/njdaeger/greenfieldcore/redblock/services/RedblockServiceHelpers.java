@@ -1,6 +1,7 @@
 package com.njdaeger.greenfieldcore.redblock.services;
 
 import com.njdaeger.greenfieldcore.redblock.Redblock;
+import com.njdaeger.pdk.utils.text.TextUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -38,14 +39,33 @@ public final class RedblockServiceHelpers {
 
     }
 
+    private static int countContentLines(int maxLineWidth, String content) {
+        var lines = content.split("\n");
+        var lineCount = 0;
+        for (String line : lines) {
+            var minecraftPixelWidth = TextUtils.getMinecraftPixelWidth(Component.text(line));
+            if (minecraftPixelWidth > maxLineWidth) {
+                lineCount += (int) Math.ceil(line.length() / (double) maxLineWidth);
+            } else {
+                lineCount++;
+            }
+        }
+        return lineCount;
+    }
+
     static UUID createDisplay(int id, String minRank, String assignedTo, Location location, String content) {
-        var display = (TextDisplay) location.getWorld().spawnEntity(location, EntityType.TEXT_DISPLAY);
+        //each new line is about .25 of a block tall
+        var yOffset = 1.0 + (minRank != null ? .25 : 0) + (assignedTo != null ? .25 : 0) + (countContentLines(200, content) * .25);
+
+        var actualLocation = location.clone().add(0.5, yOffset, 0.5);
+        var display = (TextDisplay) actualLocation.getWorld().spawnEntity(actualLocation, EntityType.TEXT_DISPLAY);
         display.setGlowing(true);
         display.setLineWidth(200);
         display.setBackgroundColor(Color.fromARGB(190, 28, 28, 28));
         display.setBillboard(Display.Billboard.CENTER);
         display.setTextOpacity((byte) 0xFF);
         display.setAlignment(TextDisplay.TextAlignment.CENTER);
+        display.setSeeThrough(true);
         System.out.println(display.getDisplayHeight());
 
         var displayComponent = Component.text();
@@ -79,9 +99,8 @@ public final class RedblockServiceHelpers {
     static void createCube(Material material, Location location, TextComponent... components) {
         //create the actual cube
         for (int x = -1; x <= 1; x++) {
-            for (int y = -1; y <= 1; y++) {
+            for (int y = -3; y <= -1; y++) {
                 for (int z = -1; z <= 1; z++) {
-                    if (x == 0 && y == 0 && z == 0) continue;
                     var loc = location.clone().add(x, y, z);
                     loc.getBlock().setType(material, false);
                 }

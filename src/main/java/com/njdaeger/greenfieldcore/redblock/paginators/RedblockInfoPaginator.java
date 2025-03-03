@@ -13,6 +13,7 @@ public class RedblockInfoPaginator extends ChatPaginatorBuilder<Redblock.Redbloc
         super();
         addComponent((ctx, paginator, res, pg) -> Component.text("Redblock Information"), ComponentPosition.TOP_CENTER);
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
+        setEqualSignCount(25);
     }
 
 }

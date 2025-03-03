@@ -49,7 +49,7 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
         createCube(Material.RED_WOOL, location, RedblockMessages.SIGN_CLICK_THIS_IF_COMPLETED);
         var displayUuid = createDisplay(storageService.getNextId(), minRank, assignedTo == null ? null : resolvePlayerName(assignedTo), location, content);
 
-        var redblock = new Redblock(storageService.getNextAndIncrementId(), content, Redblock.Status.INCOMPLETE, location, createdBy.getUniqueId(), System.currentTimeMillis(), null, 0, null, 0, assignedTo, assignedTo != null ? System.currentTimeMillis() : 0, minRank, List.of(displayUuid));
+        var redblock = new Redblock(storageService.getNextId(), content, Redblock.Status.INCOMPLETE, location, createdBy.getUniqueId(), System.currentTimeMillis(), null, 0, null, 0, assignedTo, assignedTo != null ? System.currentTimeMillis() : 0, minRank, List.of(displayUuid));
         storageService.saveRedblock(redblock);
         storageService.saveDatabase();
         var markerHtml = createMarkerHtml(redblock);

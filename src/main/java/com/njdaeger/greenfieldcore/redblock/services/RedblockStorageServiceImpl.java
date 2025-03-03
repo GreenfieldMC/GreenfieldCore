@@ -81,11 +81,6 @@ public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageSe
     }
 
     @Override
-    public int getNextAndIncrementId() {
-        return redblockIndex++;
-    }
-
-    @Override
     public Redblock getRedblock(int id) {
         return redblockMap.get(id);
     }
@@ -97,6 +92,8 @@ public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageSe
 
     @Override
     public void saveRedblock(Redblock redblock) {
+        redblockMap.put(redblock.getId(), redblock);
+        if (redblock.getId() >= redblockIndex) redblockIndex = redblock.getId() + 1;
         var path = "redblocks." + redblock.getId();
         config.setEntry(path + ".content", redblock.getContent());
         config.setEntry(path + ".status", redblock.getStatus().name());

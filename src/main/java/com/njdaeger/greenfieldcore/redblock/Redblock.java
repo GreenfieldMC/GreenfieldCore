@@ -335,12 +335,12 @@ public class Redblock implements PageItem<ICommandContext> {
                 var builder = Component.text();
                 for (var i : multiInfoLine) {
                     if (i.infoKey == null || i.infoValue == null) continue;
-                    builder.append(Component.text(i.infoKey, paginator.getHighlightColor()).append(Component.text(i.infoValue, paginator.getGrayColor())));
+                    builder.append(Component.text(i.infoKey + ": ", NamedTextColor.BLUE).append(Component.text(i.infoValue, paginator.getGrayColor())));
                 }
                 return builder.build();
             }
             if (infoKey == null || infoValue == null) return Component.empty();
-            return Component.text(infoKey, paginator.getHighlightColor()).append(Component.text(infoValue, paginator.getGrayColor()));
+            return Component.text(infoKey + ": ", NamedTextColor.BLUE).append(Component.text(infoValue, paginator.getGrayColor()));
         }
     }
 }

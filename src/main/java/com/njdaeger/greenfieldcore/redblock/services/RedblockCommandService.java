@@ -27,23 +27,23 @@ import java.util.function.Predicate;
 public class RedblockCommandService extends ModuleService<RedblockCommandService> implements IModuleService<RedblockCommandService> {
 
     private final IRedblockService redblockService;
-    private final IEssentialsService essentialsIntegration;
+    private final IEssentialsService essentialsService;
 
     private final ChatPaginator<Redblock.RedblockInfo, ICommandContext> infoPaginator = new RedblockInfoPaginator().build();
     private final ChatPaginator<Redblock, ICommandContext> listPaginator = new RedblockListPaginator().build();
 
-    public RedblockCommandService(Plugin plugin, Module module, IRedblockService redblockService, IEssentialsService essentialsIntegration) {
+    public RedblockCommandService(Plugin plugin, Module module, IRedblockService redblockService, IEssentialsService essentialsService) {
         super(plugin, module);
         this.redblockService = redblockService;
-        this.essentialsIntegration = essentialsIntegration;
+        this.essentialsService = essentialsService;
     }
 
     private void create(ICommandContext ctx) throws PDKCommandException {
-        var assignTo = ctx.<Player>getFlag("assign");
+        var assignTo = ctx.<UUID>getFlag("assign");
         var rank = ctx.<String>getFlag("rank");
         var description = ctx.getTyped("description", String.class);
 
-        var rb = redblockService.createRedblock(description, ctx.asPlayer(), ctx.getLocation().getBlock().getLocation(), assignTo.getUniqueId(), rank);
+        var rb = redblockService.createRedblock(description, ctx.asPlayer(), ctx.getLocation().getBlock().getLocation(), assignTo == null ? null : assignTo, rank);
         ctx.send(RedblockMessages.REDBLOCK_CREATED.apply(rb.getId()));
     }
 
@@ -104,7 +104,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
 
         if (rb == null) ctx.error(RedblockMessages.ERROR_GOTO_NO_REDBLOCK_FOUND.apply(radius));
 
-        essentialsIntegration.setUserLastLocation(player, location);
+        essentialsService.setUserLastLocation(player, location);
         player.teleport(rb.getLocation().clone().add(0.5, 0, 1.5));
         ctx.send(RedblockMessages.REDBLOCK_GOTO.apply(rb.getId()));
     }

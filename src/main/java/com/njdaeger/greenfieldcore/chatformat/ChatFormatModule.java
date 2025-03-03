@@ -26,7 +26,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
+import java.text.CompactNumberFormat;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +40,7 @@ import static com.njdaeger.greenfieldcore.ComponentUtils.moduleMessage;
 
 public class ChatFormatModule extends Module implements Listener {
 
-    private static final DecimalFormat format = new DecimalFormat("#.##");
+    private static final NumberFormat compactFormat = CompactNumberFormat.getInstance();
 
     private static final Pattern linkFormat = Pattern.compile("\\[[^]]*]\\((https?://\\S+)\\)|\\b((?i)https?://\\S+)");
     private static final Function<String, Style> linkStyle = (link) -> Style.style()
@@ -57,7 +59,11 @@ public class ChatFormatModule extends Module implements Listener {
             .color(TextColor.color(199, 233, 255))
             .hoverEvent(HoverEvent.showText(() -> {
                 var hover = Component.text("Conversions:").toBuilder();
-                conversions.forEach((u, d) -> hover.appendNewline().append(Component.text(format.format(d) + " " + u.getName(), NamedTextColor.GRAY)));
+                conversions.forEach((u, d) -> {
+                    var formatted = compactFormat.format(d);
+                    if (formatted.length() > 15) return;
+                    hover.appendNewline().append(Component.text(formatted + " " + u.getName(), NamedTextColor.GRAY));
+                });
                 return hover.build();
             }))
             .build();

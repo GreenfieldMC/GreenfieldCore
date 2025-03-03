@@ -50,6 +50,7 @@ public final class Util {
                 .filter(op -> op.getName() != null)
                 .forEach(op -> map.putIfAbsent(op.getUniqueId(), op.getName()));
 
+        Bukkit.getOnlinePlayers().forEach(op -> map.put(op.getUniqueId(), op.getName()));
         return map;
     }
 

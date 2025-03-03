@@ -41,7 +41,10 @@ public class RedblockArgument extends BasePdkArgumentType<Redblock, Integer> {
     @Override
     public Redblock convertToCustom(Integer nativeType, StringReader reader) throws CommandSyntaxException {
         var redblock = redblockService.getRedblock(nativeType);
-        if (redblock == null) throw REDBLOCK_NOT_FOUND.createWithContext(reader, nativeType);
+        if (redblock == null) {
+            reader.setCursor(reader.getCursor() - String.valueOf(nativeType).length());
+            throw REDBLOCK_NOT_FOUND.createWithContext(reader, nativeType);
+        }
         return redblock;
     }
 

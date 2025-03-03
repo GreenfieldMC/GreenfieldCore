@@ -46,11 +46,6 @@ public final class GreenfieldCore extends JavaPlugin {
     );
 
     @Override
-    public void onLoad() {
-
-    }
-
-    @Override
     public void onEnable() {
         GreenfieldCore.instance = this;
         coreApi = initializeCoreProtect();
@@ -67,6 +62,7 @@ public final class GreenfieldCore extends JavaPlugin {
 //            getLogger().info("Loaded " + Util.userNameMap.size() + " uuid to username mappings.");
         });
 
+        Util.getAllPlayers();
         MODULES.forEach(Module::enable);
     }
 

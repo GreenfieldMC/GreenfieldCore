@@ -249,12 +249,12 @@ public class Redblock implements PageItem<ICommandContext> {
                 location = generatorInfo.getLocation();
             } catch (PDKCommandException ignored) {
             }
-            hover.append(Component.text("Distance: ", paginator.getHighlightColor()))
+            hover.append(Component.text("Distance: ", NamedTextColor.BLUE))
                     .append(Component.text(String.format("%.2f", location.distance(getLocation())), paginator.getGrayColor()))
                     .appendNewline();
         }
 
-        hover.append(Component.text("ID: ", paginator.getHighlightColor()))
+        hover.append(Component.text("ID: ", NamedTextColor.BLUE))
                 .append(Component.text(getId(), paginator.getGrayColor()));
 
         var line = Component.text("?", switch (status) {
@@ -277,7 +277,7 @@ public class Redblock implements PageItem<ICommandContext> {
     public List<RedblockInfo> getRedblockInfo() {
         var infoLines = new ArrayList<RedblockInfo>();
         infoLines.add(new RedblockInfo("Status", status.name()));
-        infoLines.add(new RedblockInfo("Location", location.getWorld().getName() + " -- x:" + location.getBlockX() + " y:" + location.getBlockY() + " z:" + location.getBlockZ()));
+        infoLines.add(new RedblockInfo("Location", location.getWorld().getName() + ", x:" + location.getBlockX() + " y:" + location.getBlockY() + " z:" + location.getBlockZ()));
         if (minRank != null) {
             infoLines.add(new RedblockInfo("MinimumRank", minRank));
         }

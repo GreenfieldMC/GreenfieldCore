@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageService> implements IRedblockStorageService {
@@ -115,14 +114,10 @@ public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageSe
 
     @Override
     public void saveDatabase() {
-        getPlugin().getLogger().info("Saving RedBlocks to the database...");
-        var count = new AtomicInteger(0);
         redblockMap.values().stream().filter(Redblock::hasChanged).forEach(rb -> {
             saveRedblock(rb);
             rb.setChanged(false);
-            count.incrementAndGet();
         });
         config.save();
-        getPlugin().getLogger().info("Saved " + count.get() + " RedBlocks to the database.");
     }
 }

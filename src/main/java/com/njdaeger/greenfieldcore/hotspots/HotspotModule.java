@@ -2,31 +2,33 @@ package com.njdaeger.greenfieldcore.hotspots;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 import org.bukkit.Bukkit;
-import org.dynmap.DynmapAPI;
+//import org.dynmap.DynmapAPI;
 import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
 import java.io.InputStream;
+import java.util.function.Predicate;
 
 public class HotspotModule extends Module {
 
     private HotspotStorage storage;
     private MarkerAPI markerApi;
 
-    public HotspotModule(GreenfieldCore plugin) {
-        super(plugin);
+    public HotspotModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         if (Bukkit.getPluginManager().getPlugin("dynmap") == null || Bukkit.getPluginManager().getPlugin("essentials") == null) {
             plugin.getLogger().warning("Unable to start HotspotModule. Dynmap or Essentials was not found.");
             return;
         }
-        this.markerApi = ((DynmapAPI)Bukkit.getPluginManager().getPlugin("dynmap")).getMarkerAPI();
+        //this.markerApi = ((DynmapAPI)Bukkit.getPluginManager().getPlugin("dynmap")).getMarkerAPI();
         this.storage = new HotspotStorage(plugin);
         new HotspotCommands(this, this.storage, plugin);
 
@@ -95,7 +97,7 @@ public class HotspotModule extends Module {
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
         if (storage != null) storage.save();
     }
 

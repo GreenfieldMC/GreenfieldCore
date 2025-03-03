@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 import com.njdaeger.pdk.command.CommandBuilder;
 import com.njdaeger.pdk.command.CommandContext;
 import org.bukkit.ChatColor;
@@ -26,6 +27,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class PowerShovelModule extends Module implements Listener {
 
@@ -39,12 +41,12 @@ public class PowerShovelModule extends Module implements Listener {
         PROFILE.getProperties().put("textures", new Property("textures", new String(Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", "http://textures.minecraft.net/texture/633c0bb37ebe1193ee4618103460a7f129277a8c7fd081b6aedb34a92bd5").getBytes()))));
     }
 
-    public PowerShovelModule(GreenfieldCore plugin) {
-        super(plugin);
+    public PowerShovelModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         CommandBuilder.of("powershovel", "ps", "powerconnector")
                 .executor(this::powerShovelCommand)
                 .permissions("greenfieldcore.powershovel")
@@ -55,7 +57,7 @@ public class PowerShovelModule extends Module implements Listener {
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
 
     }
 

@@ -2,13 +2,16 @@ package com.njdaeger.greenfieldcore.openserver;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
+
+import java.util.function.Predicate;
 
 public final class OpenServerModule extends Module {
 
     private OpenServerConfig config;
 
-    public OpenServerModule(GreenfieldCore plugin) {
-        super(plugin);
+    public OpenServerModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     public boolean isEnabled() {
@@ -29,14 +32,14 @@ public final class OpenServerModule extends Module {
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         this.config = new OpenServerConfig(plugin);
         new OpenServerListener(plugin, this);
         new OpenServerCommand(plugin, this);
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
         config.save();
     }
 }

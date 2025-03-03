@@ -1,6 +1,8 @@
-package com.njdaeger.greenfieldcore.redblock;
+package com.njdaeger.greenfieldcore.redblock.paginators;
 
-import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.greenfieldcore.redblock.Redblock;
+import com.njdaeger.pdk.command.brigadier.ICommandContext;
+import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.components.IComponent;
 import net.kyori.adventure.text.Component;
@@ -13,22 +15,33 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class RedblockFilterComponent implements IComponent<Redblock, CommandContext> {
+public class RedblockFilterComponent implements IComponent<Redblock, ICommandContext> {
 
     @Override
-    public TextComponent getText(CommandContext context, ChatPaginator<Redblock, CommandContext> paginator, List<Redblock> results, int currentPage) {
+    public TextComponent getText(ICommandContext context, ChatPaginator<Redblock, ICommandContext> paginator, List<Redblock> results, int currentPage) {
 
         var deleted = context.hasFlag("deleted");
         var incomplete = context.hasFlag("incomplete");
         var pending = context.hasFlag("pending");
         var approved = context.hasFlag("approved");
 
-        UUID assignedTo = context.hasFlag("mine") ? context.asPlayer().getUniqueId() : context.getFlag("assignedTo");
+        UUID assignedTo;
+        if (context.isPlayer() && context.hasFlag("mine")) {
+            try {
+                assignedTo = context.asPlayer().getUniqueId();
+            } catch (PDKCommandException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (context.hasFlag("assignedTo")) {
+            assignedTo = context.getFlag("assignedTo");
+        } else assignedTo = null;
+
         UUID createdBy = context.getFlag("createdBy");
         UUID completedBy = context.getFlag("completedBy");
         UUID approvedBy = context.getFlag("approvedBy");
 
-        int radius = context.hasFlag("radius") ? context.getFlag("radius") : -1;
+        @SuppressWarnings("DataFlowIssue")
+        int radius = context.getFlag("radius", -1);
 
         Supplier<TextComponent> hoverText = () -> {
             var text = Component.text("Status Shown: ", NamedTextColor.GRAY).toBuilder();

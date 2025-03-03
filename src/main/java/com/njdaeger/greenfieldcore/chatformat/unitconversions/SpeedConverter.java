@@ -27,7 +27,7 @@ public class SpeedConverter implements IUnitConverter<SpeedConverter.SpeedUnit> 
     public static class SpeedUnit extends AbstractUnit {
 
         public SpeedUnit(double conversionFactor, String niceName, String... aliases) {
-            super(conversionFactor, Pattern.compile("(\\d*\\.?\\d*)\\s?(" + String.join("|", Stream.of(aliases).map(alias -> alias.contains("/") ? alias.replace("/", "\\/") : alias).toArray(String[]::new)) + ")", Pattern.CASE_INSENSITIVE), niceName, aliases);
+            super(conversionFactor, Pattern.compile("(\\d*\\.?\\d*)\\s?(" + String.join("|", Stream.of(aliases).map(alias -> alias.contains("/") ? alias.replace("/", "\\/") : alias).toArray(String[]::new)) + ")(?=\\s|$)", Pattern.CASE_INSENSITIVE), niceName, aliases);
             UNITS.add(this);
         }
     }

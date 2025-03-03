@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore.advancedbuild;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 import com.njdaeger.greenfieldcore.advancedbuild.handlers.*;
 import com.njdaeger.greenfieldcore.commandstore.PageFlag;
 import com.njdaeger.pdk.command.CommandBuilder;
@@ -34,6 +35,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.bukkit.ChatColor.GRAY;
 import static org.bukkit.ChatColor.LIGHT_PURPLE;
@@ -48,8 +50,8 @@ public class AdvancedBuildModule extends Module implements Listener {
 
     private List<InteractionHandler> interactionHandlers;
 
-    public AdvancedBuildModule(GreenfieldCore plugin) {
-        super(plugin);
+    public AdvancedBuildModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
 
         this.paginator = ChatPaginator.<InteractionHandler, CommandContext>builder(/*this::lineGenerator*/)
                 .addComponent(Component.text("Advanced Build Mode Handler List", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER)
@@ -76,7 +78,7 @@ public class AdvancedBuildModule extends Module implements Listener {
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         this.config = new AdvBuildConfig(plugin);
 
         this.interactionHandlers = List.of(
@@ -159,7 +161,7 @@ public class AdvancedBuildModule extends Module implements Listener {
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
         config.save();
     }
 

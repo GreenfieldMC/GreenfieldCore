@@ -2,164 +2,46 @@ package com.njdaeger.greenfieldcore.redblock;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-import org.dynmap.DynmapAPI;
-import org.dynmap.markers.Marker;
-import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerIcon;
-import org.dynmap.markers.MarkerSet;
+import com.njdaeger.greenfieldcore.ModuleConfig;
+import com.njdaeger.greenfieldcore.redblock.services.DynmapServiceImpl;
+import com.njdaeger.greenfieldcore.redblock.services.EssentialsServiceImpl;
+import com.njdaeger.greenfieldcore.redblock.services.IDynmapService;
+import com.njdaeger.greenfieldcore.redblock.services.IEssentialsService;
+import com.njdaeger.greenfieldcore.redblock.services.IRedblockService;
+import com.njdaeger.greenfieldcore.redblock.services.IRedblockStorageService;
+import com.njdaeger.greenfieldcore.redblock.services.RedblockCommandService;
+import com.njdaeger.greenfieldcore.redblock.services.RedblockListenerService;
+import com.njdaeger.greenfieldcore.redblock.services.RedblockServiceImpl;
+import com.njdaeger.greenfieldcore.redblock.services.RedblockStorageServiceImpl;
 
-import java.io.InputStream;
+import java.util.function.Predicate;
 
 public class RedblockModule extends Module {
 
-    private boolean isEnabled = false;
-    private RedblockStorage storage;
-    private MarkerAPI markerApi;
+    private IRedblockStorageService storageService;
+    private IRedblockService redblockService;
+    private IEssentialsService essentialsService;
+    private IDynmapService dynmapService;
 
-    private static final String PENDING_MARKER_SET = "Pending";
-    private static final String INCOMPLETE_MARKER_SET = "Incomplete";
-
-    public RedblockModule(GreenfieldCore plugin) {
-        super(plugin);
+    public RedblockModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     @Override
-    public void onEnable() {
-//        if (Bukkit.getPluginManager().getPlugin("Vault") == null || Bukkit.getPluginManager().getPlugin("Essentials") == null) {
-//            plugin.getLogger().warning("Unable to start RedblockModule. Vault or Essentials was not found.");
-//            this.isEnabled = false;
-//            return;
-//        }
-        this.isEnabled = true;
-        this.storage = new RedblockStorage(plugin, this);
-        new RedblockBrigadierCommands(storage, plugin);
-//        new RedblockCommands(this, this.storage, plugin);
-        Bukkit.getPluginManager().registerEvents(new RedblockListener(storage), plugin);
-
-        Plugin dynmap;
-        if ((dynmap = Bukkit.getPluginManager().getPlugin("dynmap")) != null) {
-            this.markerApi = ((DynmapAPI)dynmap).getMarkerAPI();
-            loadRedblocksToDynmap();
-        }
-    }
-
-    private MarkerIcon createOrGetMarkerIcon(String iconName) {
-        MarkerIcon icon = markerApi.getMarkerIcon(iconName);
-        InputStream stream = plugin.getResource(iconName + ".png");
-        if (icon != null) {
-            if (stream != null) icon.setMarkerIconImage(stream);
-        } else {
-            if (stream == null) {
-                plugin.getLogger().warning("Unable to find the icon " + iconName + ".png");
-                return null;
-            }
-            icon = markerApi.createMarkerIcon(iconName, iconName, stream);
-        }
-        return icon;
-    }
-
-    public void loadRedblocksToDynmap() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            plugin.getLogger().info("Adding redblock markers to dynmap...");
-            MarkerIcon pendingIcon = createOrGetMarkerIcon("yellowblock");
-            if (pendingIcon == null) throw new RuntimeException("Unable to find the pending icon needed for pending redblocks");
-            MarkerIcon incompleteIcon = createOrGetMarkerIcon("redblock");
-            if (incompleteIcon == null) throw new RuntimeException("Unable to find the incomplete icon needed for incomplete redblocks");
-
-            MarkerSet pending;
-            MarkerSet incomplete;
-            if (markerApi.getMarkerSet(PENDING_MARKER_SET) == null) pending = markerApi.createMarkerSet(PENDING_MARKER_SET, PENDING_MARKER_SET, null, false);
-            else {
-                pending = markerApi.getMarkerSet(PENDING_MARKER_SET);
-                plugin.getLogger().info("Removing old pending markers...");
-                pending.getMarkers().forEach(Marker::deleteMarker);
-                plugin.getLogger().info("Done");
-            }
-            if (markerApi.getMarkerSet(INCOMPLETE_MARKER_SET) == null) incomplete = markerApi.createMarkerSet(INCOMPLETE_MARKER_SET, INCOMPLETE_MARKER_SET, null, false);
-            else {
-                incomplete = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET);
-                plugin.getLogger().info("Removing old incomplete markers...");
-                incomplete.getMarkers().forEach(Marker::deleteMarker);
-                plugin.getLogger().info("Done");
-            }
-
-            incomplete.setLayerPriority(-11);
-            pending.setLayerPriority(-10);
-
-            incomplete.setHideByDefault(true);
-            incomplete.setDefaultMarkerIcon(incompleteIcon);
-
-            pending.setHideByDefault(true);
-            pending.setDefaultMarkerIcon(pendingIcon);
-
-            storage.getPendingRedblocks().forEach(this::createMarker);
-
-            storage.getIncompleteRedblocks().forEach(this::createMarker);
-            plugin.getLogger().info("Redblock marker load complete!");
-        });
-    }
-
-    private Marker createMarker(Redblock rb) {
-        StringBuilder html = new StringBuilder();
-        MarkerSet set;
-        MarkerIcon icon;
-
-        html.append("<div style=\"display:flex; flex-direction: column; padding: .25rem; max-width: 12rem; min-width: 8rem;\">");
-        if (rb.isIncomplete()) {
-            set = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET);
-            icon = createOrGetMarkerIcon("redblock");
-            html.append("<span><strong>Incomplete</strong></span>");
-
-        } else {
-            set = markerApi.getMarkerSet(PENDING_MARKER_SET);
-            icon = createOrGetMarkerIcon("yellowblock");
-            html.append("<span><strong>Pending</strong></span>");
-        }
-        if (rb.getAssignedTo() != null) html.append("<span>Assigned To: <strong>").append(Bukkit.getOfflinePlayer(rb.getAssignedTo()).getName()).append("</strong></span>");
-        if (rb.getMinRank() != null) html.append("<span>Recommended Rank: <strong>").append(rb.getMinRank()).append("</strong></span>");
-        html.append("<hr style=\"width: 100%;\"><span style=\"white-space: pre-wrap;\">").append(rb.getContent()).append("</span>").append("</div>");
-        return set.createMarker(rb.getId() + "_redblock", html.toString(), true, rb.getLocation().getWorld().getName(), rb.getLocation().getX(), rb.getLocation().getY(), rb.getLocation().getZ(), icon, false);
-    }
-
-    public void updateRedblock(Redblock updatedRb, boolean isEdit) {
-        if (markerApi == null) return;
-        if (isEdit) {
-            Marker marker = markerApi.getMarkerSet(PENDING_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
-            if (marker == null) marker = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
-            if (marker != null) marker.deleteMarker();
-            createMarker(updatedRb);
-        }
-        if (updatedRb.isApproved()) {
-            Marker marker = markerApi.getMarkerSet(PENDING_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
-            if (marker != null) marker.deleteMarker();
-        } else if (updatedRb.isIncomplete()) {
-            //if we get an incomplete redblock passed to this function, it will have either gone from pending approval back to incomplete, or it was newly created.
-            Marker marker = markerApi.getMarkerSet(PENDING_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
-            if (marker != null) marker.deleteMarker();
-
-            createMarker(updatedRb);
-        } else if (updatedRb.isDeleted()) {
-            Marker marker = markerApi.getMarkerSet(PENDING_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
-            if (marker == null) marker = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
-            if (marker != null) marker.deleteMarker();
-        } else {
-            Marker marker = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET).findMarker(updatedRb.getId() + "_redblock");
-            if (marker != null) marker.deleteMarker();
-            createMarker(updatedRb);
-        }
+    public void tryEnable() {
+        storageService = enableIntegration(new RedblockStorageServiceImpl(plugin, this), true);
+        essentialsService = enableIntegration(new EssentialsServiceImpl(plugin, this), false);
+        dynmapService = enableIntegration(new DynmapServiceImpl(plugin, this, storageService), false);
+        redblockService = enableIntegration(new RedblockServiceImpl(plugin, this, dynmapService, storageService), true);
+        enableIntegration(new RedblockCommandService(plugin, this, redblockService, essentialsService), true);
+        enableIntegration(new RedblockListenerService(plugin, this, redblockService), true);
     }
 
     @Override
-    public void onDisable() {
-        if (!isEnabled) return;
-        if (markerApi != null) {
-            var set = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET);
-            if (set != null) set.deleteMarkerSet();
-            set = markerApi.getMarkerSet(PENDING_MARKER_SET);
-            if (set != null) set.deleteMarkerSet();
-        }
-        storage.save();
+    public void tryDisable() throws Exception {
+        disableIntegration(dynmapService);
+        disableIntegration(storageService);
+        disableIntegration(redblockService);
+        disableIntegration(essentialsService);
     }
 }

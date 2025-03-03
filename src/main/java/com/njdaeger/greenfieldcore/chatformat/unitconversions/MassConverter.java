@@ -18,6 +18,7 @@ public class MassConverter implements IUnitConverter<MassConverter.MassUnit> {
     public static final MassUnit STONE = new MassUnit(0.157473, "Stone", "stones", "stone", "st");
     public static final MassUnit METRIC_TON = new MassUnit(0.001, "Metric Tons", "metric-tons", "metric tons", "metric-ton", "metric ton", "tonnes", "tonne", "t");
     public static final MassUnit IMPERIAL_TON = new MassUnit(0.000984207, "Imperial Tons", "imperial-tons", "imperial tons", "imperial-ton", "imperial ton", "tons", "ton");
+    public static final MassUnit YOUR_MOM = new MassUnit(0.00005, "Your Mother", "your-mom", "your mom", "moms", "mom");
 
     private static final List<MassUnit> UNITS;
 
@@ -29,7 +30,7 @@ public class MassConverter implements IUnitConverter<MassConverter.MassUnit> {
     public static class MassUnit extends AbstractUnit {
 
         public MassUnit(double conversionFactor, String niceName, String... aliases) {
-            super(conversionFactor, Pattern.compile("(\\d*\\.?\\d*)\\s?(" + String.join("|", aliases) + ")", Pattern.CASE_INSENSITIVE), niceName, aliases);
+            super(conversionFactor, Pattern.compile("(\\d*\\.?\\d*)\\s?(" + String.join("|", aliases) + ")(?=\\s|$)", Pattern.CASE_INSENSITIVE), niceName, aliases);
             UNITS.add(this);
         }
     }

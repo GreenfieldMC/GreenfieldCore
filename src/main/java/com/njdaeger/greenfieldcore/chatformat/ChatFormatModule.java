@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore.chatformat;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 import com.njdaeger.greenfieldcore.chatformat.unitconversions.ConverterManager;
 import com.njdaeger.greenfieldcore.chatformat.unitconversions.IUnit;
 import com.njdaeger.greenfieldcore.chatformat.unitconversions.IUnitConverter;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static com.njdaeger.greenfieldcore.ComponentUtils.moduleMessage;
@@ -63,12 +65,12 @@ public class ChatFormatModule extends Module implements Listener {
 
     private ChatConfig config;
 
-    public ChatFormatModule(GreenfieldCore plugin) {
-        super(plugin);
+    public ChatFormatModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
         this.config = new ChatConfig(plugin);
 
@@ -107,7 +109,7 @@ public class ChatFormatModule extends Module implements Listener {
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
         config.save();
     }
 

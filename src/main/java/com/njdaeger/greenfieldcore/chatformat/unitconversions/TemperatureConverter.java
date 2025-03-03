@@ -39,7 +39,7 @@ public class TemperatureConverter implements IUnitConverter<TemperatureConverter
     public static class TemperatureUnit extends AbstractUnit {
 
         public TemperatureUnit(double conversionFactor, String niceName, String... aliases) {
-            super(conversionFactor, Pattern.compile("(\\d*\\.?\\d*)\\s?(" + String.join("|", aliases) + ")", Pattern.CASE_INSENSITIVE), niceName, aliases);
+            super(conversionFactor, Pattern.compile("(\\d*\\.?\\d*)\\s?(" + String.join("|", aliases) + ")(?=\\s|$)", Pattern.CASE_INSENSITIVE), niceName, aliases);
             UNITS.add(this);
         }
     }

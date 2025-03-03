@@ -7,6 +7,7 @@ import com.njdaeger.authenticationhub.patreon.PatreonApplication;
 import com.njdaeger.authenticationhub.patreon.PatreonUserLoginEvent;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 import io.papermc.paper.ban.BanListType;
 import net.milkbowl.vault.chat.Chat;
 import org.bukkit.BanList;
@@ -23,6 +24,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class AuthHubIntegration extends Module implements Listener {
 
@@ -31,12 +33,12 @@ public class AuthHubIntegration extends Module implements Listener {
     private RegisteredServiceProvider<ApplicationRegistry> appReg;
     private List<UUID> prefixedUsers;
 
-    public AuthHubIntegration(GreenfieldCore plugin) {
-        super(plugin);
+    public AuthHubIntegration(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         ProfileBanList pbl = Bukkit.getBanList(BanListType.PROFILE);
         new ConnectionRequirement("DISCORD_REQUIREMENT", (p) -> {
             if (p.hasPermission("greenfieldcore.discord.exempt")) {
@@ -66,7 +68,7 @@ public class AuthHubIntegration extends Module implements Listener {
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
         //if rsp is not null, run a for loop over all players in the patreonUserPrefixes map and remove their prefixes
         if (rsp != null) {
             var chat = rsp.getProvider();

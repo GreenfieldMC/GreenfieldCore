@@ -1,8 +1,7 @@
 package com.njdaeger.greenfieldcore;
 
-import com.earth2me.essentials.Essentials;
 //import com.earth2me.essentials.userstorage.IUserMap;
-import com.njdaeger.authenticationhub.ConnectionRequirement;
+
 import com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule;
 import com.njdaeger.greenfieldcore.authhub.AuthHubIntegration;
 import com.njdaeger.greenfieldcore.chatformat.ChatFormatModule;
@@ -15,17 +14,13 @@ import com.njdaeger.greenfieldcore.powershovel.PowerShovelModule;
 import com.njdaeger.greenfieldcore.redblock.RedblockModule;
 import com.njdaeger.greenfieldcore.testresult.TestResultModule;
 import com.njdaeger.greenfieldcore.utilities.UtilitiesModule;
-import io.papermc.paper.ban.BanListType;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
-import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.ban.ProfileBanList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.logging.Logger;
 
 public final class GreenfieldCore extends JavaPlugin {
@@ -35,18 +30,20 @@ public final class GreenfieldCore extends JavaPlugin {
 
     private final ModuleConfig moduleConfig = new ModuleConfig(this);
 
-    private final OpenServerModule openServerModule = new OpenServerModule(this);
-    private final CodesModule codesModule = new CodesModule(this);
-    private final TestResultModule testResultModule = new TestResultModule(this);
-    private final PaintingSwitchModule paintingSwitchModule = new PaintingSwitchModule(this);
-    private final UtilitiesModule utilitiesModule = new UtilitiesModule(this);
-    private final AuthHubIntegration authHubIntegration = new AuthHubIntegration(this);
-    private final CommandStoreModule storeModule = new CommandStoreModule(this);
-    private final HotspotModule hotspotModule = new HotspotModule(this);
-    private final PowerShovelModule powerShovelModule = new PowerShovelModule(this);
-    private final AdvancedBuildModule advancedBuildModule = new AdvancedBuildModule(this);
-    private final RedblockModule redblockModule = new RedblockModule(this);
-    private final ChatFormatModule chatFormatModule = new ChatFormatModule(this);
+    private final List<Module> MODULES = List.of(
+            new OpenServerModule(this, ModuleConfig::isOpenServerEnabled),
+            new CodesModule(this, ModuleConfig::isCodesEnabled),
+            new TestResultModule(this, ModuleConfig::isTestResultsEnabled),
+            new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled),
+            new UtilitiesModule(this, ModuleConfig::isUtilitiesEnabled),
+            new AuthHubIntegration(this, ModuleConfig::isAuthHubEnabled),
+            new CommandStoreModule(this, ModuleConfig::isCommandStoreEnabled),
+            new HotspotModule(this, ModuleConfig::isHotspotsEnabled),
+            new PowerShovelModule(this, ModuleConfig::isPowerShovelEnabled),
+            new AdvancedBuildModule(this, ModuleConfig::isAdvancedBuildModeEnabled),
+            new RedblockModule(this, ModuleConfig::isRedblockEnabled),
+            new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled)
+    );
 
     @Override
     public void onLoad() {
@@ -70,34 +67,16 @@ public final class GreenfieldCore extends JavaPlugin {
 //            getLogger().info("Loaded " + Util.userNameMap.size() + " uuid to username mappings.");
         });
 
-
-        if (moduleConfig.isOpenServerEnabled()) openServerModule.onEnable();
-        //signEditorModule.onEnable();
-        if (moduleConfig.isCodesEnabled()) codesModule.onEnable();
-        //treePlanterModule.onEnable();
-        if (moduleConfig.isTestResultsEnabled()) testResultModule.onEnable();
-        if (moduleConfig.isPaintingSwitchEnabled()) paintingSwitchModule.onEnable();
-        if (moduleConfig.isUtilitiesEnabled()) utilitiesModule.onEnable();
-        if (moduleConfig.isAuthHubEnabled()) authHubIntegration.onEnable();
-        if (moduleConfig.isCommandStoreEnabled()) storeModule.onEnable();
-        if (moduleConfig.isHotspotsEnabled()) hotspotModule.onEnable();
-        if (moduleConfig.isPowerShovelEnabled()) powerShovelModule.onEnable();
-        if (moduleConfig.isAdvancedBuildModeEnabled()) advancedBuildModule.onEnable();
-        if (moduleConfig.isRedblockEnabled()) redblockModule.onEnable();
-        if (moduleConfig.isChatFormatEnabled()) chatFormatModule.onEnable();
+        MODULES.forEach(Module::enable);
     }
 
     @Override
     public void onDisable() {
-        if (moduleConfig.isTestResultsEnabled()) testResultModule.onDisable();
-        if (moduleConfig.isOpenServerEnabled()) openServerModule.onDisable();
-        if (moduleConfig.isCodesEnabled()) codesModule.onDisable();
-        if (moduleConfig.isCommandStoreEnabled()) storeModule.onDisable();
-        if (moduleConfig.isHotspotsEnabled()) hotspotModule.onDisable();
-        if (moduleConfig.isPowerShovelEnabled()) powerShovelModule.onDisable();
-        if (moduleConfig.isAdvancedBuildModeEnabled()) advancedBuildModule.onDisable();
-        if (moduleConfig.isRedblockEnabled()) redblockModule.onDisable();
-        if (moduleConfig.isChatFormatEnabled()) chatFormatModule.onDisable();
+        MODULES.forEach(Module::disable);
+    }
+
+    public ModuleConfig getModuleConfig() {
+        return moduleConfig;
     }
 
     public CoreProtectAPI getCoreApi() {

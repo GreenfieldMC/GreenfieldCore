@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore.paintingswitch;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Art;
@@ -22,6 +23,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static com.njdaeger.greenfieldcore.ComponentUtils.moduleMessage;
 import static java.lang.Math.*;
@@ -31,17 +33,17 @@ public class PaintingSwitchModule extends Module implements Listener {
     private static final String PERM = "greenfieldcore.paintingswitch.use";
     private final Map<UUID, PaintingSession> users = new HashMap<>();
 
-    public PaintingSwitchModule(GreenfieldCore plugin) {
-        super(plugin);
+    public PaintingSwitchModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
 
     }
 

@@ -1,14 +1,28 @@
 package com.njdaeger.greenfieldcore.redblock;
 
-import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.pdk.command.brigadier.ICommandContext;
+import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.PageItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 
-import java.util.List;
-import java.util.UUID;
+import java.text.DateFormat;
+import java.time.Instant;
+import java.util.*;
 
-public class Redblock implements PageItem<CommandContext> {
+import static com.njdaeger.greenfieldcore.Util.resolvePlayerName;
+
+public class Redblock implements PageItem<ICommandContext> {
+
+    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT);
+
+    private boolean hasChanged = false;
 
     private String content;
     private final int id;
@@ -23,11 +37,11 @@ public class Redblock implements PageItem<CommandContext> {
     private String minRank;
     private UUID assignedTo;
     private long assignedOn;
-    private List<UUID> armorstands;
+    private List<UUID> displayEntityIds;
     private final Location boxUpperBound;
     private final Location boxLowerBound;
 
-    public Redblock(int id, String content, Status status, Location location, UUID createdBy, long createdOn, UUID approvedBy, long approvedOn, UUID completedBy, long completedOn, UUID assignedTo, long assignedOn, String minRank, List<UUID> armorstands) {
+    public Redblock(int id, String content, Status status, Location location, UUID createdBy, long createdOn, UUID approvedBy, long approvedOn, UUID completedBy, long completedOn, UUID assignedTo, long assignedOn, String minRank, List<UUID> displayEntityIds) {
         this.id = id;
         this.content = content;
         this.status = status;
@@ -41,7 +55,7 @@ public class Redblock implements PageItem<CommandContext> {
         this.minRank = minRank;
         this.assignedTo = assignedTo;
         this.assignedOn = assignedOn;
-        this.armorstands = armorstands;
+        this.displayEntityIds = displayEntityIds;
         this.boxUpperBound = new Location(location.getWorld(), location.getBlockX() + 1, location.getBlockY() - 1, location.getBlockZ() + 1);
         this.boxLowerBound = new Location(location.getWorld(), location.getBlockX() - 1, location.getBlockY() - 3, location.getBlockZ() - 1);
     }
@@ -52,6 +66,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setContent(String content) {
         this.content = content;
+        this.hasChanged = true;
     }
 
     public int getId() {
@@ -64,6 +79,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setStatus(Status status) {
         this.status = status;
+        this.hasChanged = true;
     }
 
     public UUID getCompletedBy() {
@@ -72,6 +88,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setCompletedBy(UUID completedBy) {
         this.completedBy = completedBy;
+        this.hasChanged = true;
     }
 
     public long getCompletedOn() {
@@ -80,6 +97,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setCompletedOn(long completedOn) {
         this.completedOn = completedOn;
+        this.hasChanged = true;
     }
 
     public UUID getApprovedBy() {
@@ -88,6 +106,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setApprovedBy(UUID approvedBy) {
         this.approvedBy = approvedBy;
+        this.hasChanged = true;
     }
 
     public long getApprovedOn() {
@@ -96,6 +115,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setApprovedOn(long approvedOn) {
         this.approvedOn = approvedOn;
+        this.hasChanged = true;
     }
 
     public UUID getCreatedBy() {
@@ -104,6 +124,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setCreatedBy(UUID createdBy) {
         this.createdBy = createdBy;
+        this.hasChanged = true;
     }
 
     public long getCreatedOn() {
@@ -112,6 +133,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setCreatedOn(long createdOn) {
         this.createdOn = createdOn;
+        this.hasChanged = true;
     }
 
     public Location getLocation() {
@@ -136,6 +158,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setMinRank(String minRank) {
         this.minRank = minRank;
+        this.hasChanged = true;
     }
 
     public UUID getAssignedTo() {
@@ -144,6 +167,7 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setAssignedTo(UUID assignedTo) {
         this.assignedTo = assignedTo;
+        this.hasChanged = true;
     }
 
     public long getAssignedOn() {
@@ -152,14 +176,16 @@ public class Redblock implements PageItem<CommandContext> {
 
     public void setAssignedOn(long assignedOn) {
         this.assignedOn = assignedOn;
+        this.hasChanged = true;
     }
 
-    public List<UUID> getArmorstands() {
-        return armorstands;
+    public List<UUID> getDisplayEntityIds() {
+        return displayEntityIds;
     }
 
-    public void setArmorstands(List<UUID> armorstands) {
-        this.armorstands = armorstands;
+    public void setDisplayEntityIds(List<UUID> displayEntityIds) {
+        this.displayEntityIds = displayEntityIds;
+        this.hasChanged = true;
     }
 
     public boolean isPending() {
@@ -178,6 +204,14 @@ public class Redblock implements PageItem<CommandContext> {
         return status == Status.INCOMPLETE;
     }
 
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
+    public void setChanged(boolean hasChanged) {
+        this.hasChanged = hasChanged;
+    }
+
     @Override
     public String toString() {
         return "Redblock{" +
@@ -194,13 +228,71 @@ public class Redblock implements PageItem<CommandContext> {
                 ", minRank=" + minRank +
                 ", assignedTo=" + assignedTo +
                 ", assignedOn=" + assignedOn +
-                ", armorstands={" + armorstands.stream().map(UUID::toString).reduce("", (a, b) -> a + ", " + b) +
+                ", armorstands={" + displayEntityIds.stream().map(UUID::toString).reduce("", (a, b) -> a + ", " + b) +
                 "}}";
     }
 
     @Override
-    public String getPlainItemText(ChatPaginator<?, CommandContext> paginator, CommandContext generatorInfo) {
+    public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
         return content;
+    }
+
+    @Override
+    public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+        var hover = Component.text();
+        getRedblockInfo().forEach(infoLine -> {
+            hover.append(infoLine.getItemText(paginator, generatorInfo)).appendNewline();
+        });
+        if (generatorInfo.isLocatable()) {
+            Location location = null;
+            try {
+                location = generatorInfo.getLocation();
+            } catch (PDKCommandException ignored) {
+            }
+            hover.append(Component.text("Distance: ", paginator.getHighlightColor()))
+                    .append(Component.text(String.format("%.2f", location.distance(getLocation())), paginator.getGrayColor()))
+                    .appendNewline();
+        }
+
+        hover.append(Component.text("ID: ", paginator.getHighlightColor()))
+                .append(Component.text(getId(), paginator.getGrayColor()));
+
+        var line = Component.text("?", switch (status) {
+            case DELETED -> NamedTextColor.DARK_RED;
+            case INCOMPLETE -> NamedTextColor.RED;
+            case PENDING -> NamedTextColor.GOLD;
+            case APPROVED -> NamedTextColor.GREEN;
+        }, TextDecoration.BOLD).hoverEvent(HoverEvent.showText(hover)).toBuilder();
+
+        line.appendSpace();
+        line.append(Component.text("[T]", NamedTextColor.BLUE, TextDecoration.BOLD)
+                .clickEvent(ClickEvent.runCommand("/rbtp -id " + getId()))
+                .hoverEvent(HoverEvent.showText(Component.text("Teleport to this RedBlock", NamedTextColor.GRAY))));
+
+        line.append(Component.text(" - ", paginator.getGrayColor()));
+        line.append(Component.text(getContent(), paginator.getGrayColor()));
+        return line.build();
+    }
+
+    public List<RedblockInfo> getRedblockInfo() {
+        var infoLines = new ArrayList<RedblockInfo>();
+        infoLines.add(new RedblockInfo("Status", status.name()));
+        infoLines.add(new RedblockInfo("Location", location.getWorld().getName() + " -- x:" + location.getBlockX() + " y:" + location.getBlockY() + " z:" + location.getBlockZ()));
+        if (minRank != null) {
+            infoLines.add(new RedblockInfo("MinimumRank", minRank));
+        }
+        infoLines.add(new RedblockInfo(new RedblockInfo("CreatedBy", resolvePlayerName(createdBy)), new RedblockInfo("CreatedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(createdOn))))));
+
+        if (assignedTo != null)
+            infoLines.add(new RedblockInfo(new RedblockInfo("AssignedTo", resolvePlayerName(assignedTo)), new RedblockInfo("AssignedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(assignedOn))))));
+
+        if (approvedBy != null)
+            infoLines.add(new RedblockInfo(new RedblockInfo("ApprovedBy", resolvePlayerName(approvedBy)), new RedblockInfo("ApprovedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(approvedOn))))));
+
+        if (completedBy != null)
+            infoLines.add(new RedblockInfo(new RedblockInfo("CompletedBy", resolvePlayerName(completedBy)), new RedblockInfo("CompletedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(completedOn))))));
+
+        return infoLines;
     }
 
     public enum Status {
@@ -208,5 +300,47 @@ public class Redblock implements PageItem<CommandContext> {
         PENDING,
         APPROVED,
         DELETED
+    }
+
+    public class RedblockInfo implements PageItem<ICommandContext> {
+
+        private final String infoKey;
+        private final String infoValue;
+
+        private final RedblockInfo[] multiInfoLine;
+
+        public RedblockInfo(String infoKey, String infoValue) {
+            this.infoKey = infoKey;
+            this.infoValue = infoValue;
+            this.multiInfoLine = null;
+        }
+
+        public RedblockInfo(RedblockInfo... multiInfoLine) {
+            this.infoKey = null;
+            this.infoValue = null;
+            this.multiInfoLine = multiInfoLine;
+        }
+
+        @Override
+        public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+            if (multiInfoLine != null) {
+                return String.join(", ", Arrays.stream(multiInfoLine).map(i -> i.infoKey + ": " + i.infoValue).toList());
+            }
+            return infoKey + ": " + infoValue;
+        }
+
+        @Override
+        public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+            if (multiInfoLine != null) {
+                var builder = Component.text();
+                for (var i : multiInfoLine) {
+                    if (i.infoKey == null || i.infoValue == null) continue;
+                    builder.append(Component.text(i.infoKey, paginator.getHighlightColor()).append(Component.text(i.infoValue, paginator.getGrayColor())));
+                }
+                return builder.build();
+            }
+            if (infoKey == null || infoValue == null) return Component.empty();
+            return Component.text(infoKey, paginator.getHighlightColor()).append(Component.text(infoValue, paginator.getGrayColor()));
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.njdaeger.greenfieldcore.utilities;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.util.SideEffect;
@@ -16,6 +17,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class UtilitiesModule extends Module implements Listener {
@@ -23,12 +25,12 @@ public class UtilitiesModule extends Module implements Listener {
     private boolean worldeditPerfSet = false;
     private final Set<UUID> overriddenPerfs = new HashSet<>();
 
-    public UtilitiesModule(GreenfieldCore plugin) {
-        super(plugin);
+    public UtilitiesModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
 
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         new UtilityCommands(plugin);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         if (Bukkit.getPluginManager().getPlugin("worldedit") != null) worldeditPerfSet = true;
@@ -36,7 +38,7 @@ public class UtilitiesModule extends Module implements Listener {
     }
 
     @Override
-    public void onDisable() {
+    public void tryDisable() {
 
     }
 

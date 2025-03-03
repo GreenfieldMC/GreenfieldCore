@@ -7,10 +7,9 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.njdaeger.greenfieldcore.redblock.Redblock;
-import com.njdaeger.greenfieldcore.redblock.RedblockStorage;
+import com.njdaeger.greenfieldcore.redblock.services.IRedblockService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.BasePdkArgumentType;
-import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -20,17 +19,17 @@ public class RedblockArgument extends BasePdkArgumentType<Redblock, Integer> {
 
     private static final DynamicCommandExceptionType REDBLOCK_NOT_FOUND = new DynamicCommandExceptionType(o -> () -> "Redblock " + o.toString() + " not found");
 
-    private final RedblockStorage storage;
+    private final IRedblockService redblockService;
     private final Predicate<Redblock> filter;
 
-    public RedblockArgument(RedblockStorage storage, Predicate<Redblock> filter) {
-        this.storage = storage;
+    public RedblockArgument(IRedblockService redblockService, Predicate<Redblock> filter) {
+        this.redblockService = redblockService;
         this.filter = filter;
     }
 
     @Override
     public Map<Redblock, Message> listSuggestions(ICommandContext commandContext) {
-        var storage = this.storage.getRedblocksFiltered(filter);
+        var storage = this.redblockService.getRedblocks(filter);
         return storage.stream().collect(Collectors.toMap(s -> s, (rb) -> rb::getContent));
     }
 
@@ -41,9 +40,9 @@ public class RedblockArgument extends BasePdkArgumentType<Redblock, Integer> {
 
     @Override
     public Redblock convertToCustom(Integer nativeType, StringReader reader) throws CommandSyntaxException {
-        var redblock = storage.getRedblock(nativeType);
+        var redblock = redblockService.getRedblock(nativeType);
         if (redblock == null) throw REDBLOCK_NOT_FOUND.createWithContext(reader, nativeType);
-        return storage.getRedblock(nativeType);
+        return redblock;
     }
 
     @Override

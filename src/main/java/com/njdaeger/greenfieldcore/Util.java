@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MinecraftFont;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -40,6 +41,22 @@ public final class Util {
             else currentWidth += MinecraftFont.Font.getChar(text.charAt(i)).getWidth();
         }
         return text.length();
+    }
+
+    public static Map<UUID, String> getAllPlayers() {
+        var map = new HashMap<>(Util.userNameMap);
+
+        Bukkit.getWhitelistedPlayers().stream()
+                .filter(op -> op.getName() != null)
+                .forEach(op -> map.putIfAbsent(op.getUniqueId(), op.getName()));
+
+        return map;
+    }
+
+    public static String resolvePlayerName(UUID uuid) {
+        var maybePlayer = Bukkit.getPlayer(uuid);
+        if (maybePlayer != null) return maybePlayer.getName();
+        return getAllPlayers().getOrDefault(uuid, "!!Unknown!!");
     }
 
 }

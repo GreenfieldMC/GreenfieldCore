@@ -2,29 +2,31 @@ package com.njdaeger.greenfieldcore.commandstore;
 
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
+import com.njdaeger.greenfieldcore.ModuleConfig;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class CommandStoreModule extends Module {
     
     private Map<UUID, UserCommandStorage> userCommands;
     private ServerCommandStorage serverCommands;
     
-    public CommandStoreModule(GreenfieldCore plugin) {
-        super(plugin);
+    public CommandStoreModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
+        super(plugin, canEnable);
     }
     
     @Override
-    public void onEnable() {
+    public void tryEnable() {
         this.userCommands = new HashMap<>();
         this.serverCommands = new ServerCommandStorage(plugin);
         new CommandStoreCommands(plugin, this);
     }
     
     @Override
-    public void onDisable() {
+    public void tryDisable() {
         userCommands.values().forEach(UserCommandStorage::save);
         serverCommands.save();
     }

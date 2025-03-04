@@ -54,8 +54,8 @@ public final class RedblockServiceHelpers {
     }
 
     static UUID createDisplay(int id, String minRank, String assignedTo, Location location, String content) {
-        //each new line is about .25 of a block tall
-        var yOffset = 1.0 + (minRank != null ? .25 : 0) + (assignedTo != null ? .25 : 0) + (countContentLines(200, content) * .25);
+        //each new line is about .2 of a block tall
+        var yOffset = 1.0 + (minRank != null ? .2 : 0) + (assignedTo != null ? .2 : 0) + (countContentLines(200, content) * .2);
 
         var actualLocation = location.clone().add(0.5, yOffset, 0.5);
         var display = (TextDisplay) actualLocation.getWorld().spawnEntity(actualLocation, EntityType.TEXT_DISPLAY);

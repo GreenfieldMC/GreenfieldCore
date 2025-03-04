@@ -73,7 +73,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
 
     private void edit(ICommandContext ctx) throws PDKCommandException {
         var rb = resolveRedblock(ctx, Redblock::isIncomplete, "incomplete");
-        var description = ctx.getTyped("description", String.class, null);
+        var description = ctx.getTyped("description", String.class);
 
         var unassign = ctx.hasFlag("unassign");
         var unrank = ctx.hasFlag("unrank");
@@ -86,7 +86,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
         if (assignedTo == null && !unassign) assignedTo = rb.getAssignedTo();
         if (rank == null && !unrank) rank = rb.getMinRank();
 
-        redblockService.editRedblock(rb, description, assignedTo, rank);
+        redblockService.editRedblock(rb, description.isBlank() ? null : description, assignedTo, rank);
         ctx.send(RedblockMessages.REDBLOCK_EDITED.apply(rb.getId()));
     }
 
@@ -112,7 +112,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
     private void info(ICommandContext ctx) throws PDKCommandException {
         var rb = resolveRedblock(ctx, rdb -> rdb.isIncomplete() || rdb.isPending(), "incomplete or pending");
 
-        infoPaginator.generatePage(ctx, rb.getRedblockInfo(), 1).sendTo(ctx.getSender());
+        infoPaginator.generatePage(ctx, rb.getRedblockInfo(ctx.isLocatable() ? ctx.getLocation() : null), 1).sendTo(ctx.getSender());
     }
 
     private void list(ICommandContext ctx) throws PDKCommandException {
@@ -238,14 +238,12 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
         CommandBuilder.of("rbedit", "rbe")
                 .description("Edit an incomplete RedBlock")
                 .permission("greenfieldcore.redblock.edit")
-                .defaultExecutor(this::edit)
-                .then("description", PdkArgumentTypes.quotedString(false, () -> "Enter a new description for the RedBlock")).executes()
+                .then("description", PdkArgumentTypes.quotedString(true, () -> "Enter a new description for the RedBlock")).executes(this::edit)
                 .flag("id", "The incomplete RedBlock to edit", new RedblockArgument(redblockService, Redblock::isIncomplete))
                 .flag("assign", "Assign this RedBlock to a specific player", new OfflinePlayerArgument())
                 .flag("unassign", "Unassign this RedBlock")
                 .flag("rank", "Assign this RedBlock to a specific rank",  StringArgumentType.word())
                 .flag("unrank", "Unrank this RedBlock")
-                .canExecute()
                 .register(plugin);
 
         CommandBuilder.of("rbinfo", "rbi")

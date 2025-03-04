@@ -15,6 +15,7 @@ import org.bukkit.Location;
 import java.text.DateFormat;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.njdaeger.greenfieldcore.Util.resolvePlayerName;
 
@@ -240,57 +241,63 @@ public class Redblock implements PageItem<ICommandContext> {
     @Override
     public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
         var hover = Component.text();
-        getRedblockInfo().forEach(infoLine -> {
-            hover.append(infoLine.getItemText(paginator, generatorInfo)).appendNewline();
-        });
+        Location locationFrom = null;
         if (generatorInfo.isLocatable()) {
-            Location location = null;
             try {
-                location = generatorInfo.getLocation();
+                locationFrom = generatorInfo.getLocation();
             } catch (PDKCommandException ignored) {
             }
-            hover.append(Component.text("Distance: ", NamedTextColor.BLUE))
-                    .append(Component.text(String.format("%.2f", location.distance(getLocation())), paginator.getGrayColor()))
-                    .appendNewline();
         }
 
-        hover.append(Component.text("ID: ", NamedTextColor.BLUE))
-                .append(Component.text(getId(), paginator.getGrayColor()));
+        var currentLine = new AtomicInteger();
+        var finalLocationFrom = locationFrom;
+        getRedblockInfo(locationFrom).forEach(infoLine -> {
+            hover.append(infoLine.getItemText(paginator, generatorInfo));
+            if (currentLine.incrementAndGet() != getRedblockInfo(finalLocationFrom).size()) hover.appendNewline();
+        });
 
-        var line = Component.text("?", switch (status) {
+        var questionMark = Component.text("?", switch (status) {
             case DELETED -> NamedTextColor.DARK_RED;
             case INCOMPLETE -> NamedTextColor.RED;
             case PENDING -> NamedTextColor.GOLD;
             case APPROVED -> NamedTextColor.GREEN;
-        }, TextDecoration.BOLD).hoverEvent(HoverEvent.showText(hover)).toBuilder();
-
-        line.appendSpace();
-        line.append(Component.text("[T]", NamedTextColor.BLUE, TextDecoration.BOLD)
+        }, TextDecoration.BOLD).hoverEvent(HoverEvent.showText(hover));
+        var teleport = Component.text("[T]", NamedTextColor.BLUE, TextDecoration.BOLD)
                 .clickEvent(ClickEvent.runCommand("/rbtp -id " + getId()))
-                .hoverEvent(HoverEvent.showText(Component.text("Teleport to this RedBlock", NamedTextColor.GRAY))));
+                .hoverEvent(HoverEvent.showText(Component.text("Teleport to this RedBlock", NamedTextColor.GRAY)));
 
-        line.append(Component.text(" - ", paginator.getGrayColor()));
-        line.append(Component.text(getContent(), paginator.getGrayColor()));
+        var line = Component.text();
+        line.append(questionMark);
+        line.appendSpace().resetStyle();
+        line.append(teleport);
+        line.appendSpace().resetStyle();
+        line.append(Component.text("- ", paginator.getGrayColor()).append(Component.text(getContent())));
         return line.build();
     }
 
-    public List<RedblockInfo> getRedblockInfo() {
+    public List<RedblockInfo> getRedblockInfo(Location distanceFrom) {
         var infoLines = new ArrayList<RedblockInfo>();
         infoLines.add(new RedblockInfo("Status", status.name()));
-        infoLines.add(new RedblockInfo("Location", location.getWorld().getName() + ", x:" + location.getBlockX() + " y:" + location.getBlockY() + " z:" + location.getBlockZ()));
-        if (minRank != null) {
-            infoLines.add(new RedblockInfo("MinimumRank", minRank));
+        infoLines.add(new RedblockInfo("Location", location.getWorld().getName() + ", " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ()));
+        infoLines.add(new RedblockInfo("Created By", resolvePlayerName(createdBy)));
+        infoLines.add(new RedblockInfo("Created On", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(createdOn)))));
+
+        if (assignedTo != null) {
+            infoLines.add(new RedblockInfo("Assigned To", resolvePlayerName(assignedTo)));
+            infoLines.add(new RedblockInfo("Assigned On", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(assignedOn)))));
         }
-        infoLines.add(new RedblockInfo(new RedblockInfo("CreatedBy", resolvePlayerName(createdBy)), new RedblockInfo("CreatedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(createdOn))))));
 
-        if (assignedTo != null)
-            infoLines.add(new RedblockInfo(new RedblockInfo("AssignedTo", resolvePlayerName(assignedTo)), new RedblockInfo("AssignedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(assignedOn))))));
-
-        if (approvedBy != null)
-            infoLines.add(new RedblockInfo(new RedblockInfo("ApprovedBy", resolvePlayerName(approvedBy)), new RedblockInfo("ApprovedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(approvedOn))))));
-
-        if (completedBy != null)
-            infoLines.add(new RedblockInfo(new RedblockInfo("CompletedBy", resolvePlayerName(completedBy)), new RedblockInfo("CompletedOn", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(completedOn))))));
+        if (approvedBy != null) {
+            infoLines.add(new RedblockInfo("Approved By", resolvePlayerName(approvedBy)));
+            infoLines.add(new RedblockInfo("Approved On", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(approvedOn)))));
+        }
+        if (completedBy != null) {
+            infoLines.add(new RedblockInfo("Completed By", resolvePlayerName(completedBy)));
+            infoLines.add(new RedblockInfo("Completed On", DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(completedOn)))));
+        }
+        if (minRank != null) infoLines.add(new RedblockInfo("Minimum Rank", minRank));
+        if (distanceFrom != null) infoLines.add(new RedblockInfo("Distance", String.format("%.2f", distanceFrom.distance(location))));
+        infoLines.add(new RedblockInfo("ID", String.valueOf(id)));
 
         return infoLines;
     }
@@ -307,40 +314,20 @@ public class Redblock implements PageItem<ICommandContext> {
         private final String infoKey;
         private final String infoValue;
 
-        private final RedblockInfo[] multiInfoLine;
-
         public RedblockInfo(String infoKey, String infoValue) {
             this.infoKey = infoKey;
             this.infoValue = infoValue;
-            this.multiInfoLine = null;
-        }
-
-        public RedblockInfo(RedblockInfo... multiInfoLine) {
-            this.infoKey = null;
-            this.infoValue = null;
-            this.multiInfoLine = multiInfoLine;
         }
 
         @Override
         public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
-            if (multiInfoLine != null) {
-                return String.join(", ", Arrays.stream(multiInfoLine).map(i -> i.infoKey + ": " + i.infoValue).toList());
-            }
             return infoKey + ": " + infoValue;
         }
 
         @Override
         public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
-            if (multiInfoLine != null) {
-                var builder = Component.text();
-                for (var i : multiInfoLine) {
-                    if (i.infoKey == null || i.infoValue == null) continue;
-                    builder.append(Component.text(i.infoKey + ": ", NamedTextColor.BLUE).append(Component.text(i.infoValue, paginator.getGrayColor())));
-                }
-                return builder.build();
-            }
             if (infoKey == null || infoValue == null) return Component.empty();
-            return Component.text(infoKey + ": ", NamedTextColor.BLUE).append(Component.text(infoValue, paginator.getGrayColor()));
+            return Component.text(infoKey + ": ", paginator.getGrayColor()).append(Component.text(infoValue, NamedTextColor.BLUE));
         }
     }
 }

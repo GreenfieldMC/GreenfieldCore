@@ -65,7 +65,7 @@ public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageSe
                 }
             }
         } catch (Exception e) {
-            throw new Exception("Failed to load the RedblockStorageService", e);
+            throw new RuntimeException("Failed to load the RedblockStorageService", e);
         }
     }
 

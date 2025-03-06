@@ -1,4 +1,4 @@
-package com.njdaeger.greenfieldcore.redblock.arguments;
+package com.njdaeger.greenfieldcore.arguments;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;

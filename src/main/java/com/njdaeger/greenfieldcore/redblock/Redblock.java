@@ -12,16 +12,14 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 
-import java.text.DateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.njdaeger.greenfieldcore.Util.resolvePlayerName;
+import static com.njdaeger.greenfieldcore.Util.DATE_FORMAT;
 
 public class Redblock implements PageItem<ICommandContext> {
-
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT);
 
     private boolean hasChanged = false;
 

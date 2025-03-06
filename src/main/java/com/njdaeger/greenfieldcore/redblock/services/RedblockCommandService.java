@@ -6,7 +6,7 @@ import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.redblock.Redblock;
 import com.njdaeger.greenfieldcore.redblock.RedblockMessages;
-import com.njdaeger.greenfieldcore.redblock.arguments.OfflinePlayerArgument;
+import com.njdaeger.greenfieldcore.arguments.OfflinePlayerArgument;
 import com.njdaeger.greenfieldcore.redblock.arguments.RedblockArgument;
 import com.njdaeger.greenfieldcore.redblock.paginators.RedblockInfoPaginator;
 import com.njdaeger.greenfieldcore.redblock.paginators.RedblockListPaginator;
@@ -16,7 +16,6 @@ import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Comparator;

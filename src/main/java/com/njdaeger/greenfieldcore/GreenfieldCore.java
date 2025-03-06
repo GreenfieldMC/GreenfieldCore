@@ -62,6 +62,7 @@ public final class GreenfieldCore extends JavaPlugin {
 //            getLogger().info("Loaded " + Util.userNameMap.size() + " uuid to username mappings.");
         });
 
+        Util.userNameMap.put(Util.CONSOLE_UUID, "Console");
         Util.getAllPlayers();
         MODULES.forEach(Module::enable);
     }

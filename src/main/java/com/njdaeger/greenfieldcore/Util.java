@@ -1,13 +1,16 @@
 package com.njdaeger.greenfieldcore;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MinecraftFont;
 
+import java.text.DateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,6 +20,12 @@ import static org.bukkit.ChatColor.GRAY;
 public final class Util {
 
     public static Map<UUID, String> userNameMap = new ConcurrentHashMap<>();
+    public static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT);
+    public static final UUID CONSOLE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+    public static String formatDate(long time) {
+        return DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(time)));
+    }
 
     /**
      * Broadcasts a message to the players on the server if they have permission to see the message.

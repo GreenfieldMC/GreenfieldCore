@@ -1,12 +1,13 @@
 package com.njdaeger.greenfieldcore.testresult.services;
 
+import com.njdaeger.greenfieldcore.IModuleService;
 import com.njdaeger.greenfieldcore.testresult.TestAttempt;
 import com.njdaeger.greenfieldcore.testresult.TestSet;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface ITestResultStorageService {
+public interface ITestResultStorageService extends IModuleService<ITestResultStorageService> {
 
     /**
      * Gets all test attempts for all users.

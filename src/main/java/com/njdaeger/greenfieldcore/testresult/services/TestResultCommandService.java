@@ -8,15 +8,24 @@ import com.njdaeger.greenfieldcore.testresult.TestAttempt;
 import com.njdaeger.greenfieldcore.testresult.TestResultMessages;
 import com.njdaeger.greenfieldcore.testresult.TestSet;
 import com.njdaeger.greenfieldcore.testresult.paginators.TestAttemptPaginator;
+import com.njdaeger.greenfieldcore.testresult.paginators.TestInfoPaginator;
 import com.njdaeger.greenfieldcore.testresult.paginators.TestSetPaginator;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
+import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
+import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import com.njdaeger.pdk.utils.text.pager.PageItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class TestResultCommandService extends ModuleService<TestResultCommandService> implements IModuleService<TestResultCommandService> {
 
@@ -24,6 +33,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
 
     private final ChatPaginator<TestAttempt, ICommandContext> userAttemptPaginator = new TestAttemptPaginator().build();
     private final ChatPaginator<TestSet, ICommandContext> conductedPaginator = new TestSetPaginator().build();
+    private final ChatPaginator<PageItem<ICommandContext>, ICommandContext> testInfoPaginator = new TestInfoPaginator().build();
 
     public TestResultCommandService(Plugin plugin, Module module, ITestResultService testResultService) {
         super(plugin, module);
@@ -90,9 +100,67 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
         conductedPaginator.generatePage(ctx, attempts, page).sendTo(TestResultMessages.ERROR_INVALID_PAGE, ctx.getSender());
     }
 
+    // /testinfo
+    private void testInfo(ICommandContext ctx) {
+        var currentItem = new AtomicInteger(1);
+        testInfoPaginator.generatePage(ctx, testResultService.getTestInfo().stream().map((info) ->
+            new PageItem<ICommandContext>() {
+                @Override
+                public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+                    return Component.text(currentItem.getAndIncrement() + ". ", paginator.getHighlightColor()).append(Component.text(info, paginator.getGrayColor()));
+                }
+
+                @Override
+                public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+                    return info;
+                }
+            }).collect(Collectors.toUnmodifiableList()), 1).sendTo(ctx.getSender());
+    }
+
     @Override
     public void tryEnable(Plugin plugin, Module module) throws Exception {
+        CommandBuilder.of("pass")
+                .description("Pass a test build attempt.")
+                .permission("greenfieldcore.testresult.pass")
+                .then("userToPass", PdkArgumentTypes.player((Predicate<Player>)(p -> testResultService.getAttemptsForUser(p.getUniqueId()).stream().filter(att -> !att.isComplete()).toList().isEmpty())))
+                    .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
+                    .executes(this::pass)
+                .end()
+                .register(plugin);
 
+        CommandBuilder.of("fail")
+                .description("Fail a test build attempt.")
+                .permission("greenfieldcore.testresult.fail")
+                .flag("final", "Mark this test build attempt as the final attempt. This will remove the user from the server.")
+                .then("userToFail", PdkArgumentTypes.player((Predicate<Player>)(p -> testResultService.getAttemptsForUser(p.getUniqueId()).stream().filter(att -> !att.isComplete()).toList().isEmpty())))
+                    .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
+                    .executes(this::fail)
+                .end()
+                .register(plugin);
+
+        CommandBuilder.of("start")
+                .description("Start a test build attempt.")
+                .permission("greenfieldcore.testresult.start")
+                .then("userToStart", PdkArgumentTypes.player((Predicate<Player>)(p -> p.hasPermission("group.spectator"))))
+                    .executes(this::start)
+                .register(plugin);
+
+        CommandBuilder.of("attempts")
+                .description("View test build attempts.")
+                .permission("greenfieldcore.testresult.list")
+                .flag("page", "The page to view", PdkArgumentTypes.integer(1, Integer.MAX_VALUE))
+                .then("user")
+                    .then("user", PdkArgumentTypes.player())
+                        .executes(this::listUserAttempts).end()
+                .then("all")
+                    .executes(this::listAllAttempts)
+                .register(plugin);
+
+        CommandBuilder.of("testinfo")
+                .description("View test build information.")
+                .permission("greenfieldcore.testresult.info")
+                .canExecute(this::testInfo)
+                .register(plugin);
     }
 
     @Override

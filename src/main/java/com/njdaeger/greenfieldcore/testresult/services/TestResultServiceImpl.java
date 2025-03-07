@@ -2,7 +2,7 @@ package com.njdaeger.greenfieldcore.testresult.services;
 
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
-import com.njdaeger.greenfieldcore.services.IVaultService;
+import com.njdaeger.greenfieldcore.services.IVaultPermissionService;
 import com.njdaeger.greenfieldcore.testresult.TestAttempt;
 import com.njdaeger.greenfieldcore.testresult.TestSet;
 import com.njdaeger.pdk.config.ConfigType;
@@ -22,10 +22,10 @@ import static com.njdaeger.greenfieldcore.Util.CONSOLE_UUID;
 public class TestResultServiceImpl extends ModuleService<ITestResultService> implements ITestResultService {
 
     private final ITestResultStorageService storageService;
-    private final IVaultService vaultService;
+    private final IVaultPermissionService vaultService;
     private final IConfig config;
 
-    public TestResultServiceImpl(Plugin plugin, Module module, ITestResultStorageService storageService, IVaultService vaultService) {
+    public TestResultServiceImpl(Plugin plugin, Module module, ITestResultStorageService storageService, IVaultPermissionService vaultService) {
         super(plugin, module);
         this.config = ConfigType.YML.createNew(plugin, "testbuild-config");
         this.storageService = storageService;
@@ -54,12 +54,17 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
     }
 
     @Override
+    public List<String> getTestInfo() {
+        return config.getStringList("test-info");
+    }
+
+    @Override
     public void startAttempt(UUID whoIsStarting, CommandSender whoIsStartingThem, Runnable callback) {
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
             var attemptCount = storageService.getTestAttempts(whoIsStarting).size();
             var newAttempt = new TestAttempt(attemptCount, System.currentTimeMillis(), resolveUuid(whoIsStartingThem), -1, null, null, false);
             storageService.saveTestAttempt(whoIsStarting, newAttempt);
-            vaultService.addUserToGroup("", whoIsStarting, getTestingGroup()).thenAccept(success -> {
+            vaultService.addUserToGroup(null, whoIsStarting, getTestingGroup()).thenAccept(success -> {
                 if (!success) whoIsStartingThem.sendMessage(Component.text("Failed to add the user to the testing group.", NamedTextColor.RED));
                 callback.run();
             });
@@ -79,7 +84,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
             currentAttempt.setAttemptNotes(comments);
             currentAttempt.setSuccessful(true);
             storageService.saveTestAttempt(whoIsBeingPassed, currentAttempt);
-            vaultService.addUserToGroup("", whoIsBeingPassed, getPassingGroup()).thenAccept(success -> {
+            vaultService.addUserToGroup(null, whoIsBeingPassed, getPassingGroup()).thenAccept(success -> {
                 if (!success) whoIsPassingThem.sendMessage(Component.text("Failed to add the user to the passing group.", NamedTextColor.RED));
                 callback.run();
             });
@@ -118,7 +123,8 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
             currentAttempt.setAttemptNotes(failureReason);
             currentAttempt.setSuccessful(false);
             storageService.saveTestAttempt(whoIsBeingFailed, currentAttempt);
-            vaultService.removeUserFromGroup("", whoIsBeingFailed, getFailingGroup()).thenAccept(success -> {
+            vaultService.removeUserFromGroup(null, whoIsBeingFailed, getTestingGroup());
+            vaultService.addUserToGroup(null, whoIsBeingFailed, getFailingGroup()).thenAccept(success -> {
                 if (!success) whoIsFailingThem.sendMessage(Component.text("Failed to remove the user from the failing group.", NamedTextColor.RED));
                 callback.run();
             });

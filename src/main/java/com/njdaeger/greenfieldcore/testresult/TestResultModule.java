@@ -3,16 +3,21 @@ package com.njdaeger.greenfieldcore.testresult;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
-import net.milkbowl.vault.permission.Permission;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.RegisteredServiceProvider;
+import com.njdaeger.greenfieldcore.services.IVaultPermissionService;
+import com.njdaeger.greenfieldcore.services.VaultPermissionServiceImpl;
+import com.njdaeger.greenfieldcore.testresult.services.ITestResultService;
+import com.njdaeger.greenfieldcore.testresult.services.ITestResultStorageService;
+import com.njdaeger.greenfieldcore.testresult.services.TestResultCommandService;
+import com.njdaeger.greenfieldcore.testresult.services.TestResultServiceImpl;
+import com.njdaeger.greenfieldcore.testresult.services.TestResultStorageServiceImpl;
 
 import java.util.function.Predicate;
 
 public final class TestResultModule extends Module {
 
-    private Permission permission = null;
-    private TestResultConfig config = null;
+    private ITestResultStorageService storageService;
+    private ITestResultService testResultService;
+    private IVaultPermissionService permissionService;
 
     public TestResultModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
         super(plugin, canEnable);
@@ -20,29 +25,16 @@ public final class TestResultModule extends Module {
 
     @Override
     public void tryEnable() {
-        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
-            plugin.getLogger().warning("Could not enable TestResultModule. (Vault isn't installed)");
-            return;
-        }
-        RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServicesManager().getRegistration(Permission.class);
-        if (permissionProvider != null) {
-            this.permission = permissionProvider.getProvider();
-            this.config = new TestResultConfig(plugin);
-            new TestResultCommands(plugin, this);
-        } else plugin.getLogger().warning("Could not enable TestResultModule, there was an issue getting the Permission system service provider.");
+        this.storageService = enableIntegration(new TestResultStorageServiceImpl(plugin, this), true);
+        this.permissionService = enableIntegration(new VaultPermissionServiceImpl(plugin, this), true);
+        this.testResultService = enableIntegration(new TestResultServiceImpl(plugin, this, storageService, permissionService), true);
+        enableIntegration(new TestResultCommandService(plugin, this, testResultService), true);
     }
 
     @Override
     public void tryDisable() {
-        if (config != null) config.save();
+        disableIntegration(testResultService);
+        disableIntegration(permissionService);
+        disableIntegration(storageService);
     }
-
-    public Permission getPermissions() {
-        return permission;
-    }
-
-    public TestResultConfig getConfig() {
-        return config;
-    }
-
 }

@@ -30,6 +30,12 @@ public interface ITestResultService extends IModuleService<ITestResultService> {
     String getFailingGroup();
 
     /**
+     * Gets the testing information for a user
+     * @return The testing information for a user
+     */
+    List<String> getTestInfo();
+
+    /**
      * Starts a testbuild attempt for a user. Asynchronously.
      * @param whoIsStarting The user starting the attempt
      * @param whoIsStartingThem The user starting the attempt

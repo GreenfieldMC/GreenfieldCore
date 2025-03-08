@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.chatformat;
 
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
@@ -9,6 +10,9 @@ import com.njdaeger.greenfieldcore.chatformat.unitconversions.IUnitConverter;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import com.njdaeger.pdk.utils.Pair;
+import io.papermc.paper.chat.ChatRenderer;
+import io.papermc.paper.event.player.AsyncChatDecorateEvent;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -18,6 +22,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -69,6 +74,7 @@ public class ChatFormatModule extends Module implements Listener {
             .build();
 
 
+    private LegacyComponentSerializer serializer;
     private ChatConfig config;
 
     public ChatFormatModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
@@ -78,6 +84,7 @@ public class ChatFormatModule extends Module implements Listener {
     @Override
     public void tryEnable() {
         Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+        this.serializer = LegacyComponentSerializer.builder().build();
         this.config = new ChatConfig(plugin);
 
         CommandBuilder.of("togglepings", "togglementions")
@@ -120,17 +127,31 @@ public class ChatFormatModule extends Module implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onAsyncChat(AsyncPlayerChatEvent event) {
-        var combined = event.getFormat().replace("%1$s", event.getPlayer().getDisplayName().replace('&','§')).replace("%2$s", event.getMessage().replace('&','§'));
-        var formattedMessage = formatString(combined, false);
+    public void onAsyncChat(AsyncChatEvent event) {
+        var message = serializer.serialize(event.message());
+        var message1 = serializer.serialize(event.originalMessage());
+        System.out.println(message);
+        System.out.println(message1);
+        System.out.println(event.signedMessage().message());
+//        var combined = message.replace("%1$s", event.getPlayer().getDisplayName().replace('&','§')).replace("%2$s", message.replace('&','§'));
+        var formattedMessage = formatString(message.replace('&', '§'), false);
         if (event.getPlayer().hasPermission("greenfieldcore.chat.mention")) {
-            var mentions = getMentionIndices(event.getMessage());
+            var mentions = getMentionIndices(message);
             mentions.values().stream().map(Pair::getSecond).filter(config::allowsMentions).forEach(player -> player.playSound(player.getLocation(), config.getSound(player), config.getVolume(player), 1));
         }
-        var recipients = new ArrayList<Audience>(event.getRecipients());
-        recipients.add(Bukkit.getConsoleSender());
-        recipients.forEach(p -> p.sendMessage(formattedMessage));
-        event.setCancelled(true);
+        event.message(formattedMessage);
+//        event.renderer(ChatRenderer.viewerUnaware((player, displayName, msg) -> {
+//            Bukkit.getConsoleSender().sendMessage(player.displayName());
+//            Bukkit.getConsoleSender().sendMessage(displayName);
+//            Bukkit.getConsoleSender().sendMessage(msg);
+//            return formattedMessage;
+//        }));
+
+//        var recipients = new ArrayList<>(event.viewers());
+//
+//        recipients.add(Bukkit.getConsoleSender());
+//        recipients.forEach(p -> p.sendMessage(formattedMessage));
+//        event.setCancelled(true);
     }
 
     public static Map<Integer, String> getLinkIndices(String str) {

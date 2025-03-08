@@ -15,6 +15,7 @@ public class TestInfoPaginator extends ChatPaginatorBuilder<PageItem<ICommandCon
         addComponent(Component.text("Test Build Rules", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         setLineWrappingMode(LineWrappingMode.FIXED_ITEMS_WRAP);
         setResultsPerPage(30);
+        setEqualSignCount(25);
     }
 
 }

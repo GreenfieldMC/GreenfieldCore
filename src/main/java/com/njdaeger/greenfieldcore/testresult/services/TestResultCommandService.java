@@ -158,7 +158,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
 
         CommandBuilder.of("testinfo")
                 .description("View test build information.")
-                .permission("greenfieldcore.testresult.info")
+                .permission("greenfieldcore.testinfo")
                 .canExecute(this::testInfo)
                 .register(plugin);
     }

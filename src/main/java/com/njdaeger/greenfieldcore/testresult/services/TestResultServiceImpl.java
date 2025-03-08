@@ -33,7 +33,24 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {}
+    public void tryEnable(Plugin plugin, Module module) throws Exception {
+        config.addEntry("testing-group", "Testing");
+        config.addEntry("passing-group", "Apprentice");
+        config.addEntry("failing-group", "Spectator");
+        config.addEntry("test-info", List.of(
+                "Absolutely no hyper-modern buildings.",
+                "Maximum number of floors in a house is 3. (Excluding basement)",
+                "Interior must be completed.",
+                "All codes (/codes, or acceptance message) must be followed. You may reference these during your test.",
+                "@ an administrator in Discord when you complete your test build.",
+                "You have 30 days and 3 attempts to complete your test build. If you take longer than 30 days or fail 3 attempts, you will be remove from the whitelist and will need to reapply.",
+                "You may build within the wooden logs. Your house cannot sit on the logs, but your fence can.",
+                "You may not ask anyone for help nor advice once the test has begun.",
+                "You are to build an American styled house from any era. (Keep it realistic to what you would find in a typical, American, city.",
+                "You may use a google earth/maps reference for your test build."
+        ));
+        config.save();
+    }
 
     @Override
     public void tryDisable(Plugin plugin, Module module) throws Exception {}

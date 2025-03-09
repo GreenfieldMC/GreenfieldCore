@@ -1,19 +1,17 @@
 package com.njdaeger.greenfieldcore.chatformat;
 
-import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
+import com.njdaeger.greenfieldcore.chatformat.services.ChatConfigServiceImpl;
+import com.njdaeger.greenfieldcore.chatformat.services.ChatFormatCommandService;
+import com.njdaeger.greenfieldcore.chatformat.services.DefaultChatService;
+import com.njdaeger.greenfieldcore.chatformat.services.EssentialsChatService;
+import com.njdaeger.greenfieldcore.chatformat.services.IChatConfigService;
 import com.njdaeger.greenfieldcore.chatformat.unitconversions.ConverterManager;
 import com.njdaeger.greenfieldcore.chatformat.unitconversions.IUnit;
 import com.njdaeger.greenfieldcore.chatformat.unitconversions.IUnitConverter;
-import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
-import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import com.njdaeger.pdk.utils.Pair;
-import io.papermc.paper.chat.ChatRenderer;
-import io.papermc.paper.event.player.AsyncChatDecorateEvent;
-import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -22,28 +20,18 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.text.CompactNumberFormat;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import static com.njdaeger.greenfieldcore.ComponentUtils.moduleMessage;
-
-public class ChatFormatModule extends Module implements Listener {
+public class ChatFormatModule extends Module {
 
     private static final NumberFormat compactFormat = CompactNumberFormat.getInstance();
 
@@ -73,9 +61,7 @@ public class ChatFormatModule extends Module implements Listener {
             }))
             .build();
 
-
-    private LegacyComponentSerializer serializer;
-    private ChatConfig config;
+    private IChatConfigService config;
 
     public ChatFormatModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
         super(plugin, canEnable);
@@ -83,75 +69,15 @@ public class ChatFormatModule extends Module implements Listener {
 
     @Override
     public void tryEnable() {
-        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-        this.serializer = LegacyComponentSerializer.builder().build();
-        this.config = new ChatConfig(plugin);
-
-        CommandBuilder.of("togglepings", "togglementions")
-                .description("Enables the ping sounds when you are mentioned in chat.")
-                .permission("greenfieldcore.chat.toggle-mentions")
-                .canExecute(ctx -> {
-                    var player = ctx.asPlayer();
-                    config.setAllowMentions(player, !config.allowsMentions(player));
-                    ctx.send(moduleMessage("Chat").append(Component.text(config.allowsMentions(player) ? "Enabled Chat Pings." : "Disabled Chat Pings.", NamedTextColor.GRAY)));
-                })
-                .then("forUser", PdkArgumentTypes.player()).permission("greenfieldcore.chat.toggle-mentions.others").executes(ctx -> {
-                    var player = ctx.getTyped("forUser", Player.class);
-                    config.setAllowMentions(player, !config.allowsMentions(player));
-                    ctx.send(moduleMessage("Chat").append(Component.text(config.allowsMentions(player) ? "Enabled Chat Pings for " + player.getName() : "Disabled Chat Pings for " + player.getName(), NamedTextColor.GRAY)));
-                })
-                .register(plugin);
-
-        CommandBuilder.of("pings", "mentions")
-                .description("Set ping settings for chat pings.")
-                .permission("greenfieldcore.chat.mention")
-                .then("volume").then("volumeLevel", PdkArgumentTypes.floatArg(0.1f, 2.0f)).executes(ctx -> {
-                    var vol = ctx.getTyped("volumeLevel", Float.class);
-                    config.setVolume(ctx.asPlayer(), vol);
-                    ctx.send(moduleMessage("Chat").append(Component.text("Your ping volume has been set to " + vol, NamedTextColor.GRAY)));
-                }).end()
-                .then("sound").then("soundChoice", PdkArgumentTypes.enumArg(Sound.class)).executes(ctx -> {
-                    var sound = ctx.getTyped("soundChoice", Sound.class);
-                    config.setSound(ctx.asPlayer(), sound);
-                    ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been set to " + sound.getKey().getKey(), NamedTextColor.GRAY)));
-                }).then("reset").executes(ctx -> {
-                    config.setSound(ctx.asPlayer(), Sound.BLOCK_NOTE_BLOCK_CHIME);
-                    ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been reset to the default.", NamedTextColor.GRAY)));
-                }).end()
-                .register(plugin);
+        this.config = enableIntegration(new ChatConfigServiceImpl(plugin, this), true);
+        if (enableIntegration(new EssentialsChatService(plugin, this, config), false).isEnabled()) getLogger().info("Using EssentialsChat integration for chat formatting.");
+        else if (enableIntegration(new DefaultChatService(plugin, this, config), true).isEnabled()) getLogger().info("Using DefaultChat integration for chat formatting.");
+        enableIntegration(new ChatFormatCommandService(plugin, this, config), true);
     }
 
     @Override
     public void tryDisable() {
-        config.save();
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onAsyncChat(AsyncChatEvent event) {
-        var message = serializer.serialize(event.message());
-        var message1 = serializer.serialize(event.originalMessage());
-        System.out.println(message);
-        System.out.println(message1);
-        System.out.println(event.signedMessage().message());
-//        var combined = message.replace("%1$s", event.getPlayer().getDisplayName().replace('&','§')).replace("%2$s", message.replace('&','§'));
-        var formattedMessage = formatString(message.replace('&', '§'), false);
-        if (event.getPlayer().hasPermission("greenfieldcore.chat.mention")) {
-            var mentions = getMentionIndices(message);
-            mentions.values().stream().map(Pair::getSecond).filter(config::allowsMentions).forEach(player -> player.playSound(player.getLocation(), config.getSound(player), config.getVolume(player), 1));
-        }
-        event.message(formattedMessage);
-//        event.renderer(ChatRenderer.viewerUnaware((player, displayName, msg) -> {
-//            Bukkit.getConsoleSender().sendMessage(player.displayName());
-//            Bukkit.getConsoleSender().sendMessage(displayName);
-//            Bukkit.getConsoleSender().sendMessage(msg);
-//            return formattedMessage;
-//        }));
-
-//        var recipients = new ArrayList<>(event.viewers());
-//
-//        recipients.add(Bukkit.getConsoleSender());
-//        recipients.forEach(p -> p.sendMessage(formattedMessage));
-//        event.setCancelled(true);
+        disableIntegration(config);
     }
 
     public static Map<Integer, String> getLinkIndices(String str) {
@@ -270,6 +196,7 @@ public class ChatFormatModule extends Module implements Listener {
                 } else {
                     if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
                     current = new StringBuilder();
+                    boolean wasAmp = false; //if it really was just an ampersand
                     switch (next) {
                         case 'r', 'R' -> currentStyle = Style.empty();
                         case 'l', 'L' -> currentStyle = currentStyle.decorate(TextDecoration.BOLD);
@@ -277,10 +204,10 @@ public class ChatFormatModule extends Module implements Listener {
                         case 'n', 'N' -> currentStyle = currentStyle.decorate(TextDecoration.UNDERLINED);
                         case 'o', 'O' -> currentStyle = currentStyle.decorate(TextDecoration.ITALIC);
                         case 'k', 'K' -> currentStyle = currentStyle.decorate(TextDecoration.OBFUSCATED);
+                        default -> wasAmp = true;
                     }
-                    i += 2;
+                    if (!wasAmp) i += 2;
                 }
-
             }
             if (i < chars.length) current.append(chars[i]);
         }

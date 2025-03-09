@@ -20,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -30,20 +31,7 @@ public final class GreenfieldCore extends JavaPlugin {
 
     private final ModuleConfig moduleConfig = new ModuleConfig(this);
 
-    private final List<Module> MODULES = List.of(
-            new OpenServerModule(this, ModuleConfig::isOpenServerEnabled),
-            new CodesModule(this, ModuleConfig::isCodesEnabled),
-            new TestResultModule(this, ModuleConfig::isTestResultsEnabled),
-            new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled),
-            new UtilitiesModule(this, ModuleConfig::isUtilitiesEnabled),
-            new AuthHubIntegration(this, ModuleConfig::isAuthHubEnabled),
-            new CommandStoreModule(this, ModuleConfig::isCommandStoreEnabled),
-            new HotspotModule(this, ModuleConfig::isHotspotsEnabled),
-            new PowerShovelModule(this, ModuleConfig::isPowerShovelEnabled),
-            new AdvancedBuildModule(this, ModuleConfig::isAdvancedBuildModeEnabled),
-            new RedblockModule(this, ModuleConfig::isRedblockEnabled),
-            new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled)
-    );
+    private final List<Module> MODULES = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -61,6 +49,21 @@ public final class GreenfieldCore extends JavaPlugin {
 //            Bukkit.getWhitelistedPlayers().stream().map(OfflinePlayer::getUniqueId).map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));
 //            getLogger().info("Loaded " + Util.userNameMap.size() + " uuid to username mappings.");
         });
+
+        MODULES.addAll(List.of(
+                new OpenServerModule(this, ModuleConfig::isOpenServerEnabled),
+                new CodesModule(this, ModuleConfig::isCodesEnabled),
+                new TestResultModule(this, ModuleConfig::isTestResultsEnabled),
+                new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled),
+                new UtilitiesModule(this, ModuleConfig::isUtilitiesEnabled),
+                new AuthHubIntegration(this, ModuleConfig::isAuthHubEnabled),
+                new CommandStoreModule(this, ModuleConfig::isCommandStoreEnabled),
+                new HotspotModule(this, ModuleConfig::isHotspotsEnabled),
+                new PowerShovelModule(this, ModuleConfig::isPowerShovelEnabled),
+                new AdvancedBuildModule(this, ModuleConfig::isAdvancedBuildModeEnabled),
+                new RedblockModule(this, ModuleConfig::isRedblockEnabled),
+                new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled)
+        ));
 
         Util.userNameMap.put(Util.CONSOLE_UUID, "Console");
         Util.getAllPlayers();

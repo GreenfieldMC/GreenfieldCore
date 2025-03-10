@@ -25,7 +25,7 @@ public class DefaultChatService extends ModuleService<DefaultChatService> implem
     @EventHandler
     public void onAsyncChat(AsyncChatEvent event) {
         var message = serializer.serialize(event.message());
-        var formattedMessage = ChatFormatModule.formatString(message.replace('&', '§'), false);
+        var formattedMessage = ChatFormatModule.formatString(message.replace('§', '&'), false);
         if (event.getPlayer().hasPermission("greenfieldcore.chat.mention")) {
             var mentions = ChatFormatModule.getMentionIndices(message);
             mentions.values().stream().map(Pair::getSecond).filter(config::allowsMentions).forEach(player -> player.playSound(player.getLocation(), config.getSound(player), config.getVolume(player), 1));

@@ -4,6 +4,7 @@ import com.njdaeger.greenfieldcore.IModuleService;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.Util;
+import com.njdaeger.greenfieldcore.arguments.OfflinePlayerArgument;
 import com.njdaeger.greenfieldcore.testresult.TestAttempt;
 import com.njdaeger.greenfieldcore.testresult.TestResultMessages;
 import com.njdaeger.greenfieldcore.testresult.TestSet;
@@ -42,7 +43,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
 
     // /start <user>
     private void start(ICommandContext ctx) throws PDKCommandException {
-        var playerBeingStarted = ctx.getTyped("userToStart", UUID.class);
+        var playerBeingStarted = ctx.getTyped("userToStart", Player.class).getUniqueId();
         var onlinePlayer = Bukkit.getPlayer(playerBeingStarted);
         if (onlinePlayer == null) ctx.error(TestResultMessages.ERROR_PLAYER_OFFLINE);
         testResultService.startAttempt(playerBeingStarted, ctx.getSender(), () -> {
@@ -53,7 +54,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
 
     // /pass <user> <comments>
     private void pass(ICommandContext ctx) throws PDKCommandException {
-        var playerBeingPassed = ctx.getTyped("userToPass", UUID.class);
+        var playerBeingPassed = ctx.getTyped("userToPass", Player.class).getUniqueId();
         var comments = ctx.getTyped("comments", String.class);
         var onlinePlayer = Bukkit.getPlayer(playerBeingPassed);
         if (onlinePlayer == null) ctx.error(TestResultMessages.ERROR_PLAYER_OFFLINE);
@@ -66,7 +67,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
     // /fail <user> <comments> -final
     // This will fail a user attempt. if the -final flag is set, the user will be removed from the server.
     private void fail(ICommandContext ctx) {
-        var playerBeingFailed = ctx.getTyped("userToFail", UUID.class);
+        var playerBeingFailed = ctx.getTyped("userToFail", Player.class).getUniqueId();
         var comments = ctx.getTyped("comments", String.class);
         var hasFinalFlag = ctx.hasFlag("final");
         if (hasFinalFlag)
@@ -150,7 +151,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
                 .permission("greenfieldcore.testresult.list")
                 .flag("page", "The page to view", PdkArgumentTypes.integer(1, Integer.MAX_VALUE))
                 .then("user")
-                    .then("user", PdkArgumentTypes.player())
+                    .then("user", new OfflinePlayerArgument())
                         .executes(this::listUserAttempts).end()
                 .then("all")
                     .executes(this::listAllAttempts)

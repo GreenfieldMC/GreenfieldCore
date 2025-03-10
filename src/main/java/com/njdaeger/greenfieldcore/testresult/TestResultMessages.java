@@ -22,6 +22,8 @@ public class TestResultMessages {
     public static final Function<String, TextComponent> ATTEMPT_PASS_SENDER = userName -> MODULE.append(Component.text("Latest test build for " + userName + " was successful.", NamedTextColor.GRAY));
     public static final TextComponent ATTEMPT_FAIL = MODULE.append(Component.text("Unfortunately, your latest test build attempt was unsuccessful. Please follow guidance from our staff.", NamedTextColor.GRAY));
     public static final Function<String, TextComponent> ATTEMPT_FAIL_SENDER = userName -> MODULE.append(Component.text("Latest test build for " + userName + " was unsuccessful.", NamedTextColor.GRAY));
-    public static final TextComponent ATTEMPT_FAIL_FINAL = MODULE.append(Component.text("Unfortunately, your test builds were not successful. Thank you for applying, we hope to see you apply to the server again in the future!", NamedTextColor.GRAY).append(Component.text("[You will be automatically kicked in 10 seconds]", NamedTextColor.GRAY, TextDecoration.BOLD)));
+    public static final TextComponent ATTEMPT_FAIL_FINAL = MODULE.append(Component.text("Unfortunately, your test builds were not successful. Thank you for applying, we hope to see you apply to the server again in the future!", NamedTextColor.GRAY).appendNewline().appendNewline().append(Component.text("[You will be automatically kicked in 10 seconds]", NamedTextColor.GRAY, TextDecoration.BOLD)));
     public static final Function<String, TextComponent> ATTEMPT_FAIL_FINAL_SENDER = userName -> MODULE.append(Component.text("Latest test build for " + userName + " was unsuccessful. Kicking in 10 seconds.", NamedTextColor.GRAY));
+
+    public static final TextComponent KICK_FAIL_MESSAGE = Component.text("You can re-apply again to get another chance at joining! We're glad we could meet you.");
 }

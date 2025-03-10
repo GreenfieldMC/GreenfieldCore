@@ -4,6 +4,7 @@ import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.services.IVaultPermissionService;
 import com.njdaeger.greenfieldcore.testresult.TestAttempt;
+import com.njdaeger.greenfieldcore.testresult.TestResultMessages;
 import com.njdaeger.greenfieldcore.testresult.TestSet;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
@@ -79,10 +80,17 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
     public void startAttempt(UUID whoIsStarting, CommandSender whoIsStartingThem, Runnable callback) {
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
             var attemptCount = storageService.getTestAttempts(whoIsStarting).size();
+            var incomplete = getIncompleteAttempt(whoIsStarting);
+            if (incomplete != null) {
+                whoIsStartingThem.sendMessage(Component.text("User already has an attempt in progress. Please finish that one before starting another.", NamedTextColor.RED));
+                return;
+            }
             var newAttempt = new TestAttempt(attemptCount, System.currentTimeMillis(), resolveUuid(whoIsStartingThem), -1, null, null, false);
+            newAttempt.setHasChanged(true);
             storageService.saveTestAttempt(whoIsStarting, newAttempt);
+            storageService.saveDatabase();
             vaultService.addUserToGroup(null, whoIsStarting, getTestingGroup()).thenAccept(success -> {
-                if (!success) whoIsStartingThem.sendMessage(Component.text("Failed to add the user to the testing group.", NamedTextColor.RED));
+                if (!success) whoIsStartingThem.sendMessage(Component.text("Failed to add the user to the testing group. Please perform the promotion manually.", NamedTextColor.RED));
                 callback.run();
             });
         });
@@ -101,6 +109,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
             currentAttempt.setAttemptNotes(comments);
             currentAttempt.setSuccessful(true);
             storageService.saveTestAttempt(whoIsBeingPassed, currentAttempt);
+            storageService.saveDatabase();
             vaultService.addUserToGroup(null, whoIsBeingPassed, getPassingGroup()).thenAccept(success -> {
                 if (!success) whoIsPassingThem.sendMessage(Component.text("Failed to add the user to the passing group.", NamedTextColor.RED));
                 callback.run();
@@ -121,8 +130,10 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
             currentAttempt.setAttemptNotes(failureReason);
             currentAttempt.setSuccessful(false);
             var newAttempt = new TestAttempt(currentAttempt.getAttemptNumber() + 1, System.currentTimeMillis(), resolveUuid(whoIsFailingThem), -1, null, null, false);
+            newAttempt.setHasChanged(true);
             storageService.saveTestAttempt(whoIsBeingFailed, currentAttempt);
             storageService.saveTestAttempt(whoIsBeingFailed, newAttempt);
+            storageService.saveDatabase();
             callback.run();
         });
     }
@@ -140,11 +151,22 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
             currentAttempt.setAttemptNotes(failureReason);
             currentAttempt.setSuccessful(false);
             storageService.saveTestAttempt(whoIsBeingFailed, currentAttempt);
+            storageService.saveDatabase();
             vaultService.removeUserFromGroup(null, whoIsBeingFailed, getTestingGroup());
             vaultService.addUserToGroup(null, whoIsBeingFailed, getFailingGroup()).thenAccept(success -> {
                 if (!success) whoIsFailingThem.sendMessage(Component.text("Failed to remove the user from the failing group.", NamedTextColor.RED));
                 callback.run();
             });
+            Bukkit.getScheduler().runTaskLater(getPlugin(), () -> {
+                var player = Bukkit.getPlayer(whoIsBeingFailed);
+                if (player != null) {
+                    player.kick(TestResultMessages.KICK_FAIL_MESSAGE);
+                    player.setWhitelisted(false);
+                } else {
+                    var offlinePlayer = Bukkit.getOfflinePlayer(whoIsBeingFailed);
+                    if (offlinePlayer.isWhitelisted()) offlinePlayer.setWhitelisted(false);
+                }
+            }, 200L);
         });
     }
 

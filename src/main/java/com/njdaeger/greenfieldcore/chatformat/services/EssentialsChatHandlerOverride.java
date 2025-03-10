@@ -7,10 +7,8 @@ import com.njdaeger.greenfieldcore.chatformat.ChatFormatModule;
 import com.njdaeger.pdk.utils.Pair;
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.ess3.provider.AbstractChatEvent;
 import net.ess3.provider.providers.PaperChatEvent;
-import net.kyori.adventure.text.flattener.ComponentFlattener;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,16 +35,13 @@ public class EssentialsChatHandlerOverride extends AbstractChatHandler {
 
     public final class ChatListener implements Listener {
 
-        private final Map<AsyncChatEvent, PaperChatEvent> eventMap = new IdentityHashMap<>();
-        private final LegacyComponentSerializer serializer;
+        private final Map<AsyncChatEvent, PaperChatEventOverride> eventMap = new IdentityHashMap<>();
+        private final PlainTextComponentSerializer serializer;
         private final boolean formatParsing;
 
         public ChatListener(boolean formatParsing) {
             this.formatParsing = formatParsing;
-            this.serializer = LegacyComponentSerializer.builder()
-                    .flattener(ComponentFlattener.basic())
-                    .extractUrls(AbstractChatEvent.URL_PATTERN)
-                    .useUnusualXRepeatedCharacterHexFormat().build();
+            this.serializer = PlainTextComponentSerializer.plainText();
         }
 
         @EventHandler(priority = EventPriority.LOWEST)
@@ -69,8 +64,8 @@ public class EssentialsChatHandlerOverride extends AbstractChatHandler {
 
             if (!formatParsing) return;
 
-            var format = ChatFormatModule.formatString(paperEvent.getFormat().replace('&', '§'), false);
-            var message = ChatFormatModule.formatString(paperEvent.getMessage().replace('&', '§'), false);
+            var format = ChatFormatModule.formatString(paperEvent.getFormat().replace('§', '&'), false);
+            var message = ChatFormatModule.formatString(paperEvent.getMessage().replace('§', '&'), false);
 
             if (event.getPlayer().hasPermission("greenfieldcore.chat.mention")) {
                 var mentions = ChatFormatModule.getMentionIndices(paperEvent.getMessage());
@@ -86,18 +81,41 @@ public class EssentialsChatHandlerOverride extends AbstractChatHandler {
             ));
         }
 
-        private PaperChatEvent wrap(final AsyncChatEvent event) {
-            PaperChatEvent paperChatEvent = eventMap.get(event);
+        private PaperChatEventOverride wrap(final AsyncChatEvent event) {
+            PaperChatEventOverride paperChatEvent = eventMap.get(event);
             if (paperChatEvent != null) {
                 return paperChatEvent;
             }
 
-            paperChatEvent = new PaperChatEvent(event, serializer);
+            paperChatEvent = new PaperChatEventOverride(event, serializer);
             eventMap.put(event, paperChatEvent);
 
             return paperChatEvent;
         }
 
+    }
+
+
+    public static final class PaperChatEventOverride extends PaperChatEvent {
+
+        private final PlainTextComponentSerializer serializer;
+        private final AsyncChatEvent event;
+
+        public PaperChatEventOverride(AsyncChatEvent event, PlainTextComponentSerializer serializer) {
+            super(event, null);
+            this.serializer = serializer;
+            this.event = event;
+        }
+
+        @Override
+        public void setMessage(String message) {
+            this.event.message(serializer.deserialize(message));
+        }
+
+        @Override
+        public String getMessage() {
+            return this.serializer.serialize(event.originalMessage());
+        }
     }
 
 }

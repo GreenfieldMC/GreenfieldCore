@@ -31,7 +31,8 @@ public class TestResultStorageServiceImpl extends ModuleService<ITestResultStora
                 for (var uidString : config.getSection("testsets").getKeys(false)) {
                     var uid = UUID.fromString(uidString);
                     var userAttempts = new ArrayList<TestAttempt>();
-                    for (var attempt : config.getSection("testsets").getSection(uidString).getKeys(false)) {
+                    for (var attempt : config.getSection("testsets." + uidString).getKeys(false)) {
+                        if (!isValidInt(attempt)) continue;
                         var attemptNumber = Integer.parseInt(attempt);
                         var attemptSection = config.getSection("testsets." + uidString + "." + attempt);
                         var attemptStart = attemptSection.getLong("startedOn");
@@ -48,6 +49,15 @@ public class TestResultStorageServiceImpl extends ModuleService<ITestResultStora
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to load the TestResultStorageService", e);
+        }
+    }
+
+    private static boolean isValidInt(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

@@ -141,11 +141,16 @@ public class ChatFormatModule extends Module {
         var unitIndices = getUnitConversionIndices(message);
 
         var currentStyle = Style.empty();
+        var skipChars = 0;
         for (int i = 0; i < chars.length; i++) {
+            if (skipChars > 0) {
+                skipChars--;
+                continue;
+            }
             if (linkIndices.containsKey(i) && !ignoreExtras) {
                 if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
                 current = new StringBuilder();
-                var link = linkIndices.get(i).replaceAll("§", "&");
+                var link = linkIndices.get(i);//.replaceAll("§", "&");
                 boolean isMarkdown = link.startsWith("[");
                 if (!isMarkdown) {
                     base.append(Component.text(link, linkStyle.apply(link)));
@@ -154,20 +159,18 @@ public class ChatFormatModule extends Module {
                     var linkUrl = link.substring(link.indexOf("](") + 2, link.length() - 1);
                     base.append(Component.text(linkText, linkStyle.apply(linkUrl)));
                 }
-                i += link.length();
+                skipChars += link.length() - 1;
                 base.append();
-                if (chars.length <= i) break;
             }
             if (mentionIndices.containsKey(i) && !ignoreExtras) {
                 if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
                 current = new StringBuilder();
                 var player = mentionIndices.get(i).getSecond();
                 var mention = mentionIndices.get(i).getFirst();
-                var displayName = player.getDisplayName().replaceAll("§.", "");
+                var displayName = player.getDisplayName().replaceAll("§.|&.", "");
                 base.append(Component.text('@' + displayName, mentionStyle.apply(displayName)));
-                i += mention.length() + 1;
+                skipChars += mention.length();
                 base.append();
-                if (chars.length <= i) break;
             }
             if (unitIndices.containsKey(i) && !ignoreExtras) {
                 if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
@@ -175,28 +178,30 @@ public class ChatFormatModule extends Module {
                 var unit = unitIndices.get(i).getFirst();
                 var conversions = unitIndices.get(i).getSecond();
                 base.append(Component.text(unit, unitStyle.apply(conversions)));
-                i += unit.length();
+                skipChars += unit.length() - 1;
                 base.append();
-                if (chars.length <= i) break;
             }
-            if (chars[i] == '§' && i + 1 < chars.length) {
+            if (chars[i] == '&' && i + 1 < chars.length) {
                 char next = chars[i + 1];
                 if (next == '#') {
                     if (i + 7 < chars.length) {
                         if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
-                        currentStyle = Style.style(TextColor.fromHexString(new String(chars, i + 1, 7)));
-                        current = new StringBuilder();
-                        i += 8;
+                        var color = TextColor.fromHexString(new String(chars, i + 1, 7));
+                        if (color != null) {
+                            currentStyle = currentStyle.color(color);
+                            current = new StringBuilder();
+                            skipChars += 7;
+                        }
                     }
                 } else if (isBukkitColorCode(next)) {
                     if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
                     current = new StringBuilder();
-                    currentStyle = Style.style(fromColorCode(next));
-                    i += 2;
+                    currentStyle = currentStyle.color(fromColorCode(next));
+                    skipChars += 1;
                 } else {
                     if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
                     current = new StringBuilder();
-                    boolean wasAmp = false; //if it really was just an ampersand
+                    boolean wasFormat = true;
                     switch (next) {
                         case 'r', 'R' -> currentStyle = Style.empty();
                         case 'l', 'L' -> currentStyle = currentStyle.decorate(TextDecoration.BOLD);
@@ -204,12 +209,12 @@ public class ChatFormatModule extends Module {
                         case 'n', 'N' -> currentStyle = currentStyle.decorate(TextDecoration.UNDERLINED);
                         case 'o', 'O' -> currentStyle = currentStyle.decorate(TextDecoration.ITALIC);
                         case 'k', 'K' -> currentStyle = currentStyle.decorate(TextDecoration.OBFUSCATED);
-                        default -> wasAmp = true;
+                        default -> wasFormat = false;
                     }
-                    if (!wasAmp) i += 2;
+                    if (wasFormat) skipChars += 1;
                 }
             }
-            if (i < chars.length) current.append(chars[i]);
+            if (skipChars == 0) current.append(chars[i]);
         }
         if (!current.isEmpty()) base.append(Component.text(current.toString(), currentStyle));
         return base.build();

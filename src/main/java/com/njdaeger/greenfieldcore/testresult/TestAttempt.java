@@ -83,11 +83,15 @@ public class TestAttempt implements PageItem<ICommandContext> {
     }
 
     public boolean isComplete() {
-        return attemptEnd != 0;
+        return finishedBy != null;
     }
 
     public boolean hasChanged() {
         return hasChanged;
+    }
+
+    public void setHasChanged(boolean hasChanged) {
+        this.hasChanged = hasChanged;
     }
 
     @Override
@@ -113,9 +117,9 @@ public class TestAttempt implements PageItem<ICommandContext> {
         text.appendSpace();
         text.append(Component.text("Attempt #" + attemptNumber, paginator.getGrayColor()));
         text.appendSpace();
-        text.append(Component.text(successful ? "Passed" : "Failed", successful ? NamedTextColor.GREEN : NamedTextColor.RED, TextDecoration.BOLD));
+        text.append(Component.text(successful ? "Passed" : (isComplete() ? "Failed" : "Pending"), successful ? NamedTextColor.GREEN : (isComplete() ? NamedTextColor.RED : NamedTextColor.GOLD)));
         text.appendSpace();
-        text.append(Component.text(" - " + attemptNotes, paginator.getGrayColor()));
+        if (isComplete()) text.append(Component.text(" - " + attemptNotes, paginator.getGrayColor()));
         return text.build();
     }
 }

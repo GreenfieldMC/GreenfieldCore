@@ -45,7 +45,7 @@ public class TestSet implements PageItem<ICommandContext> {
     public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
         var playerName = Util.resolvePlayerName(uuid);
         var attemptCount = attempts.size();
-        var hasSuccessfulTest = attempts.stream().anyMatch(TestAttempt::isSuccessful);
+        var hasSuccessfulTest = attempts.stream().anyMatch(att -> att.isSuccessful() && att.isComplete());
         var whitelistedPlayer = Bukkit.getWhitelistedPlayers().stream()
                 .filter(player -> player.getUniqueId().equals(uuid))
                 .findFirst().orElse(null);
@@ -68,11 +68,11 @@ public class TestSet implements PageItem<ICommandContext> {
 
         TextComponent viewButton;
         if (!playerName.equalsIgnoreCase("!!Unknown!!")) {
-            viewButton = Component.text("[V]", NamedTextColor.BLUE, TextDecoration.BOLD).toBuilder()
+            viewButton = Component.text("«", NamedTextColor.BLUE, TextDecoration.BOLD).toBuilder()
                     .hoverEvent(HoverEvent.showText(Component.text("View attempts", NamedTextColor.GRAY)))
                     .clickEvent(ClickEvent.runCommand("/attempts user " + playerName)).build();
         } else {
-            viewButton = Component.text("[V]", paginator.getGrayedOutColor(), TextDecoration.BOLD).toBuilder()
+            viewButton = Component.text("«", paginator.getGrayedOutColor(), TextDecoration.BOLD).toBuilder()
                     .hoverEvent(HoverEvent.showText(Component.text("User not found, no attempts can be viewed.", NamedTextColor.GRAY))).build();
         }
 
@@ -84,9 +84,7 @@ public class TestSet implements PageItem<ICommandContext> {
             text.append(Component.text(playerName, paginator.getGrayedOutColor()).hoverEvent(HoverEvent.showText(Component.text(uuid.toString(), paginator.getGrayColor()))));
         else text.append(Component.text(playerName, paginator.getHighlightColor()));
 
-        text.append(Component.text(" - Attempts: ", paginator.getGrayColor()))
-                .append(Component.text(attemptCount, paginator.getHighlightColor()))
-                .append(Component.text(" - Member Status: ", paginator.getGrayColor()))
+        text.append(Component.text(": " + attemptCount + " Attempts - Current Status: ", paginator.getGrayColor()))
                 .append(Component.text(status, paginator.getHighlightColor()));
 
         return text.build();

@@ -10,6 +10,7 @@ import com.njdaeger.greenfieldcore.arguments.OfflinePlayerArgument;
 import com.njdaeger.greenfieldcore.redblock.arguments.RedblockArgument;
 import com.njdaeger.greenfieldcore.redblock.paginators.RedblockInfoPaginator;
 import com.njdaeger.greenfieldcore.redblock.paginators.RedblockListPaginator;
+import com.njdaeger.greenfieldcore.services.IEssentialsService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;

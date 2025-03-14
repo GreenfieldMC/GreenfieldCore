@@ -3,10 +3,11 @@ package com.njdaeger.greenfieldcore.redblock;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
-import com.njdaeger.greenfieldcore.redblock.services.DynmapServiceImpl;
-import com.njdaeger.greenfieldcore.redblock.services.EssentialsServiceImpl;
-import com.njdaeger.greenfieldcore.redblock.services.IDynmapService;
-import com.njdaeger.greenfieldcore.redblock.services.IEssentialsService;
+import com.njdaeger.greenfieldcore.redblock.services.RedblockDynmapServiceImpl;
+import com.njdaeger.greenfieldcore.services.DynmapServiceImpl;
+import com.njdaeger.greenfieldcore.services.EssentialsServiceImpl;
+import com.njdaeger.greenfieldcore.services.IDynmapService;
+import com.njdaeger.greenfieldcore.services.IEssentialsService;
 import com.njdaeger.greenfieldcore.redblock.services.IRedblockService;
 import com.njdaeger.greenfieldcore.redblock.services.IRedblockStorageService;
 import com.njdaeger.greenfieldcore.redblock.services.RedblockCommandService;
@@ -31,7 +32,7 @@ public class RedblockModule extends Module {
     public void tryEnable() {
         storageService = enableIntegration(new RedblockStorageServiceImpl(plugin, this), true);
         essentialsService = enableIntegration(new EssentialsServiceImpl(plugin, this), false);
-        dynmapService = enableIntegration(new DynmapServiceImpl(plugin, this, storageService), false);
+        dynmapService = enableIntegration(new RedblockDynmapServiceImpl(plugin, this, storageService), false);
         redblockService = enableIntegration(new RedblockServiceImpl(plugin, this, dynmapService, storageService), true);
         enableIntegration(new RedblockCommandService(plugin, this, redblockService, essentialsService), true);
         enableIntegration(new RedblockListenerService(plugin, this, redblockService), true);

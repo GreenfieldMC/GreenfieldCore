@@ -8,7 +8,6 @@ import com.njdaeger.greenfieldcore.chatformat.ChatFormatModule;
 import com.njdaeger.greenfieldcore.codes.CodesModule;
 import com.njdaeger.greenfieldcore.commandstore.CommandStoreModule;
 import com.njdaeger.greenfieldcore.hotspots.HotspotModule;
-import com.njdaeger.greenfieldcore.openserver.OpenServerModule;
 import com.njdaeger.greenfieldcore.paintingswitch.PaintingSwitchModule;
 import com.njdaeger.greenfieldcore.powershovel.PowerShovelModule;
 import com.njdaeger.greenfieldcore.redblock.RedblockModule;
@@ -51,7 +50,6 @@ public final class GreenfieldCore extends JavaPlugin {
         });
 
         MODULES.addAll(List.of(
-                new OpenServerModule(this, ModuleConfig::isOpenServerEnabled),
                 new CodesModule(this, ModuleConfig::isCodesEnabled),
                 new TestResultModule(this, ModuleConfig::isTestResultsEnabled),
                 new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled),

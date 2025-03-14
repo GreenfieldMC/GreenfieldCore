@@ -1,4 +1,4 @@
-package com.njdaeger.greenfieldcore.redblock.services;
+package com.njdaeger.greenfieldcore.services;
 
 import com.earth2me.essentials.IEssentials;
 import com.njdaeger.greenfieldcore.Module;

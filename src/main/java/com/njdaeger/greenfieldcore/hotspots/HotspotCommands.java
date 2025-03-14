@@ -34,26 +34,26 @@ public class HotspotCommands {
 
     private final HotspotModule module;
     private final HotspotStorage storage;
-    private final ChatPaginator<Hotspot, CommandContext> paginator;
+//    private final ChatPaginator<Hotspot, CommandContext> paginator;
 
     public HotspotCommands(HotspotModule module, HotspotStorage storage, GreenfieldCore plugin) {
         this.storage = storage;
         this.module = module;
 
-        this.paginator = ChatPaginator.<Hotspot, CommandContext>builder()
-                .addComponent((ctx, paginator, results, pg) -> {
-                    if (ctx.first().equalsIgnoreCase("delete")) return Component.text("Delete Options", NamedTextColor.LIGHT_PURPLE);
-                    else if (ctx.first().equalsIgnoreCase("teleport")) return Component.text("Teleport Options", NamedTextColor.LIGHT_PURPLE);
-                    else return Component.text("Hotspot List", NamedTextColor.LIGHT_PURPLE);
-                }, ComponentPosition.TOP_CENTER)
-                .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
-                .addComponent(new PageNavigationComponent<>(
-                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
-                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg - 1),
-                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg + 1),
-                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + ((int) Math.ceil(res.size() / 8.0))
-                ), ComponentPosition.BOTTOM_CENTER)
-                .build();
+//        this.paginator = ChatPaginator.<Hotspot, CommandContext>builder()
+//                .addComponent((ctx, paginator, results, pg) -> {
+//                    if (ctx.first().equalsIgnoreCase("delete")) return Component.text("Delete Options", NamedTextColor.LIGHT_PURPLE);
+//                    else if (ctx.first().equalsIgnoreCase("teleport")) return Component.text("Teleport Options", NamedTextColor.LIGHT_PURPLE);
+//                    else return Component.text("Hotspot List", NamedTextColor.LIGHT_PURPLE);
+//                }, ComponentPosition.TOP_CENTER)
+//                .addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT)
+//                .addComponent(new PageNavigationComponent<>(
+//                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + 1,
+//                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg - 1),
+//                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + (pg + 1),
+//                        (ctx, res, pg) -> "/hs " + ctx.getRawCommandString().replace("-page " + pg, "") + " -page " + ((int) Math.ceil(res.size() / 8.0))
+//                ), ComponentPosition.BOTTOM_CENTER)
+//                .build();
 
         CommandBuilder.of("hotspot", "hotspots", "hs")
                 .flag(new PageFlag(module))
@@ -116,7 +116,7 @@ public class HotspotCommands {
             context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully teleported to " + hotspots.get(0).getName());
         } else {
             int page = context.hasFlag("page") ? context.getFlag("page") : 1;
-            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
+            //paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
         }
     }
 
@@ -154,7 +154,7 @@ public class HotspotCommands {
             context.send(LIGHT_PURPLE + "[Hotspots] " + GRAY + "Successfully deleted " + hotspots.get(0).getName());
         } else {
             int page = context.hasFlag("page") ? context.getFlag("page") : 1;
-            paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
+            //paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
         }
     }
 
@@ -167,7 +167,7 @@ public class HotspotCommands {
         int page = context.getFlag("page", 1);
         if (category != null) hotspots = storage.getHotspots().values().stream().filter(h -> h.getCategory().equals(category) && h.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
         else hotspots = storage.getHotspots().values().stream().filter(hs -> hs.getLocation().getWorld().getUID().equals(senderWorldUid)).sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).collect(Collectors.toList());
-        paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
+        //paginator.generatePage(context, hotspots.stream().sorted(Comparator.comparingDouble(h -> h.getLocation().distance(context.getLocation()))).toList(), page).sendTo(Component.text("Page does not exist.", NamedTextColor.RED), context.asPlayer());
     }
 
     private TextComponent lineGenerator(Hotspot hs, CommandContext ctx) {

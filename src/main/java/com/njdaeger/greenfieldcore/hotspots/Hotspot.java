@@ -1,12 +1,15 @@
 package com.njdaeger.greenfieldcore.hotspots;
 
-import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.PageItem;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-public class Hotspot implements PageItem<CommandContext> {
+public class Hotspot implements PageItem<ICommandContext> {
+
+    private boolean hasChanged = false;
 
     private String name;
     private Category category;
@@ -42,6 +45,7 @@ public class Hotspot implements PageItem<CommandContext> {
 
     public void setName(String name) {
         this.name = name;
+        hasChanged = true;
     }
 
     public Category getCategory() {
@@ -50,6 +54,7 @@ public class Hotspot implements PageItem<CommandContext> {
 
     public void setCategory(Category category) {
         this.category = category;
+        hasChanged = true;
     }
 
     public int getId() {
@@ -67,6 +72,7 @@ public class Hotspot implements PageItem<CommandContext> {
         this.yaw = location.getYaw();
         this.pitch = location.getPitch();
         this.world = location.getWorld();
+        hasChanged = true;
     }
 
     public String getCustomMarker() {
@@ -75,11 +81,17 @@ public class Hotspot implements PageItem<CommandContext> {
 
     public void setCustomMarker(String customMarker) {
         this.customMarker = customMarker;
+        hasChanged = true;
     }
 
     @Override
-    public String getPlainItemText(ChatPaginator<?, CommandContext> paginator, CommandContext generatorInfo) {
-        return name;
+    public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+        return PageItem.super.getItemText(paginator, generatorInfo);
+    }
+
+    @Override
+    public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+        return "";
     }
 }
 

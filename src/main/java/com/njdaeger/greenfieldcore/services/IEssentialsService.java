@@ -1,4 +1,4 @@
-package com.njdaeger.greenfieldcore.redblock.services;
+package com.njdaeger.greenfieldcore.services;
 
 import com.njdaeger.greenfieldcore.IModuleService;
 import org.bukkit.Location;

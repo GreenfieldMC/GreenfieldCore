@@ -14,6 +14,14 @@ public class Category {
         this.id = id;
     }
 
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
+    public void setChanged(boolean changed) {
+        this.hasChanged = changed;
+    }
+
     public String getMarker() {
         return marker;
     }
@@ -25,6 +33,11 @@ public class Category {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+        hasChanged = true;
     }
 
     public String getId() {

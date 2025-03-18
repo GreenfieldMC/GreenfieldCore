@@ -10,6 +10,8 @@ import com.njdaeger.greenfieldcore.hotspots.arguments.CategoryIdArgument;
 import com.njdaeger.greenfieldcore.hotspots.arguments.CategoryNameArgument;
 import com.njdaeger.greenfieldcore.hotspots.arguments.HotspotIdArgument;
 import com.njdaeger.greenfieldcore.hotspots.arguments.HotspotNameArgument;
+import com.njdaeger.greenfieldcore.hotspots.arguments.IconArgument;
+import com.njdaeger.greenfieldcore.services.IDynmapService;
 import com.njdaeger.greenfieldcore.services.IEssentialsService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
@@ -23,11 +25,13 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
 
     private final IHotspotService hotspotService;
     private final IEssentialsService essentialsService;
+    private final IDynmapService dynmapService;
 
-    public HotspotCommandService(Plugin plugin, Module module, IHotspotService hotspotService, IEssentialsService essentialsService) {
+    public HotspotCommandService(Plugin plugin, Module module, IDynmapService dynmapService, IHotspotService hotspotService, IEssentialsService essentialsService) {
         super(plugin, module);
         this.hotspotService = hotspotService;
         this.essentialsService = essentialsService;
+        this.dynmapService = dynmapService;
     }
 
     // /hotspot goto "hotspot name"|hotspotId
@@ -131,17 +135,17 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                     .then("hotspot")
                         .then("hotspotName", PdkArgumentTypes.quotedString(false, () -> "The new hotspot name"))
                             .then("categoryName", new CategoryNameArgument(hotspotService, cat -> true)).canExecute(this::createHotspot)
-                                .then("customIcon", PdkArgumentTypes.string()).executes(this::createHotspot)
+                                .then("customIcon", new IconArgument(dynmapService)).executes(this::createHotspot)
                             .end()
                             .then("categoryId", PdkArgumentTypes.string()).canExecute(this::createHotspot)
-                                .then("customIcon", PdkArgumentTypes.string()).executes(this::createHotspot)
+                                .then("customIcon", new IconArgument(dynmapService)).executes(this::createHotspot)
                             .end()
                         .end()
                     .end()
                     .then("category")
                         .then("categoryName", PdkArgumentTypes.quotedString(false, () -> "The new category name"))
                             .then("categoryId", PdkArgumentTypes.string()).canExecute(this::createCategory)
-                                .then("categoryIcon", PdkArgumentTypes.string()).executes(this::createCategory)
+                                .then("categoryIcon", new IconArgument(dynmapService)).executes(this::createCategory)
                             .end()
                         .end()
                     .end()
@@ -166,7 +170,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                                 .then("categoryId", new CategoryIdArgument(hotspotService, cat -> true)).executes(this::editHotspot)
                             .end()
                             .then("icon")
-                                .then("iconName", PdkArgumentTypes.string()).executes(this::editHotspot)
+                                .then("iconName", new IconArgument(dynmapService)).executes(this::editHotspot)
                             .end()
                             .then("name")
                                 .then("newName", PdkArgumentTypes.quotedString(false, () -> "The new name")).executes(this::editHotspot)
@@ -178,7 +182,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                                 .then("categoryId", new CategoryIdArgument(hotspotService, cat -> true)).executes(this::editHotspot)
                             .end()
                             .then("icon")
-                                .then("iconName", PdkArgumentTypes.string()).executes(this::editHotspot)
+                                .then("iconName", new IconArgument(dynmapService)).executes(this::editHotspot)
                             .end()
                             .then("name")
                                 .then("newName", PdkArgumentTypes.quotedString(false, () -> "The new name")).executes(this::editHotspot)
@@ -187,12 +191,20 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                     .end()
                     .then("category")
                         .then("categoryName", new CategoryNameArgument(hotspotService, cat -> true))
-                            .then("name", PdkArgumentTypes.quotedString(false, () -> "The new name")).executes(this::editCategory)
-                            .then("icon", PdkArgumentTypes.string()).executes(this::editCategory)
+                            .then("icon")
+                                .then("iconName", new IconArgument(dynmapService)).executes(this::editCategory)
+                            .end()
+                            .then("name")
+                                .then("newName", PdkArgumentTypes.quotedString(false, () -> "The new name")).executes(this::editCategory)
+                            .end()
                         .end()
                         .then("categoryId", PdkArgumentTypes.integer(() -> "The id of the category"))
-                            .then("name", PdkArgumentTypes.quotedString(false, () -> "The new name")).executes(this::editCategory)
-                            .then("icon", PdkArgumentTypes.string()).executes(this::editCategory)
+                            .then("icon")
+                                .then("iconName", new IconArgument(dynmapService)).executes(this::editCategory)
+                            .end()
+                            .then("name")
+                                .then("newName", PdkArgumentTypes.quotedString(false, () -> "The new name")).executes(this::editCategory)
+                            .end()
                         .end()
                     .end()
                 .end()

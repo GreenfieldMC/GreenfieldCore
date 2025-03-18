@@ -12,7 +12,7 @@ public class Hotspot implements PageItem<ICommandContext> {
     private boolean hasChanged = false;
 
     private String name;
-    private Category category;
+    private String category;
     private final int id;
     private int x;
     private int y;
@@ -22,7 +22,7 @@ public class Hotspot implements PageItem<ICommandContext> {
     private World world;
     private String customMarker;
 
-    public Hotspot(String name, Category category, int id, int x, int y, int z, float yaw, float pitch, World world, String customMarker) {
+    public Hotspot(String name, String category, int id, int x, int y, int z, float yaw, float pitch, World world, String customMarker) {
         this.name = name;
         this.category = category;
         this.id = id;
@@ -35,7 +35,7 @@ public class Hotspot implements PageItem<ICommandContext> {
         this.customMarker = customMarker;
     }
 
-    public Hotspot(String name, Category category, int id, int x, int y, int z, float yaw, float pitch, World world) {
+    public Hotspot(String name, String category, int id, int x, int y, int z, float yaw, float pitch, World world) {
         this(name, category, id, x, y, z, yaw, pitch, world, null);
     }
 
@@ -48,11 +48,11 @@ public class Hotspot implements PageItem<ICommandContext> {
         hasChanged = true;
     }
 
-    public Category getCategory() {
+    public String getCategory() {
         return category;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(String category) {
         this.category = category;
         hasChanged = true;
     }
@@ -84,6 +84,10 @@ public class Hotspot implements PageItem<ICommandContext> {
         hasChanged = true;
     }
 
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
     @Override
     public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
         return PageItem.super.getItemText(paginator, generatorInfo);
@@ -92,6 +96,10 @@ public class Hotspot implements PageItem<ICommandContext> {
     @Override
     public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
         return "";
+    }
+
+    public void setChanged(boolean changedStatus) {
+        this.hasChanged = changedStatus;
     }
 }
 

@@ -27,9 +27,13 @@ public interface IHotspotService extends IModuleService<IHotspotService> {
 
     /**
      * Edits the given hotspot
-     * @param editedHotspot The hotspot to edit
+     *
+     * @param hotspot
+     * @param name
+     * @param category
+     * @param customMarker
      */
-    void editHotspot(Hotspot editedHotspot);
+    void editHotspot(Hotspot hotspot, String name, Category category, String customMarker);
 
     /**
      * Deletes the given hotspot
@@ -72,7 +76,7 @@ public interface IHotspotService extends IModuleService<IHotspotService> {
      * Edits the given category
      * @param editedCategory The category to edit
      */
-    void editCategory(Category editedCategory);
+    void editCategory(Category editedCategory, String name, String marker);
 
     /**
      * Deletes the given category

@@ -87,6 +87,24 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
         return true;
     }
 
+    @Override
+    public MarkerSet getMarkerSet(String setId) {
+        if (!isEnabled()) return null;
+        return markerApi.getMarkerSet(setId);
+    }
+
+    @Override
+    public MarkerIcon getMarkerIcon(String iconName) {
+        if (!isEnabled()) return null;
+        return markerApi.getMarkerIcon(iconName);
+    }
+
+    @Override
+    public MarkerAPI getMarkerAPI() {
+        if (!isEnabled()) return null;
+        return markerApi;
+    }
+
     protected MarkerSet getOrCreateMarkerSet(String setName) {
         if (!isEnabled()) return null;
         var set = markerApi.getMarkerSet(setName);

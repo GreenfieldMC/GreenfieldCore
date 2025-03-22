@@ -1,5 +1,6 @@
 package com.njdaeger.greenfieldcore.hotspots.arguments;
 
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -9,6 +10,7 @@ import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractIntegerTypedArgument;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class HotspotIdArgument extends AbstractIntegerTypedArgument<Hotspot> {
@@ -25,8 +27,9 @@ public class HotspotIdArgument extends AbstractIntegerTypedArgument<Hotspot> {
     }
 
     @Override
-    public List<Hotspot> listBasicSuggestions(ICommandContext commandContext) {
-        return hotspotService.getHotspots(filter);
+    public Map<Hotspot, Message> listSuggestions(ICommandContext commandContext) {
+        return hotspotService.getHotspots(filter).stream()
+                .collect(java.util.stream.Collectors.toMap(hotspot -> hotspot, (hs) -> hs::getName));
     }
 
     @Override

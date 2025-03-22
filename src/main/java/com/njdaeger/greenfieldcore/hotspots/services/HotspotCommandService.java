@@ -7,7 +7,6 @@ import com.njdaeger.greenfieldcore.hotspots.Category;
 import com.njdaeger.greenfieldcore.hotspots.Hotspot;
 import com.njdaeger.greenfieldcore.hotspots.HotspotMessages;
 import com.njdaeger.greenfieldcore.hotspots.arguments.CategoryIdArgument;
-import com.njdaeger.greenfieldcore.hotspots.arguments.CategoryNameArgument;
 import com.njdaeger.greenfieldcore.hotspots.arguments.HotspotIdArgument;
 import com.njdaeger.greenfieldcore.hotspots.arguments.HotspotNameArgument;
 import com.njdaeger.greenfieldcore.hotspots.arguments.IconArgument;
@@ -18,10 +17,10 @@ import com.njdaeger.greenfieldcore.services.IEssentialsService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
+import com.njdaeger.pdk.command.exception.CommandSenderTypeException;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.Pair;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
-import net.kyori.adventure.text.Component;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Comparator;
 import java.util.List;
 
+@SuppressWarnings("DataFlowIssue")
 public class HotspotCommandService extends ModuleService<HotspotCommandService> implements IModuleService<HotspotCommandService> {
 
     private final ChatPaginator<Hotspot, Pair<HotspotPaginator.HotspotPaginatorMode, ICommandContext>> hotspotPaginator = new HotspotPaginator().build();
@@ -45,7 +45,6 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
         this.dynmapService = dynmapService;
     }
 
-    // /hotspot goto "hotspot name"|hotspotId
     private void gotoHotspot(ICommandContext ctx) throws PDKCommandException {
         var hotspots = resolveHotspot(ctx);
         var player = ctx.asPlayer();
@@ -65,7 +64,6 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
         }
     }
 
-    // /hotspot create hotspot "hotspot name" <category> [customIcon]
     private void createHotspot(ICommandContext ctx) throws PDKCommandException {
         var hotspotName = ctx.getTyped("hotspotName", String.class);
         var category = resolveCategory(ctx);
@@ -76,7 +74,6 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
         ctx.send(HotspotMessages.HOTSPOT_CREATE_SUCCESS.apply(hotspot.getName()));
     }
 
-    // /hsdelete hotspot "hotspot name"|hotspotId
     private void deleteHotspot(ICommandContext ctx) throws PDKCommandException {
         var hotspots = resolveHotspot(ctx);
         if (hotspots.size() == 1) {
@@ -95,7 +92,6 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
 
     }
 
-    // /hsedit hotspot "hotspot name"|hotspotId category|icon|name <new value>
     private void editHotspot(ICommandContext ctx) throws PDKCommandException {
         var hotspots = resolveHotspot(ctx);
         if (hotspots.size() > 1) {
@@ -117,31 +113,37 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                 return;
             }
         }
-        if (ctx.hasTyped("iconName")) {
-            var icon = ctx.getTyped("iconName", String.class);
-            if (!icon.equals(hotspot.getCustomMarker())) {
+        if (ctx.last().equalsIgnoreCase("icon") || ctx.hasTyped("icon")) {
+            String icon = null;
+            if (ctx.hasTyped("icon")) icon = ctx.getTyped("icon", String.class);
+            if (hotspot.getCustomMarker() == null && icon != null || hotspot.getCustomMarker() != null && icon == null) {
                 hotspotService.editHotspot(hotspot, null, null, icon);
-                ctx.send(HotspotMessages.HOTSPOT_EDIT_SUCCESS.apply(hotspot.getName(), "icon", icon));
+                ctx.send(HotspotMessages.HOTSPOT_EDIT_SUCCESS.apply(hotspot.getName(), "icon", icon == null ? "none" : icon));
                 return;
             }
         }
         if (ctx.hasTyped("newName")) {
             var newName = ctx.getTyped("newName", String.class);
             if (!newName.equals(hotspot.getName())) {
-                hotspotService.editHotspot(hotspot, newName, null, null);
                 ctx.send(HotspotMessages.HOTSPOT_EDIT_SUCCESS.apply(hotspot.getName(), "name", newName));
+                hotspotService.editHotspot(hotspot, newName, null, null);
                 return;
             }
         }
         ctx.error(HotspotMessages.ERROR_EDIT_NO_CHANGE);
     }
 
-    // /hslist hotspots categoryId -page <page>
-    private void listHotspots(ICommandContext ctx) throws PDKCommandException {
+    private void listHotspots(ICommandContext ctx) throws CommandSenderTypeException {
         var hotspots = hotspotService.getHotspots(hs -> true);
         if (ctx.hasTyped("categoryName")) {
             var category = resolveCategory(ctx);
             hotspots = hotspots.stream().filter(hs -> hs.getCategory().equalsIgnoreCase(category.getId())).toList();
+        }
+        if (ctx.isLocatable()) {
+            var location = ctx.getLocation();
+            hotspots = hotspots.stream().filter(hs -> hs.getLocation().getWorld().getUID().equals(location.getWorld().getUID()))
+                    .sorted(Comparator.comparingDouble(h -> h.getLocation().distanceSquared(location)))
+                    .toList();
         }
         var page = ctx.getFlag("page", 1);
         var mode = ctx.hasFlag("deleteMode") ? HotspotPaginator.HotspotPaginatorMode.DELETE : HotspotPaginator.HotspotPaginatorMode.LIST;
@@ -149,7 +151,6 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
         hotspotPaginator.generatePage(Pair.of(mode, ctx), hotspots, page).sendTo(HotspotMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
     }
 
-    // /hotspot create category "category name" categoryId categoryIcon
     private void createCategory(ICommandContext ctx) {
         var categoryName = ctx.getTyped("categoryName", String.class);
         var categoryId = ctx.getTyped("categoryId", String.class);
@@ -158,7 +159,6 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
         ctx.send(HotspotMessages.CATEGORY_CREATE_SUCCESS.apply(categoryName));
     }
 
-    // /hsdelete category "category name"|categoryId "replacement category"|categoryId
     private void deleteCategory(ICommandContext ctx) throws PDKCommandException {
         var category = resolveCategory(ctx);
         var replacementCategory = resolveReplacementCategory(ctx);
@@ -172,16 +172,34 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
         else ctx.send(HotspotMessages.CATEGORY_DELETE_SUCCESS.apply(category.getName()));
     }
 
-    // /hsedit category "category name"|categoryId name|icon <new value>
-    private void editCategory(ICommandContext ctx) {
-
+    private void editCategory(ICommandContext ctx) throws PDKCommandException {
+        var category = resolveCategory(ctx);
+        if (ctx.hasTyped("icon")) {
+            var icon = ctx.getTyped("icon", String.class);
+            if (!icon.equals(category.getMarker())) {
+                hotspotService.editCategory(category, null, icon);
+                ctx.send(HotspotMessages.CATEGORY_EDIT_SUCCESS.apply(category.getName(), "icon", icon));
+                return;
+            }
+        }
+        if (ctx.hasTyped("newName")) {
+            var newName = ctx.getTyped("newName", String.class);
+            if (!newName.equals(category.getName())) {
+                hotspotService.editCategory(category, newName, null);
+                ctx.send(HotspotMessages.CATEGORY_EDIT_SUCCESS.apply(category.getName(), "name", newName));
+                return;
+            }
+        }
+        ctx.error(HotspotMessages.ERROR_EDIT_NO_CHANGE);
     }
 
-    // /hslist categories -page <page>
     private void listCategories(ICommandContext ctx) {
-
+        var categories = hotspotService.getCategories(cat -> true);
+        var page = ctx.getFlag("page", 1);
+        categoryPaginator.generatePage(CategoryPaginator.CategoryPaginatorMode.LIST, categories, page).sendTo(HotspotMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
     }
 
+    @SuppressWarnings("unchecked")
     private @NotNull List<Hotspot> resolveHotspot(ICommandContext ctx) {
         if (ctx.hasTyped("hotspotId")) {
             var hotspot = ctx.getTyped("hotspotId", Hotspot.class);
@@ -230,7 +248,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                 .end()
                 .register(plugin);
 
-        CommandBuilder.of("hsdelete", "hsd")
+        CommandBuilder.of("hsdelete", "hsd", "hsdel")
                 .description("Delete a Hotspot or Hotspot Category")
                 .permission("greenfieldcore.hotspot.delete")
                 .then("hotspot")
@@ -246,12 +264,6 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                 .end()
                 .register(plugin);
 
-        /*
-        helptext:
-
-        /hsedit hotspot (<hotspotName>|byId <hotspotId>) (category <categoryId>|icon <iconName>|name <newName>)
-        /hsedit category (<categoryName>|byId <categoryId>) (name <newName>|icon <iconName>)
-         */
         CommandBuilder.of("hsedit", "hse")
                 .description("Edit a Hotspot or Hotspot Category")
                 .permission("greenfieldcore.hotspot.edit")
@@ -260,7 +272,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                         .then("category")
                             .then("categoryId", new CategoryIdArgument(hotspotService, cat -> true)).executes(this::editHotspot)
                         .end()
-                        .then("icon")
+                        .then("icon").canExecute(this::editHotspot)
                             .then("iconName", new IconArgument(dynmapService)).executes(this::editHotspot)
                         .end()
                         .then("name")
@@ -272,7 +284,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                             .then("category")
                                 .then("categoryId", new CategoryIdArgument(hotspotService, cat -> true)).executes(this::editHotspot)
                             .end()
-                            .then("icon")
+                            .then("icon").canExecute(this::editHotspot)
                                 .then("iconName", new IconArgument(dynmapService)).executes(this::editHotspot)
                             .end()
                             .then("name")
@@ -293,18 +305,13 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                 .end()
                 .register(plugin);
 
-        //helptext:
-        /*
-        helptext:
-        /hslist hotspots [<categoryName>]|[byId <categoryId>]
-        /hslist categories
-         */
-        CommandBuilder.of("hslist", "hsl")
+        CommandBuilder.of("hslist", "hsl", "hotspots")
                 .description("List Hotspots or Hotspot Categories")
                 .permission("greenfieldcore.hotspot.list")
                 .flag("page", "The page number", PdkArgumentTypes.integer(1, () -> "The page number"))
                 .hiddenFlag("deleteMode", "This list will show as deletable entries.")
                 .hiddenFlag("editMode", "This list will show as editable entries.")
+                .canExecute(this::listHotspots)
                 .then("hotspots").canExecute(this::listHotspots)
                     .then("categoryId", new CategoryIdArgument(hotspotService, cat -> true)).executes(this::listHotspots)
                 .end()

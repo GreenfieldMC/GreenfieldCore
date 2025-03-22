@@ -90,7 +90,7 @@ public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageServ
                     hotspots.put(hsId, new Hotspot(
                             section.getString("name"),
                             category.getId(),
-                            hotspotIdCounter,
+                            hsId,
                             section.getInt("x"),
                             section.getInt("y"),
                             section.getInt("z"),

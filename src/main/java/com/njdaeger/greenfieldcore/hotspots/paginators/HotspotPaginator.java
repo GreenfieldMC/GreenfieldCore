@@ -31,9 +31,6 @@ public class HotspotPaginator extends ChatPaginatorBuilder<Hotspot, Pair<Hotspot
         if (ctx.hasTyped("categoryId")) {
             var category = ctx.getTyped("categoryId", Category.class);
             return " byId " + category.getId();
-        } else if (ctx.hasTyped("categoryName")) {
-            var category = ctx.getTyped("categoryName", Category.class);
-            return " " + category.getName();
         }
         return "";
     }

@@ -86,11 +86,12 @@ public interface IHotspotService extends IModuleService<IHotspotService> {
     void deleteCategory(Category category, Category replacement);
 
     /**
-     * Gets a category by its name
-     * @param name The name of the category
+     * Gets a category by its id
+     *
+     * @param id The id of the category
      * @return The category
      */
-    Category getCategory(String name);
+    Category getCategory(String id);
 
     /**
      * Gets a list of all categories

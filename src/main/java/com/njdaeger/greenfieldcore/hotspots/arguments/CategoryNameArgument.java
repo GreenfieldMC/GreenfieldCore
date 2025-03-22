@@ -12,10 +12,9 @@ import com.njdaeger.pdk.command.brigadier.arguments.AbstractQuotedTypedArgument;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class CategoryNameArgument extends AbstractQuotedTypedArgument<Category> {
+public class CategoryNameArgument extends AbstractQuotedTypedArgument<List<Category>> {
 
     private static final DynamicCommandExceptionType CATEGORY_NOT_FOUND = new DynamicCommandExceptionType(o -> () -> "Category " + o.toString() + " not found");
-    private static final DynamicCommandExceptionType MULTIPLE_CATEGORIES_FOUND = new DynamicCommandExceptionType(o -> () -> "Multiple categories found with the name " + o.toString());
 
     private final IHotspotService hotspotService;
     private final Predicate<Category> filter;
@@ -31,26 +30,22 @@ public class CategoryNameArgument extends AbstractQuotedTypedArgument<Category> 
     }
 
     @Override
-    public List<Category> listBasicSuggestions(ICommandContext commandContext) {
-        return hotspotService.getCategories(filter);
+    public List<List<Category>> listBasicSuggestions(ICommandContext commandContext) {
+        return hotspotService.getCategories(filter).stream().map(List::of).toList();
     }
 
     @Override
-    public String convertToNative(Category category) {
-        return category.getName();
+    public String convertToNative(List<Category> category) {
+        return category.getFirst().getName();
     }
 
     @Override
-    public Category convertToCustom(String nativeType, StringReader reader) throws CommandSyntaxException {
+    public List<Category> convertToCustom(String nativeType, StringReader reader) throws CommandSyntaxException {
         var categories = hotspotService.getCategories(cat -> cat.getName().equalsIgnoreCase(nativeType));
         if (categories.isEmpty()) {
             reader.setCursor(reader.getCursor() - nativeType.length());
             throw CATEGORY_NOT_FOUND.createWithContext(reader, nativeType);
         }
-        if (categories.size() > 1) {
-            reader.setCursor(reader.getCursor() - nativeType.length());
-            throw MULTIPLE_CATEGORIES_FOUND.createWithContext(reader, nativeType);
-        }
-        return categories.getFirst();
+        return categories;
     }
 }

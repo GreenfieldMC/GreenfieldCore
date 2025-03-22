@@ -34,7 +34,7 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
 
     @Override
     public Hotspot createHotspot(String name, Category category, int x, int y, int z, float yaw, float pitch, World world, String customMarker) {
-        var hotspot = new Hotspot(name, category.getName(), storageService.getNextHotspotId(), x, y, z, yaw, pitch, world, customMarker);
+        var hotspot = new Hotspot(name, category.getId(), storageService.getNextHotspotId(), x, y, z, yaw, pitch, world, customMarker);
         storageService.saveHotspot(hotspot);
         storageService.saveDatabase();
         if (dynmapService.isEnabled()) dynmapService.tryCreateMarker(category.getId(), hotspot.getId() + "", hotspot.getName(), hotspot.getLocation(), resolveMarker(hotspot), false);
@@ -47,8 +47,8 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
         if (name != null && !name.isBlank() && !name.equals(hotspot.getName())) {
             hotspot.setName(name);
         }
-        if (category != null && !category.getName().equals(hotspot.getCategory())) {
-            hotspot.setCategory(category.getName());
+        if (category != null && !category.getId().equals(hotspot.getCategory())) {
+            hotspot.setCategory(category.getId());
         }
         if (customMarker == null && hotspot.getCustomMarker() != null) {
             hotspot.setCustomMarker(null);
@@ -130,24 +130,24 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
     @Override
     public void deleteCategory(Category category, Category replacement) {
         if (replacement != null) {
-            var hotspots = storageService.getHotspots(hotspot -> hotspot.getCategory().equals(category.getName()));
+            var hotspots = storageService.getHotspots(hotspot -> hotspot.getCategory().equalsIgnoreCase(category.getId()));
             for (var hotspot : hotspots) {
-                hotspot.setCategory(replacement.getName());
+                hotspot.setCategory(replacement.getId());
                 storageService.saveHotspot(hotspot);
             }
         }
-        storageService.deleteCategory(category.getName());
+        storageService.deleteCategory(category.getId());
         storageService.saveDatabase();
         if (dynmapService.isEnabled()) {
             if (!dynmapService.tryDeleteMarkerSet(category.getId())) {
-                getModule().getLogger().warning("Failed to delete marker set for category " + category.getName());
+                getModule().getLogger().warning("Failed to delete marker set for category " + category.getId());
             }
         }
     }
 
     @Override
-    public Category getCategory(String name) {
-        return storageService.getCategory(name);
+    public Category getCategory(String id) {
+        return storageService.getCategory(id);
     }
 
     @Override

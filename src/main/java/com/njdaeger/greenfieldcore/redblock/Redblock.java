@@ -239,19 +239,12 @@ public class Redblock implements PageItem<ICommandContext> {
     @Override
     public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
         var hover = Component.text();
-        Location locationFrom = null;
-        if (generatorInfo.isLocatable()) {
-            try {
-                locationFrom = generatorInfo.getLocation();
-            } catch (PDKCommandException ignored) {
-            }
-        }
+        var locationFrom = generatorInfo.getLocationOrNull();
 
         var currentLine = new AtomicInteger();
-        var finalLocationFrom = locationFrom;
         getRedblockInfo(locationFrom).forEach(infoLine -> {
             hover.append(infoLine.getItemText(paginator, generatorInfo));
-            if (currentLine.incrementAndGet() != getRedblockInfo(finalLocationFrom).size()) hover.appendNewline();
+            if (currentLine.incrementAndGet() != getRedblockInfo(locationFrom).size()) hover.appendNewline();
         });
 
         var questionMark = Component.text("?", switch (status) {

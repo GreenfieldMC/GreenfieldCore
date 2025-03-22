@@ -84,7 +84,7 @@ public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageServ
                         hotspotIdCounter = hsId + 1;
                     }
                     if (category == null) {
-                        plugin.getLogger().warning("Hotspot #" + hotspot + " has an invalid category. Skipping.");
+                        plugin.getLogger().warning("Hotspot #" + hotspot + " has an invalid category " + ". Skipping.");
                         continue;
                     }
                     hotspots.put(hsId, new Hotspot(
@@ -118,8 +118,8 @@ public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageServ
     }
 
     @Override
-    public Category getCategory(String name) {
-        return categories.get(name);
+    public Category getCategory(String id) {
+        return categories.get(id);
     }
 
     @Override
@@ -130,10 +130,10 @@ public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageServ
     }
 
     @Override
-    public void deleteCategory(String name) {
-        var removed = categories.remove(name);
+    public void deleteCategory(String id) {
+        var removed = categories.remove(id);
         if (removed != null) {
-            config.setEntry("categories." + name, null);
+            config.setEntry("categories." + id, null);
         }
     }
 

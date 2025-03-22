@@ -37,7 +37,7 @@ public class HotspotDynmapService extends DynmapServiceImpl {
         storageService.getCategories().forEach(cat -> {
             var icon = getOrCreateMarkerIcon(cat.getMarker());
             if (icon == null) {
-                getModule().getLogger().warning("Failed to load category " + cat.getName() + " with marker " + cat.getMarker() + ". Marker icon not found.");
+                getModule().getLogger().warning("Failed to load category " + cat.getId() + " with marker " + cat.getMarker() + ". Marker icon not found.");
                 return;
             }
 

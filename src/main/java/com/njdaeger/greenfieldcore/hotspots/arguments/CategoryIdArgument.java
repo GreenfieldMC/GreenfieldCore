@@ -9,8 +9,9 @@ import com.njdaeger.greenfieldcore.hotspots.services.IHotspotService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
 
-import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class CategoryIdArgument extends AbstractStringTypedArgument<Category> {
 
@@ -25,8 +26,8 @@ public class CategoryIdArgument extends AbstractStringTypedArgument<Category> {
     }
 
     @Override
-    public List<Category> listBasicSuggestions(ICommandContext commandContext) {
-        return hotspotService.getCategories(filter);
+    public Map<Category, Message> listSuggestions(ICommandContext commandContext) {
+        return hotspotService.getCategories(filter).stream().collect(Collectors.toMap(cat -> cat, cat -> cat::getName));
     }
 
     @Override

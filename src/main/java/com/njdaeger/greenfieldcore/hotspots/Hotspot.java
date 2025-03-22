@@ -1,13 +1,20 @@
 package com.njdaeger.greenfieldcore.hotspots;
 
+import com.njdaeger.greenfieldcore.hotspots.paginators.HotspotPaginator;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
+import com.njdaeger.pdk.utils.Pair;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.PageItem;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-public class Hotspot implements PageItem<ICommandContext> {
+public class Hotspot implements PageItem<Pair<HotspotPaginator.HotspotPaginatorMode, ICommandContext>> {
 
     private boolean hasChanged = false;
 
@@ -89,13 +96,55 @@ public class Hotspot implements PageItem<ICommandContext> {
     }
 
     @Override
-    public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
-        return PageItem.super.getItemText(paginator, generatorInfo);
+    public TextComponent getItemText(ChatPaginator<?, Pair<HotspotPaginator.HotspotPaginatorMode, ICommandContext>> paginator, Pair<HotspotPaginator.HotspotPaginatorMode, ICommandContext> generatorInfo) {
+        var mode = generatorInfo.getFirst();
+        var ctx = generatorInfo.getSecond();
+        var location = ctx.getLocationOrNull();
+
+        var questionMark = getQuestionMark(location);
+
+        var line = Component.text();
+        line.append(questionMark);
+        line.resetStyle().appendSpace();
+
+        switch (mode) {
+            case LIST -> line.append(Component.text("[T]", NamedTextColor.BLUE, TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand("/hstp byId " + id))
+                    .hoverEvent(Component.text("Click to teleport to this Hotspot", NamedTextColor.GRAY)));
+            case EDIT -> line.append(Component.text("[E]", NamedTextColor.BLUE, TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.suggestCommand("/hsedit hotspot byId " + id + " "))
+                    .hoverEvent(Component.text("Click to begin editing this Hotspot", NamedTextColor.GRAY)));
+            case DELETE -> line.append(Component.text("[X]", NamedTextColor.RED, TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand("/hsdelete hotspot byId " + id))
+                    .hoverEvent(Component.text("Click to delete this Hotspot", NamedTextColor.GRAY)));
+        }
+
+        line.resetStyle().appendSpace();
+        line.append(Component.text("- " + getName(), paginator.getGrayColor()));
+        return line.build();
+    }
+
+    private TextComponent getQuestionMark(Location distanceFrom) {
+        var questionMark = Component.text("?", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD).toBuilder();
+        var hoverText = Component.text();
+        hoverText.append(Component.text("Location: ", NamedTextColor.GRAY).append(Component.text(getLocation().getWorld().getName() + ", " + getLocation().getBlockX() + ", " + getLocation().getBlockY() + ", " + getLocation().getBlockZ(), NamedTextColor.BLUE)));
+        hoverText.appendNewline();
+        hoverText.append(Component.text("Category: ", NamedTextColor.GRAY).append(Component.text(getCategory(), NamedTextColor.BLUE)));
+        hoverText.appendNewline();
+        hoverText.append(Component.text("Custom Marker: ", NamedTextColor.GRAY).append(Component.text(getCustomMarker() == null ? "None" : getCustomMarker(), NamedTextColor.BLUE)));
+        if (distanceFrom != null) {
+            hoverText.appendNewline();
+            hoverText.append(Component.text("Distance: ", NamedTextColor.GRAY).append(Component.text(String.format("%.2f", distanceFrom.distance(getLocation())), NamedTextColor.BLUE)));
+        }
+        hoverText.appendNewline();
+        hoverText.append(Component.text("ID: ", NamedTextColor.GRAY).append(Component.text(getId(), NamedTextColor.BLUE)));
+        questionMark.hoverEvent(HoverEvent.showText(hoverText));
+        return questionMark.build();
     }
 
     @Override
-    public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
-        return "";
+    public String getPlainItemText(ChatPaginator<?, Pair<HotspotPaginator.HotspotPaginatorMode, ICommandContext>> paginator, Pair<HotspotPaginator.HotspotPaginatorMode, ICommandContext> generatorInfo) {
+        return getName();
     }
 
     public void setChanged(boolean changedStatus) {

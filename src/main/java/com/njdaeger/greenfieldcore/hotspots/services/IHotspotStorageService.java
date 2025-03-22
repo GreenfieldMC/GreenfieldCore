@@ -26,10 +26,11 @@ public interface IHotspotStorageService extends IModuleService<IHotspotStorageSe
 
     /**
      * Gets a category by its name
-     * @param name The name of the category
+     *
+     * @param id The id of the category
      * @return The category, or null if it does not exist
      */
-    Category getCategory(String name);
+    Category getCategory(String id);
 
     /**
      * Saves a category
@@ -38,10 +39,11 @@ public interface IHotspotStorageService extends IModuleService<IHotspotStorageSe
     void saveCategory(Category category);
 
     /**
-     * Deletes a category by its name
-     * @param name The name of the category to delete
+     * Deletes a category by its id
+     *
+     * @param id The id of the category to delete
      */
-    void deleteCategory(String name);
+    void deleteCategory(String id);
 
     /**
      * Gets the next available hotspot id

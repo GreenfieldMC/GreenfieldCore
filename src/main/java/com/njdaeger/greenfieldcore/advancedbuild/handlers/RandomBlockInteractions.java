@@ -1,6 +1,8 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import com.njdaeger.pdk.utils.text.Text;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -10,8 +12,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class RandomBlockInteractions extends InteractionHandler {
 
-    public RandomBlockInteractions() {
-        super(
+    public RandomBlockInteractions(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
+        super(worldEditService, coreProtectService,
                 Material.BLACK_CARPET,
                 Material.BLUE_CARPET,
                 Material.BROWN_CARPET,

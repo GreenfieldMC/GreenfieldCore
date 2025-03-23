@@ -101,7 +101,7 @@ public class Hotspot implements PageItem<Pair<HotspotPaginator.HotspotPaginatorM
         var ctx = generatorInfo.getSecond();
         var location = ctx.getLocationOrNull();
 
-        var questionMark = getQuestionMark(location);
+        var questionMark = getQuestionMark(paginator, location);
 
         var line = Component.text();
         line.append(questionMark);
@@ -124,18 +124,17 @@ public class Hotspot implements PageItem<Pair<HotspotPaginator.HotspotPaginatorM
         return line.build();
     }
 
-    private TextComponent getQuestionMark(Location distanceFrom) {
-        var questionMark = Component.text("?", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD).toBuilder();
+    private TextComponent getQuestionMark(ChatPaginator<?,?> paginator, Location distanceFrom) {
+        var questionMark = Component.text("?", paginator.getHighlightColor(), TextDecoration.BOLD).toBuilder();
         var hoverText = Component.text();
         hoverText.append(Component.text("Location: ", NamedTextColor.GRAY).append(Component.text(getLocation().getWorld().getName() + ", " + getLocation().getBlockX() + ", " + getLocation().getBlockY() + ", " + getLocation().getBlockZ(), NamedTextColor.BLUE)));
         hoverText.appendNewline();
         hoverText.append(Component.text("Category: ", NamedTextColor.GRAY).append(Component.text(getCategory(), NamedTextColor.BLUE)));
-        hoverText.appendNewline();
-        hoverText.append(Component.text("Custom Marker: ", NamedTextColor.GRAY).append(Component.text(getCustomMarker() == null ? "None" : getCustomMarker(), NamedTextColor.BLUE)));
-        if (distanceFrom != null) {
-            hoverText.appendNewline();
-            hoverText.append(Component.text("Distance: ", NamedTextColor.GRAY).append(Component.text(String.format("%.2f", distanceFrom.distance(getLocation())), NamedTextColor.BLUE)));
-        }
+        if (getCustomMarker() != null )
+            hoverText.appendNewline().append(Component.text("Custom Marker: ", NamedTextColor.GRAY).append(Component.text(getCustomMarker(), NamedTextColor.BLUE)));
+        if (distanceFrom != null)
+            hoverText.appendNewline().append(Component.text("Distance: ", NamedTextColor.GRAY).append(Component.text(String.format("%.2f", distanceFrom.distance(getLocation())), NamedTextColor.BLUE)));
+
         hoverText.appendNewline();
         hoverText.append(Component.text("ID: ", NamedTextColor.GRAY).append(Component.text(getId(), NamedTextColor.BLUE)));
         questionMark.hoverEvent(HoverEvent.showText(hoverText));

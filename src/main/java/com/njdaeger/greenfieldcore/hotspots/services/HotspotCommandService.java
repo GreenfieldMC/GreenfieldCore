@@ -113,10 +113,10 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                 return;
             }
         }
-        if (ctx.last().equalsIgnoreCase("icon") || ctx.hasTyped("icon")) {
+        if (ctx.last().equalsIgnoreCase("icon") || ctx.hasTyped("iconName")) {
             String icon = null;
-            if (ctx.hasTyped("icon")) icon = ctx.getTyped("icon", String.class);
-            if (hotspot.getCustomMarker() == null && icon != null || hotspot.getCustomMarker() != null && icon == null) {
+            if (ctx.hasTyped("iconName")) icon = ctx.getTyped("iconName", String.class);
+            if ((hotspot.getCustomMarker() == null && icon != null) || (hotspot.getCustomMarker() != null && icon == null)) {
                 hotspotService.editHotspot(hotspot, null, null, icon);
                 ctx.send(HotspotMessages.HOTSPOT_EDIT_SUCCESS.apply(hotspot.getName(), "icon", icon == null ? "none" : icon));
                 return;
@@ -174,8 +174,8 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
 
     private void editCategory(ICommandContext ctx) throws PDKCommandException {
         var category = resolveCategory(ctx);
-        if (ctx.hasTyped("icon")) {
-            var icon = ctx.getTyped("icon", String.class);
+        if (ctx.hasTyped("iconName")) {
+            var icon = ctx.getTyped("iconName", String.class);
             if (!icon.equals(category.getMarker())) {
                 hotspotService.editCategory(category, null, icon);
                 ctx.send(HotspotMessages.CATEGORY_EDIT_SUCCESS.apply(category.getName(), "icon", icon));

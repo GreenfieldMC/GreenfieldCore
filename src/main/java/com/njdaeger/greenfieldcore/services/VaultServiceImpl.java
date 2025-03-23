@@ -2,7 +2,7 @@ package com.njdaeger.greenfieldcore.services;
 
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
-import com.njdaeger.greenfieldcore.Util;
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -11,11 +11,12 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class VaultPermissionServiceImpl extends ModuleService<IVaultPermissionService> implements IVaultPermissionService {
+public class VaultServiceImpl extends ModuleService<IVaultService> implements IVaultService {
 
     private Permission permission;
+    private Chat chat;
 
-    public VaultPermissionServiceImpl(Plugin plugin, Module module) {
+    public VaultServiceImpl(Plugin plugin, Module module) {
         super(plugin, module);
     }
 
@@ -28,7 +29,12 @@ public class VaultPermissionServiceImpl extends ModuleService<IVaultPermissionSe
         if (permissionProvider == null)
             throw new Exception("No permission provider found for VaultServiceImpl");
 
+        RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServicesManager().getRegistration(Chat.class);
+        if (chatProvider == null)
+            throw new Exception("No chat provider found for VaultServiceImpl");
+
         permission = permissionProvider.getProvider();
+        chat = chatProvider.getProvider();
     }
 
     @Override
@@ -55,5 +61,30 @@ public class VaultPermissionServiceImpl extends ModuleService<IVaultPermissionSe
             return CompletableFuture.supplyAsync(() -> false);
         }
         return CompletableFuture.supplyAsync(() -> permission.playerRemoveGroup(world, Bukkit.getOfflinePlayer(uuid), group));
+    }
+
+    @Override
+    public CompletableFuture<String> getUserPrefix(UUID user) {
+        if (!isEnabled()) return null;
+        return CompletableFuture.supplyAsync(() -> {
+            var player = Bukkit.getPlayer(user);
+            if (player != null) {
+                return chat.getPlayerPrefix(player);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public CompletableFuture<Boolean> setUserPrefix(UUID user, String prefix) {
+        if (!isEnabled()) return CompletableFuture.supplyAsync(() -> false);
+        return CompletableFuture.supplyAsync(() -> {
+            var player = Bukkit.getPlayer(user);
+            if (player != null) {
+                chat.setPlayerPrefix(player, prefix);
+                return true;
+            }
+            return false;
+        });
     }
 }

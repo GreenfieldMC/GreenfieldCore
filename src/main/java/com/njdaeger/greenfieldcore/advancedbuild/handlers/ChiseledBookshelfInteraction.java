@@ -1,8 +1,9 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
-import com.njdaeger.greenfieldcore.advancedbuild.AdvBuildConfig;
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
-import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.greenfieldcore.advancedbuild.services.IAdvBuildService;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,16 +28,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
 import static java.lang.Math.*;
 
 public class ChiseledBookshelfInteraction extends InteractionHandler implements Listener {
 
-    private final AdvBuildConfig config;
+    private final IAdvBuildService advService;
     private final Map<UUID, BookshelfSession> sessions;
 
-    public ChiseledBookshelfInteraction(Plugin plugin, AdvBuildConfig config) {
-        super((event) -> {
+    public ChiseledBookshelfInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService, Plugin plugin, IAdvBuildService advService) {
+        super(worldEditService, coreProtectService, (event) -> {
                     var player = event.getPlayer();
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand == Material.AIR &&
@@ -46,7 +46,7 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
                 Material.CHISELED_BOOKSHELF);
 
         this.sessions = new HashMap<>();
-        this.config = config;
+        this.advService = advService;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -57,13 +57,13 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
 
     @Override
     public TextComponent getInteractionUsage() {
-        return Component.text("If hand is empty: right click a bookshelf toggles your ").color(LIGHT_BLUE).append(Component.text("selecting shelf", LIGHT_BLUE, TextDecoration.UNDERLINED)).append(Component.text(" status.", LIGHT_BLUE))
+        return Component.text("If hand is empty: right click a bookshelf toggles your ").color(NamedTextColor.GRAY).append(Component.text("selecting shelf", NamedTextColor.GRAY, TextDecoration.UNDERLINED)).append(Component.text(" status.", NamedTextColor.GRAY))
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
-                .append(Component.text("If a bookshelf is selected (aka 'selecting shelf'): The scroll wheel will allow the traversal of all bookshelf options in that color.", LIGHT_BLUE))
+                .append(Component.text("If a bookshelf is selected (aka 'selecting shelf'): The scroll wheel will allow the traversal of all bookshelf options in that color.", NamedTextColor.GRAY))
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
-                .append(Component.text("If hand is holding a bookshelf and NOT shifting: clicking on the front or back of the bookshelf will toggle between the available colors", LIGHT_BLUE))
+                .append(Component.text("If hand is holding a bookshelf and NOT shifting: clicking on the front or back of the bookshelf will toggle between the available colors", NamedTextColor.GRAY))
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
-                .append(Component.text("If hand is holding a bookshelf and shifting: right clicking will place a bookshelf in the desired location with the last placed book amount.", LIGHT_BLUE));
+                .append(Component.text("If hand is holding a bookshelf and shifting: right clicking will place a bookshelf in the desired location with the last placed book amount.", NamedTextColor.GRAY));
     }
 
     @EventHandler
@@ -113,7 +113,7 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent e) {
-        if (config.isEnabledFor(e.getPlayer())) {
+        if (advService.isEnabledFor(e.getPlayer().getUniqueId())) {
             var session = getSession(e.getPlayer().getUniqueId());
             if (session.isSelectingShelf()) {
                 e.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE + "[AdvBuild] " + ChatColor.GRAY + "Bookshelf locked.");
@@ -134,7 +134,7 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
 
     @EventHandler
     public void onScroll(PlayerItemHeldEvent event) {
-        if (config.isEnabledFor(event.getPlayer())) {
+        if (advService.isEnabledFor(event.getPlayer().getUniqueId())) {
             var session = getSession(event.getPlayer().getUniqueId());
             if (session.isSelectingShelf()) {
                 var current = (ChiseledBookshelf) session.getSelected().getBlock().getBlockData();
@@ -148,7 +148,7 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        if (config.isEnabledFor(event.getPlayer())) {
+        if (advService.isEnabledFor(event.getPlayer().getUniqueId())) {
             var session = getSession(event.getPlayer().getUniqueId());
             if (session.isSelectingShelf()) {
                 var loc = session.getSelected();

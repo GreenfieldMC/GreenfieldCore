@@ -2,7 +2,7 @@ package com.njdaeger.greenfieldcore.testresult.services;
 
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
-import com.njdaeger.greenfieldcore.services.IVaultPermissionService;
+import com.njdaeger.greenfieldcore.services.IVaultService;
 import com.njdaeger.greenfieldcore.testresult.TestAttempt;
 import com.njdaeger.greenfieldcore.testresult.TestResultMessages;
 import com.njdaeger.greenfieldcore.testresult.TestSet;
@@ -23,10 +23,10 @@ import static com.njdaeger.greenfieldcore.Util.CONSOLE_UUID;
 public class TestResultServiceImpl extends ModuleService<ITestResultService> implements ITestResultService {
 
     private final ITestResultStorageService storageService;
-    private final IVaultPermissionService vaultService;
+    private final IVaultService vaultService;
     private final IConfig config;
 
-    public TestResultServiceImpl(Plugin plugin, Module module, ITestResultStorageService storageService, IVaultPermissionService vaultService) {
+    public TestResultServiceImpl(Plugin plugin, Module module, ITestResultStorageService storageService, IVaultService vaultService) {
         super(plugin, module);
         this.config = ConfigType.YML.createNew(plugin, "testbuild-config");
         this.storageService = storageService;

@@ -3,8 +3,8 @@ package com.njdaeger.greenfieldcore.testresult;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
-import com.njdaeger.greenfieldcore.services.IVaultPermissionService;
-import com.njdaeger.greenfieldcore.services.VaultPermissionServiceImpl;
+import com.njdaeger.greenfieldcore.services.IVaultService;
+import com.njdaeger.greenfieldcore.services.VaultServiceImpl;
 import com.njdaeger.greenfieldcore.testresult.services.ITestResultService;
 import com.njdaeger.greenfieldcore.testresult.services.ITestResultStorageService;
 import com.njdaeger.greenfieldcore.testresult.services.TestResultCommandService;
@@ -17,7 +17,7 @@ public final class TestResultModule extends Module {
 
     private ITestResultStorageService storageService;
     private ITestResultService testResultService;
-    private IVaultPermissionService permissionService;
+    private IVaultService permissionService;
 
     public TestResultModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
         super(plugin, canEnable);
@@ -26,7 +26,7 @@ public final class TestResultModule extends Module {
     @Override
     public void tryEnable() {
         this.storageService = enableIntegration(new TestResultStorageServiceImpl(plugin, this), true);
-        this.permissionService = enableIntegration(new VaultPermissionServiceImpl(plugin, this), true);
+        this.permissionService = enableIntegration(new VaultServiceImpl(plugin, this), true);
         this.testResultService = enableIntegration(new TestResultServiceImpl(plugin, this, storageService, permissionService), true);
         enableIntegration(new TestResultCommandService(plugin, this, testResultService), true);
     }

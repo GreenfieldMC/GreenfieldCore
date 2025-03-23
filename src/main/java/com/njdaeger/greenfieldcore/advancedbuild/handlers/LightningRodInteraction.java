@@ -1,14 +1,16 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.LightningRod;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class LightningRodInteraction extends InteractionHandler {
 
-    public LightningRodInteraction() {
-        super(Material.LIGHTNING_ROD);
+    public LightningRodInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
+        super(worldEditService, coreProtectService, Material.LIGHTNING_ROD);
     }
 
     @Override

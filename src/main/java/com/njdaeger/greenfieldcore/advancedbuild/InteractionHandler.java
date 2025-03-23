@@ -1,16 +1,14 @@
 package com.njdaeger.greenfieldcore.advancedbuild;
 
-import com.njdaeger.greenfieldcore.GreenfieldCore;
-import com.njdaeger.pdk.command.CommandContext;
-import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
+import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.PageItem;
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.util.SideEffectSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
@@ -25,22 +23,22 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
-
-public abstract class InteractionHandler implements PageItem<CommandContext> {
+public abstract class InteractionHandler implements PageItem<ICommandContext> {
 
     protected final List<Material> materials;
     private final Predicate<PlayerInteractEvent> predicate;
-    protected final GreenfieldCore plugin;
+    private final IWorldEditService worldEditService;
+    private final ICoreProtectService coreProtectService;
 
     /**
      * Create an interaction handler for given materials.
      * @param heldMaterials The materials to look for in the main hand of the player when interacting.
      */
-    public InteractionHandler(Material... heldMaterials) {
+    public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, Material... heldMaterials) {
         this.materials = heldMaterials == null ? new ArrayList<>() : Arrays.asList(heldMaterials);
-        this.plugin = GreenfieldCore.getPlugin(GreenfieldCore.class);
         this.predicate = null;
+        this.worldEditService = worldEditService;
+        this.coreProtectService = coreProtectService;
     }
 
     /**
@@ -48,15 +46,11 @@ public abstract class InteractionHandler implements PageItem<CommandContext> {
      * @param predicate The predicate to test for to determine if the interaction should be handled by this interaction handler.
      * @param materials The materials to look for in the main hand of the player when interacting.
      */
-    public InteractionHandler(Predicate<PlayerInteractEvent> predicate, Material...  materials) {
+    public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, Predicate<PlayerInteractEvent> predicate, Material...  materials) {
         this.materials = Arrays.asList(materials);
-        this.plugin = GreenfieldCore.getPlugin(GreenfieldCore.class);
         this.predicate = predicate;
-    }
-
-    @Override
-    public String getPlainItemText(ChatPaginator<?, CommandContext> paginator, CommandContext generatorInfo) {
-        return getInteractionName();
+        this.worldEditService = worldEditService;
+        this.coreProtectService = coreProtectService;
     }
 
     /**
@@ -94,7 +88,7 @@ public abstract class InteractionHandler implements PageItem<CommandContext> {
 
         for (int i = 0; i < materials.size(); i++) {
             var mat = materials.get(i);
-            base2.append(Component.text(mat.getKey().getKey(), LIGHT_BLUE));
+            base2.append(Component.text(mat.getKey().getKey(), NamedTextColor.GRAY));
             if (i != materials.size() - 1) base2.append(Component.text(", ", NamedTextColor.BLUE, TextDecoration.BOLD));
         }
         base2.append(Component.text("]", NamedTextColor.GRAY));
@@ -175,10 +169,9 @@ public abstract class InteractionHandler implements PageItem<CommandContext> {
      * @param changedBlock The block that was placed or removed.
      */
     public final void log(boolean placement, Player player, Block changedBlock) {
-        var plugin = GreenfieldCore.getPlugin(GreenfieldCore.class);
-        if (!plugin.isCoreProtectEnabled()) return;
-        if (placement) plugin.getCoreApi().logPlacement(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
-        else plugin.getCoreApi().logRemoval(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
+        if (!coreProtectService.isEnabled()) return;
+        if (placement) coreProtectService.logPlacement(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
+        else coreProtectService.logRemoval(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
     }
 
     /**
@@ -236,16 +229,25 @@ public abstract class InteractionHandler implements PageItem<CommandContext> {
 
     public void placeBlockNatively(Player player, Location location, BlockData data) {
         log(false, player, location.getBlock());
-        WorldEditPlugin worldedit = (WorldEditPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
-        var world = worldedit.getWorldEdit().getPlatformManager().getWorldForEditing(BukkitAdapter.adapt(location.getWorld()));
-        var blockstate = BukkitAdapter.adapt(data);
-
-        try {
-            world.setBlock(BukkitAdapter.asBlockVector(location), blockstate.toBaseBlock(), SideEffectSet.none());
-        } catch (WorldEditException e) {
-            throw new RuntimeException(e);
-        }
+        worldEditService.setBlock(location, data);
         log(true, player, location.getBlock());
     }
 
+    @Override
+    public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+        return getInteractionName();
+    }
+
+    @Override
+    public TextComponent getItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
+        var questionMark = Component.text("?", paginator.getHighlightColor(), TextDecoration.BOLD).toBuilder();
+        questionMark.hoverEvent(HoverEvent.showText(Component.text("Click to view detailed information about this interaction handler.", paginator.getGrayColor())));
+        questionMark.clickEvent(ClickEvent.runCommand("/avb " + getInteractionName()));
+
+        var line = Component.text();
+        line.append(questionMark);
+        line.resetStyle().appendSpace();
+        line.append(Component.text("| ", paginator.getGrayColor()).append(Component.text(getInteractionName()).hoverEvent(HoverEvent.showText(getInteractionDescription().color(paginator.getGrayColor())))));
+        return line.build();
+    }
 }

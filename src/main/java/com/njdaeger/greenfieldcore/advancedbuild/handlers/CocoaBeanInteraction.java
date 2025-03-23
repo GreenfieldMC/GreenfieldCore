@@ -1,6 +1,8 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Cocoa;
@@ -15,8 +17,8 @@ public class CocoaBeanInteraction extends InteractionHandler {
 
     private final Map<UUID, Integer> lastAge = new HashMap<>();
 
-    public CocoaBeanInteraction() {
-        super(Material.COCOA_BEANS);
+    public CocoaBeanInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
+        super(worldEditService, coreProtectService, Material.COCOA_BEANS);
     }
 
     @Override

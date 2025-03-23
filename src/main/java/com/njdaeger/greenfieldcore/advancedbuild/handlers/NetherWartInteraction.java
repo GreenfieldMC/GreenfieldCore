@@ -1,22 +1,20 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
-import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
-
 public class NetherWartInteraction extends InteractionHandler {
 
-    public NetherWartInteraction() {
-        super(Material.NETHER_WART);
+    public NetherWartInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
+        super(worldEditService, coreProtectService, Material.NETHER_WART);
     }
 
     @Override
@@ -26,9 +24,9 @@ public class NetherWartInteraction extends InteractionHandler {
 
     @Override
     public TextComponent getInteractionUsage() {
-        return Component.text("If not shifting, and a block clicked is a nether wart: Cycle the \"age\" property", LIGHT_BLUE)
+        return Component.text("If not shifting, and a block clicked is a nether wart: Cycle the \"age\" property", NamedTextColor.GRAY)
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
-                .append(Component.text("If shifting: place the nether wart", LIGHT_BLUE));
+                .append(Component.text("If shifting: place the nether wart", NamedTextColor.GRAY));
     }
 
     @Override

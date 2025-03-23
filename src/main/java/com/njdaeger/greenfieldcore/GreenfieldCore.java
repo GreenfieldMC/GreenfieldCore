@@ -3,7 +3,7 @@ package com.njdaeger.greenfieldcore;
 //import com.earth2me.essentials.userstorage.IUserMap;
 
 import com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule;
-import com.njdaeger.greenfieldcore.authhub.AuthHubIntegration;
+import com.njdaeger.greenfieldcore.authhub.AuthhubModule;
 import com.njdaeger.greenfieldcore.chatformat.ChatFormatModule;
 import com.njdaeger.greenfieldcore.codes.CodesModule;
 import com.njdaeger.greenfieldcore.commandstore.CommandStoreModule;
@@ -54,7 +54,7 @@ public final class GreenfieldCore extends JavaPlugin {
                 new TestResultModule(this, ModuleConfig::isTestResultsEnabled),
                 new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled),
                 new UtilitiesModule(this, ModuleConfig::isUtilitiesEnabled),
-                new AuthHubIntegration(this, ModuleConfig::isAuthHubEnabled),
+                new AuthhubModule(this, ModuleConfig::isAuthHubEnabled),
                 new CommandStoreModule(this, ModuleConfig::isCommandStoreEnabled),
                 new HotspotModule(this, ModuleConfig::isHotspotsEnabled),
                 new PowerShovelModule(this, ModuleConfig::isPowerShovelEnabled),

@@ -66,7 +66,6 @@ public final class RedblockServiceHelpers {
         display.setTextOpacity((byte) 0xFF);
         display.setAlignment(TextDisplay.TextAlignment.CENTER);
         display.setSeeThrough(true);
-        System.out.println(display.getDisplayHeight());
 
         var displayComponent = Component.text();
         displayComponent.append(Component.text("ID: ", NamedTextColor.GRAY, TextDecoration.BOLD).append(Component.text(id, NamedTextColor.BLUE)));

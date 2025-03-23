@@ -1,11 +1,11 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
-import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.data.type.PinkPetals;
 import org.bukkit.event.Event;
@@ -15,14 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
-
 public class PinkPetalsInteraction extends InteractionHandler {
 
     private final Map<UUID, PetalSession> sessions;
 
-    public PinkPetalsInteraction() {
-        super((event) -> {
+    public PinkPetalsInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
+        super(worldEditService, coreProtectService, (event) -> {
                     var player = event.getPlayer();
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand == Material.AIR &&
@@ -41,9 +39,9 @@ public class PinkPetalsInteraction extends InteractionHandler {
 
     @Override
     public TextComponent getInteractionUsage() {
-        return Component.text("If hand is empty or is holding pink petals: right clicking pink petals cycles the petal amount.", LIGHT_BLUE)
+        return Component.text("If hand is empty or is holding pink petals: right clicking pink petals cycles the petal amount.", NamedTextColor.GRAY)
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY)
-                .append(Component.text("If hand is holding pink petals and shifting: pink petals will be placed with the last petal amount you used.", LIGHT_BLUE)));
+                .append(Component.text("If hand is holding pink petals and shifting: pink petals will be placed with the last petal amount you used.", NamedTextColor.GRAY)));
     }
 
     @Override

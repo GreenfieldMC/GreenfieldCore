@@ -1,11 +1,11 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
-import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
@@ -17,14 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
-
 public class CandleInteraction extends InteractionHandler {
 
     private final Map<UUID, CandleSession> sessions;
 
-    public CandleInteraction() {
-        super((event) -> {
+    public CandleInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
+        super(worldEditService, coreProtectService, (event) -> {
                 var player = event.getPlayer();
                 var mainHand = player.getInventory().getItemInMainHand().getType();
                 return !player.isSneaking() &&
@@ -60,11 +58,11 @@ public class CandleInteraction extends InteractionHandler {
 
     @Override
     public TextComponent getInteractionUsage() {
-        return Component.text("If hand is empty: right click a candle toggles the \"lit\" state of the candle.", LIGHT_BLUE)
+        return Component.text("If hand is empty: right click a candle toggles the \"lit\" state of the candle.", NamedTextColor.GRAY)
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
-                .append(Component.text("If hand is not empty: right clicking a candle cycles the candle amount of that candle.", LIGHT_BLUE))
+                .append(Component.text("If hand is not empty: right clicking a candle cycles the candle amount of that candle.", NamedTextColor.GRAY))
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
-                .append(Component.text("If hand is holding a candle and shifting: right clicking will place a candle in the desired location.", LIGHT_BLUE));
+                .append(Component.text("If hand is holding a candle and shifting: right clicking will place a candle in the desired location.", NamedTextColor.GRAY));
     }
 
     @Override

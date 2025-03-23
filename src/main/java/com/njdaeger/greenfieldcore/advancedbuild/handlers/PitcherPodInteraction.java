@@ -1,23 +1,21 @@
 package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
-import com.njdaeger.pdk.utils.text.Text;
+import com.njdaeger.greenfieldcore.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.services.IWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.PitcherCrop;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import static com.njdaeger.greenfieldcore.advancedbuild.AdvancedBuildModule.LIGHT_BLUE;
-
 public class PitcherPodInteraction extends InteractionHandler {
 
-    public PitcherPodInteraction() {
-        super(Material.PITCHER_POD);
+    public PitcherPodInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
+        super(worldEditService, coreProtectService, Material.PITCHER_POD);
     }
 
     @Override
@@ -27,9 +25,9 @@ public class PitcherPodInteraction extends InteractionHandler {
 
     @Override
     public TextComponent getInteractionUsage() {
-        return Component.text("If not shifting, and block clicked is a pitcher crop: Cycle the \"age\" property", LIGHT_BLUE)
+        return Component.text("If not shifting, and block clicked is a pitcher crop: Cycle the \"age\" property", NamedTextColor.GRAY)
                 .append(Component.text(" ----- ", NamedTextColor.DARK_GRAY))
-                .append(Component.text("If shifting: place the pitcher crop", LIGHT_BLUE));
+                .append(Component.text("If shifting: place the pitcher crop", NamedTextColor.GRAY));
     }
 
     @Override

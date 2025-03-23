@@ -33,6 +33,6 @@ public class Code implements PageItem<ICommandContext> {
 
     @Override
     public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
-        return "";
+        return getCode();
     }
 }

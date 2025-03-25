@@ -8,6 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 
@@ -23,7 +24,7 @@ public class UtilityCommands {
                     player.removePotionEffect(PotionEffectType.NIGHT_VISION);
                     player.sendMessage(Component.text("Night vision disabled.", NamedTextColor.GRAY));
                 } else {
-                    player.addPotionEffect(PotionEffectType.NIGHT_VISION.createEffect(Integer.MAX_VALUE, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 1, false, false));
                     player.sendMessage(Component.text("Night vision enabled.", NamedTextColor.GRAY));
                 }
             }).register(plugin);

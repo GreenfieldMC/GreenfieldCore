@@ -5,6 +5,8 @@ import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
@@ -47,10 +49,10 @@ public class ChatFormatCommandService extends ModuleService<ChatFormatCommandSer
                     config.setVolume(ctx.asPlayer(), vol);
                     ctx.send(moduleMessage("Chat").append(Component.text("Your ping volume has been set to " + vol, NamedTextColor.GRAY)));
                 }).end()
-                .then("sound").then("soundChoice", PdkArgumentTypes.enumArg(Sound.class)).executes(ctx -> {
+                .then("sound").then("soundChoice", ArgumentTypes.resource(RegistryKey.SOUND_EVENT)).executes(ctx -> {
                     var sound = ctx.getTyped("soundChoice", Sound.class);
                     config.setSound(ctx.asPlayer(), sound);
-                    ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been set to " + sound.getKey().getKey(), NamedTextColor.GRAY)));
+                    ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been set to " + sound, NamedTextColor.GRAY)));
                 }).then("reset").executes(ctx -> {
                     config.setSound(ctx.asPlayer(), Sound.BLOCK_NOTE_BLOCK_CHIME);
                     ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been reset to the default.", NamedTextColor.GRAY)));

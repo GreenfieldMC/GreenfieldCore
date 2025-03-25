@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.njdaeger.greenfieldcore.Util;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.BasePdkArgumentType;
+import org.bukkit.command.CommandSender;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class OfflinePlayerArgument extends BasePdkArgumentType<UUID, String> {
     }
 
     @Override
-    public UUID convertToCustom(String nativeType, StringReader reader) throws CommandSyntaxException {
+    public UUID convertToCustom(CommandSender sender, String nativeType, StringReader reader) throws CommandSyntaxException {
         if (nativeType == null || nativeType.isBlank()) throw PLAYER_NOT_FOUND.createWithContext(reader, nativeType);
         for (var entry : Util.userNameMap.entrySet()) {
             if (entry.getValue().equalsIgnoreCase(nativeType)) {

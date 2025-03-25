@@ -1,7 +1,6 @@
 package com.njdaeger.greenfieldcore;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MinecraftFont;

@@ -8,8 +8,8 @@ import com.njdaeger.greenfieldcore.hotspots.Hotspot;
 import com.njdaeger.greenfieldcore.hotspots.services.IHotspotService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractIntegerTypedArgument;
+import org.bukkit.command.CommandSender;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -38,7 +38,7 @@ public class HotspotIdArgument extends AbstractIntegerTypedArgument<Hotspot> {
     }
 
     @Override
-    public Hotspot convertToCustom(Integer nativeType, StringReader reader) throws CommandSyntaxException {
+    public Hotspot convertToCustom(CommandSender sender, Integer nativeType, StringReader reader) throws CommandSyntaxException {
         var hotspot = hotspotService.getHotspot(nativeType);
         if (hotspot == null) {
             reader.setCursor(reader.getCursor() - String.valueOf(nativeType).length());

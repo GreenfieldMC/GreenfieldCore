@@ -8,6 +8,7 @@ import com.njdaeger.greenfieldcore.hotspots.Hotspot;
 import com.njdaeger.greenfieldcore.hotspots.services.IHotspotService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractQuotedTypedArgument;
+import org.bukkit.command.CommandSender;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -40,7 +41,7 @@ public class HotspotNameArgument extends AbstractQuotedTypedArgument<List<Hotspo
     }
 
     @Override
-    public List<Hotspot> convertToCustom(String nativeType, StringReader reader) throws CommandSyntaxException {
+    public List<Hotspot> convertToCustom(CommandSender sender, String nativeType, StringReader reader) throws CommandSyntaxException {
         var hotspots = hotspotService.getHotspots(hs -> hs.getName().equalsIgnoreCase(nativeType));
         if (hotspots.isEmpty()) {
             reader.setCursor(reader.getCursor() - nativeType.length());

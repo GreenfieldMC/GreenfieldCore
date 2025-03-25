@@ -1,7 +1,6 @@
 package com.njdaeger.greenfieldcore.redblock;
 
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
-import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.PageItem;
 import net.kyori.adventure.text.Component;

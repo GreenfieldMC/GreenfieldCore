@@ -8,6 +8,7 @@ import com.njdaeger.greenfieldcore.hotspots.Category;
 import com.njdaeger.greenfieldcore.hotspots.services.IHotspotService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
+import org.bukkit.command.CommandSender;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -41,7 +42,7 @@ public class CategoryIdArgument extends AbstractStringTypedArgument<Category> {
     }
 
     @Override
-    public Category convertToCustom(String nativeType, StringReader reader) throws CommandSyntaxException {
+    public Category convertToCustom(CommandSender sender, String nativeType, StringReader reader) throws CommandSyntaxException {
         var category = hotspotService.getCategory(nativeType);
         if (category == null) {
             reader.setCursor(reader.getCursor() - nativeType.length());

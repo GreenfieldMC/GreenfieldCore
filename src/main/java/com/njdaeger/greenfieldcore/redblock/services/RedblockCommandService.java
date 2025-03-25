@@ -112,7 +112,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
     private void info(ICommandContext ctx) throws PDKCommandException {
         var rb = resolveRedblock(ctx, rdb -> rdb.isIncomplete() || rdb.isPending(), "incomplete or pending");
 
-        infoPaginator.generatePage(ctx, rb.getRedblockInfo(ctx.isLocatable() ? ctx.getLocation() : null), 1).sendTo(ctx.getSender());
+        infoPaginator.generatePage(ctx, rb.getRedblockInfo(ctx.isLocatable() ? ctx.getLocation() : null), 1).sendTo(RedblockMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
     }
 
     private void list(ICommandContext ctx) throws PDKCommandException {
@@ -155,7 +155,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
                 .filter(rb -> approvedBy == null || rb.getApprovedBy() != null && rb.getApprovedBy().equals(approvedBy))
                 .toList();
 
-        listPaginator.generatePage(ctx, filtered, page).sendTo(ctx.getSender());
+        listPaginator.generatePage(ctx, filtered, page).sendTo(RedblockMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
     }
 
     // region Helpers

@@ -1,6 +1,5 @@
 package com.njdaeger.greenfieldcore.codes.services;
 
-import com.earth2me.essentials.IConf;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.codes.Code;

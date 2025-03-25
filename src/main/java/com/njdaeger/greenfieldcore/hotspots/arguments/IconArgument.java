@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.njdaeger.greenfieldcore.services.IDynmapService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
+import org.bukkit.command.CommandSender;
 import org.dynmap.markers.MarkerIcon;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class IconArgument extends AbstractStringTypedArgument<String> {
     }
 
     @Override
-    public String convertToCustom(String nativeType, StringReader reader) throws CommandSyntaxException {
+    public String convertToCustom(CommandSender sender, String nativeType, StringReader reader) throws CommandSyntaxException {
         if (!dynmapService.isEnabled()) {
             return nativeType;
         }

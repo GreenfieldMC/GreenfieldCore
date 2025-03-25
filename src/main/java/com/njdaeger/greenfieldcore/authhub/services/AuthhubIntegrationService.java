@@ -9,7 +9,6 @@ import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.services.IVaultService;
 import io.papermc.paper.ban.BanListType;
 import org.bukkit.Bukkit;
-import org.bukkit.ban.ProfileBanList;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

@@ -7,6 +7,7 @@ import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.greenfieldcore.advancedbuild.services.IAdvBuildService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
+import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class InteractionHandlerArgument extends AbstractStringTypedArgument<Inte
     }
 
     @Override
-    public InteractionHandler convertToCustom(String nativeType, StringReader reader) throws CommandSyntaxException {
+    public InteractionHandler convertToCustom(CommandSender sender, String nativeType, StringReader reader) throws CommandSyntaxException {
         var interaction = advBuildService.getInteractionHandlers().stream().filter(i -> i.getInteractionName().equalsIgnoreCase(nativeType)).findFirst();
         if (interaction.isEmpty()) {
             reader.setCursor(reader.getCursor() - nativeType.length());

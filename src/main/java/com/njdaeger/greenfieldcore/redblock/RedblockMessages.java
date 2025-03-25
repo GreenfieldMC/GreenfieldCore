@@ -22,6 +22,8 @@ public class RedblockMessages {
     public static final String ERROR_EDIT_RANK_UNRANK = "You cannot rank and unrank a RedBlock simultaneously.";
     public static final String ERROR_GOTO_ID_MINE = "You cannot use -id and -mine flags simultaneously.";
     public static final Function<Integer, String> ERROR_GOTO_NO_REDBLOCK_FOUND = (radius) -> "No incomplete RedBlock found" + (radius > 0 ? " in a " + radius + " block radius of you" : "") + " matching the given criteria.";
+    public static final TextComponent ERROR_NO_RESULTS_TO_DISPLAY = Component.text("There are no results to display.", NamedTextColor.RED);
+
 
     // All other messages
     public static final Function<Integer, TextComponent> REDBLOCK_CREATED = id -> MODULE.append(Component.text("Created RedBlock #" + id, NamedTextColor.GRAY));

@@ -3,7 +3,6 @@ package com.njdaeger.greenfieldcore.advancedbuild.handlers;
 import com.njdaeger.greenfieldcore.advancedbuild.InteractionHandler;
 import com.njdaeger.greenfieldcore.services.ICoreProtectService;
 import com.njdaeger.greenfieldcore.services.IWorldEditService;
-import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class DefaultInteraction extends InteractionHandler {

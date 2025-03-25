@@ -4,7 +4,6 @@ import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
 import com.njdaeger.greenfieldcore.redblock.services.RedblockDynmapServiceImpl;
-import com.njdaeger.greenfieldcore.services.DynmapServiceImpl;
 import com.njdaeger.greenfieldcore.services.EssentialsServiceImpl;
 import com.njdaeger.greenfieldcore.services.IDynmapService;
 import com.njdaeger.greenfieldcore.services.IEssentialsService;

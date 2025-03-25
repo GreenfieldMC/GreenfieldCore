@@ -10,6 +10,7 @@ import com.njdaeger.greenfieldcore.redblock.Redblock;
 import com.njdaeger.greenfieldcore.redblock.services.IRedblockService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.BasePdkArgumentType;
+import org.bukkit.command.CommandSender;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -39,7 +40,7 @@ public class RedblockArgument extends BasePdkArgumentType<Redblock, Integer> {
     }
 
     @Override
-    public Redblock convertToCustom(Integer nativeType, StringReader reader) throws CommandSyntaxException {
+    public Redblock convertToCustom(CommandSender sender, Integer nativeType, StringReader reader) throws CommandSyntaxException {
         var redblock = redblockService.getRedblock(nativeType);
         if (redblock == null) {
             reader.setCursor(reader.getCursor() - String.valueOf(nativeType).length());

@@ -5,8 +5,8 @@ import com.mojang.authlib.properties.Property;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
-import com.njdaeger.pdk.command.CommandBuilder;
-import com.njdaeger.pdk.command.CommandContext;
+import com.njdaeger.pdk.command.brigadier.ICommandContext;
+import com.njdaeger.pdk.command.exception.CommandSenderTypeException;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -47,12 +47,12 @@ public class PowerShovelModule extends Module implements Listener {
 
     @Override
     public void tryEnable() {
-        CommandBuilder.of("powershovel", "ps", "powerconnector")
-                .executor(this::powerShovelCommand)
-                .permissions("greenfieldcore.powershovel")
-                .usage("/powershovel")
-                .description("Gives you a power shovel for easy power connectors.")
-                .register(plugin);
+//        CommandBuilder.of("powershovel", "ps", "powerconnector")
+//                .executor(this::powerShovelCommand)
+//                .permissions("greenfieldcore.powershovel")
+//                .usage("/powershovel")
+//                .description("Gives you a power shovel for easy power connectors.")
+//                .register(plugin);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -135,7 +135,7 @@ public class PowerShovelModule extends Module implements Listener {
         }
     }
 
-    private void powerShovelCommand(CommandContext context) {
+    private void powerShovelCommand(ICommandContext context) throws CommandSenderTypeException {
         Player player = context.asPlayer();
         context.send(ChatColor.LIGHT_PURPLE + "[PowerShovel] " + ChatColor.GRAY + "You now have the power shovel.");
         player.getInventory().addItem(SHOVEL);

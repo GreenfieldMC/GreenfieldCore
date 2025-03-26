@@ -54,7 +54,7 @@ public abstract class Module {
             this.enabled = true;
         } catch (Exception e) {
             this.enabled = false;
-            throw new RuntimeException(e);
+            getLogger().severe("Failed to enable module: " + e.getMessage());
         }
     }
 
@@ -64,7 +64,7 @@ public abstract class Module {
             tryDisable();
             this.enabled = false;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            getLogger().severe("Failed to enable module: " + e.getMessage());
         }
     }
 

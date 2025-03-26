@@ -1,4 +1,4 @@
-package com.njdaeger.greenfieldcore.paintingswitch;
+package com.njdaeger.greenfieldcore.paintingswitch.services;
 
 import org.bukkit.Art;
 import org.bukkit.Location;

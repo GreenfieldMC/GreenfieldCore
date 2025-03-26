@@ -56,7 +56,6 @@ public class AdvBuildCommandService extends ModuleService<AdvBuildCommandService
     }
 
     private void toggle(ICommandContext ctx) throws PDKCommandException {
-        if (!ctx.isPlayer()) ctx.error(AdvBuildMessages.ERROR_PLAYERS_ONLY);
         var id = ctx.asPlayer().getUniqueId();
         var wasEnabled = advBuildService.isEnabledFor(id);
         advBuildService.setEnabledFor(id, !wasEnabled);

@@ -1,4 +1,4 @@
-package com.njdaeger.greenfieldcore.utilities;
+package com.njdaeger.greenfieldcore.utilities.services;
 
 import com.njdaeger.greenfieldcore.IModuleService;
 import com.njdaeger.greenfieldcore.Module;

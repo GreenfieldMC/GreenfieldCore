@@ -5,7 +5,7 @@ import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
 import com.njdaeger.greenfieldcore.authhub.services.AuthhubIntegrationService;
 import com.njdaeger.greenfieldcore.authhub.services.AuthhubServiceImpl;
-import com.njdaeger.greenfieldcore.services.VaultServiceImpl;
+import com.njdaeger.greenfieldcore.shared.services.VaultServiceImpl;
 
 import java.util.function.Predicate;
 

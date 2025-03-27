@@ -26,31 +26,6 @@ public final class Util {
         return DATE_FORMAT.format(Date.from(Instant.ofEpochMilli(time)));
     }
 
-    /**
-     * Broadcasts a message to the players on the server if they have permission to see the message.
-     * @param message The message to send
-     * @param permission The permission to check
-     */
-    public static void broadcast(String message, String permission) {
-        Bukkit.getConsoleSender().sendMessage(message);
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (player.hasPermission(permission)) player.sendMessage(message);
-        }
-    }
-
-    public static void notAllowed(Entity entity) {
-        entity.sendMessage(LIGHT_PURPLE + "[OpenServer] " + GRAY + "You cannot do that when the server is locked.");
-    }
-
-    public static int getSubstringIndex(int maxPixelWidth, String text) {
-        int currentWidth = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (currentWidth >= maxPixelWidth) return i - 1;
-            else currentWidth += MinecraftFont.Font.getChar(text.charAt(i)).getWidth();
-        }
-        return text.length();
-    }
-
     public static Map<UUID, String> getAllPlayers() {
         var map = new HashMap<>(Util.userNameMap);
 

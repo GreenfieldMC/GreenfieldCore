@@ -4,7 +4,7 @@ import com.njdaeger.greenfieldcore.IModuleService;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.Util;
-import com.njdaeger.greenfieldcore.arguments.OfflinePlayerArgument;
+import com.njdaeger.greenfieldcore.shared.arguments.OfflinePlayerArgument;
 import com.njdaeger.greenfieldcore.testresult.TestAttempt;
 import com.njdaeger.greenfieldcore.testresult.TestResultMessages;
 import com.njdaeger.greenfieldcore.testresult.TestSet;

@@ -1,8 +1,9 @@
-package com.njdaeger.greenfieldcore.utilities;
+package com.njdaeger.greenfieldcore.utilities.services;
 
 import com.njdaeger.greenfieldcore.IModuleService;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
+import com.njdaeger.greenfieldcore.utilities.UtilityMessages;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import net.kyori.adventure.text.Component;
@@ -31,10 +32,10 @@ public class UtilityCommands extends ModuleService<UtilityCommands> implements I
                     var player = ctx.asPlayer();
                     if (player.hasPotionEffect(PotionEffectType.NIGHT_VISION)) {
                         player.removePotionEffect(PotionEffectType.NIGHT_VISION);
-                        player.sendMessage(Component.text("Night vision disabled.", NamedTextColor.GRAY));
+                        player.sendMessage(UtilityMessages.DISABLE_NIGHTVISION);
                     } else {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 1, false, false));
-                        player.sendMessage(Component.text("Night vision enabled.", NamedTextColor.GRAY));
+                        player.sendMessage(UtilityMessages.ENABLE_NIGHTVISION);
                     }
                 }).register(plugin);
 

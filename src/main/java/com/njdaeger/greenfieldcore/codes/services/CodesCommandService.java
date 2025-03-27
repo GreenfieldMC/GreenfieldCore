@@ -4,7 +4,7 @@ import com.njdaeger.greenfieldcore.IModuleService;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.codes.Code;
-import com.njdaeger.greenfieldcore.codes.CodesPaginator;
+import com.njdaeger.greenfieldcore.codes.paginators.CodesPaginator;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;

@@ -4,7 +4,7 @@ import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.hotspots.Category;
 import com.njdaeger.greenfieldcore.hotspots.Hotspot;
-import com.njdaeger.greenfieldcore.services.IDynmapService;
+import com.njdaeger.greenfieldcore.shared.services.IDynmapService;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 

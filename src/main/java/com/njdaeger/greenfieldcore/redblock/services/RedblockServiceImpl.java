@@ -4,7 +4,7 @@ import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
 import com.njdaeger.greenfieldcore.redblock.Redblock;
 import com.njdaeger.greenfieldcore.redblock.RedblockMessages;
-import com.njdaeger.greenfieldcore.services.IDynmapService;
+import com.njdaeger.greenfieldcore.shared.services.IDynmapService;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

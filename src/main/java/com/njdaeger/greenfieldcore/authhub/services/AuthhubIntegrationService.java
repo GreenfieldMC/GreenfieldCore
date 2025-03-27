@@ -6,7 +6,7 @@ import com.njdaeger.authenticationhub.patreon.PatreonUserLoginEvent;
 import com.njdaeger.greenfieldcore.IModuleService;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
-import com.njdaeger.greenfieldcore.services.IVaultService;
+import com.njdaeger.greenfieldcore.shared.services.IVaultService;
 import io.papermc.paper.ban.BanListType;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;

@@ -6,8 +6,8 @@ import com.njdaeger.greenfieldcore.ModuleConfig;
 import com.njdaeger.greenfieldcore.advancedbuild.services.AdvBuildCommandService;
 import com.njdaeger.greenfieldcore.advancedbuild.services.AdvBuildServiceImpl;
 import com.njdaeger.greenfieldcore.advancedbuild.services.IAdvBuildService;
-import com.njdaeger.greenfieldcore.services.CoreProtectServiceImpl;
-import com.njdaeger.greenfieldcore.services.WorldEditServiceImpl;
+import com.njdaeger.greenfieldcore.shared.services.CoreProtectServiceImpl;
+import com.njdaeger.greenfieldcore.shared.services.WorldEditServiceImpl;
 
 import java.util.function.Predicate;
 

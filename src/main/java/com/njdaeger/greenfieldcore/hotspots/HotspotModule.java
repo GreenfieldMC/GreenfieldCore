@@ -9,9 +9,9 @@ import com.njdaeger.greenfieldcore.hotspots.services.HotspotServiceImpl;
 import com.njdaeger.greenfieldcore.hotspots.services.HotspotStorageServiceImpl;
 import com.njdaeger.greenfieldcore.hotspots.services.IHotspotService;
 import com.njdaeger.greenfieldcore.hotspots.services.IHotspotStorageService;
-import com.njdaeger.greenfieldcore.services.EssentialsServiceImpl;
-import com.njdaeger.greenfieldcore.services.IDynmapService;
-import com.njdaeger.greenfieldcore.services.IEssentialsService;
+import com.njdaeger.greenfieldcore.shared.services.EssentialsServiceImpl;
+import com.njdaeger.greenfieldcore.shared.services.IDynmapService;
+import com.njdaeger.greenfieldcore.shared.services.IEssentialsService;
 
 import java.util.function.Predicate;
 

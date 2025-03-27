@@ -1,7 +1,7 @@
 package com.njdaeger.greenfieldcore.advancedbuild;
 
-import com.njdaeger.greenfieldcore.services.ICoreProtectService;
-import com.njdaeger.greenfieldcore.services.IWorldEditService;
+import com.njdaeger.greenfieldcore.shared.services.ICoreProtectService;
+import com.njdaeger.greenfieldcore.shared.services.IWorldEditService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import com.njdaeger.pdk.utils.text.pager.PageItem;

@@ -1,7 +1,7 @@
 package com.njdaeger.greenfieldcore.hotspots.services;
 
 import com.njdaeger.greenfieldcore.Module;
-import com.njdaeger.greenfieldcore.services.DynmapServiceImpl;
+import com.njdaeger.greenfieldcore.shared.services.DynmapServiceImpl;
 import org.bukkit.plugin.Plugin;
 import org.dynmap.markers.MarkerIcon;
 

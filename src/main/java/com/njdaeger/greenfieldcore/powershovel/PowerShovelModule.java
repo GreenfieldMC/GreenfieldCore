@@ -3,7 +3,7 @@ package com.njdaeger.greenfieldcore.powershovel;
 import com.njdaeger.greenfieldcore.GreenfieldCore;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleConfig;
-import com.njdaeger.greenfieldcore.services.CoreProtectServiceImpl;
+import com.njdaeger.greenfieldcore.shared.services.CoreProtectServiceImpl;
 import org.bukkit.event.Listener;
 
 import java.util.function.Predicate;

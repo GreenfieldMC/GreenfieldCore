@@ -1,12 +1,16 @@
-package com.njdaeger.greenfieldcore.services;
+package com.njdaeger.greenfieldcore.shared.services;
 
 import com.earth2me.essentials.IEssentials;
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
+import com.njdaeger.greenfieldcore.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+
+import java.util.Objects;
 
 public class EssentialsServiceImpl extends ModuleService<IEssentialsService> implements IEssentialsService {
 
@@ -34,5 +38,16 @@ public class EssentialsServiceImpl extends ModuleService<IEssentialsService> imp
     public void setUserLastLocation(Player player, Location location) {
         if (!isEnabled()) return;
         essentials.getUser(player).setLastLocation(location);
+    }
+
+    @Override
+    public void loadUsernameMap() {
+        if (!isEnabled()) return;
+        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+            var userMap = essentials.getUsers();
+            getModule().getLogger().info("Loading uuid to username map...");
+            Bukkit.getWhitelistedPlayers().stream().map(OfflinePlayer::getUniqueId).map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));
+            getModule().getLogger().info("Loaded " + Util.userNameMap.size() + " usernames.");
+        });
     }
 }

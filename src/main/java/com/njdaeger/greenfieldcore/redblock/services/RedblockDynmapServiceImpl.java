@@ -2,7 +2,7 @@ package com.njdaeger.greenfieldcore.redblock.services;
 
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.redblock.Redblock;
-import com.njdaeger.greenfieldcore.services.DynmapServiceImpl;
+import com.njdaeger.greenfieldcore.shared.services.DynmapServiceImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.dynmap.markers.Marker;

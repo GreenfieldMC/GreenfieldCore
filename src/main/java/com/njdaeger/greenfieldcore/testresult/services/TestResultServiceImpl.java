@@ -2,7 +2,7 @@ package com.njdaeger.greenfieldcore.testresult.services;
 
 import com.njdaeger.greenfieldcore.Module;
 import com.njdaeger.greenfieldcore.ModuleService;
-import com.njdaeger.greenfieldcore.services.IVaultService;
+import com.njdaeger.greenfieldcore.shared.services.IVaultService;
 import com.njdaeger.greenfieldcore.testresult.TestAttempt;
 import com.njdaeger.greenfieldcore.testresult.TestResultMessages;
 import com.njdaeger.greenfieldcore.testresult.TestSet;

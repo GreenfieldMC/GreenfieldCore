@@ -1,4 +1,4 @@
-package com.njdaeger.greenfieldcore.services;
+package com.njdaeger.greenfieldcore.shared.services;
 
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;

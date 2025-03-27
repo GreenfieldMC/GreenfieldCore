@@ -3,7 +3,7 @@ package com.njdaeger.greenfieldcore.hotspots.arguments;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.njdaeger.greenfieldcore.services.IDynmapService;
+import com.njdaeger.greenfieldcore.shared.services.IDynmapService;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
 import org.bukkit.command.CommandSender;

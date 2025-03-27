@@ -1,5 +1,6 @@
-package com.njdaeger.greenfieldcore.codes;
+package com.njdaeger.greenfieldcore.codes.paginators;
 
+import com.njdaeger.greenfieldcore.codes.Code;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginatorBuilder;
 import com.njdaeger.pdk.utils.text.pager.ComponentPosition;

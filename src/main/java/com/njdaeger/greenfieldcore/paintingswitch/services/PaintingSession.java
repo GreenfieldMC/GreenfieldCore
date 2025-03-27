@@ -6,7 +6,6 @@ import org.bukkit.entity.Painting;
 
 class PaintingSession {
 
-    private boolean justStarted;
     private boolean isSwitching;
     private Art lastArt;
     private Painting selected;
@@ -37,14 +36,6 @@ class PaintingSession {
 
     Painting getSelected() {
         return selected;
-    }
-
-    boolean justStarted() {
-        return justStarted;
-    }
-
-    void setJustStarted(boolean justStarted) {
-        this.justStarted = justStarted;
     }
 
     Location getSelectedLocation() {

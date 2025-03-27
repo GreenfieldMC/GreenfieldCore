@@ -18,7 +18,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -92,27 +91,6 @@ public class PaintingSwitchServiceImpl extends ModuleService<IPaintingSwitchServ
     }
 
     @EventHandler
-    public void onInteract(PlayerInteractEvent event) {
-        if (disabledUsers.contains(event.getPlayer().getUniqueId())) return;
-        if (event.getPlayer().hasPermission(PERM) && event.getHand() == EquipmentSlot.HAND) {
-            Player player = event.getPlayer();
-            PaintingSession session = users.getOrDefault(player.getUniqueId(), new PaintingSession());
-            users.putIfAbsent(player.getUniqueId(), session);
-
-            if (session.isSwitching()) {
-
-                if (session.justStarted()) {
-                    session.setJustStarted(false);
-                } else {
-                    session.setLastArt(session.getSelected().getArt());
-                    session.setSwitching(false, null);
-                    player.sendMessage(PaintingSwitchMessages.PAINTING_LOCKED);
-                }
-            }
-        }
-    }
-
-    @EventHandler
     public void onEntityClick(PlayerInteractEntityEvent event) {
         if (disabledUsers.contains(event.getPlayer().getUniqueId())) return;
         if (event.getPlayer().hasPermission(PERM) && event.getHand() == EquipmentSlot.HAND) {
@@ -120,10 +98,15 @@ public class PaintingSwitchServiceImpl extends ModuleService<IPaintingSwitchServ
             PaintingSession session = users.getOrDefault(player.getUniqueId(), new PaintingSession());
             users.putIfAbsent(player.getUniqueId(), session);
 
-            if (event.getRightClicked() instanceof Painting && !session.isSwitching()) {
-                session.setSwitching(true, (Painting) event.getRightClicked());
-                session.setJustStarted(true);
-                player.sendMessage(PaintingSwitchMessages.PAINTING_SCROLL);
+            if (event.getRightClicked() instanceof Painting painting) {
+                if (!session.isSwitching()) {
+                    session.setSwitching(true, painting);
+                    player.sendMessage(PaintingSwitchMessages.PAINTING_SCROLL);
+                } else {
+                    session.setLastArt(session.getSelected().getArt());
+                    session.setSwitching(false, null);
+                    player.sendMessage(PaintingSwitchMessages.PAINTING_LOCKED);
+                }
             }
         }
     }

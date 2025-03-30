@@ -1,8 +1,8 @@
-main: com.njdaeger.greenfieldcore.GreenfieldCore
+main: net.greenfieldmc.core.GreenfieldCore
 version: ${project.version}
 name: ${project.artifactId}
 author: NJDaeger
-api-version: 1.17
+api-version: 1.21
 softdepend:
   - Vault
   - CoreProtect

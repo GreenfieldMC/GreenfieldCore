@@ -1,4 +1,4 @@
-main: com.njdaeger.greenfieldcore.GreenfieldCore
+main: net.greenfieldmc.core.GreenfieldCore
 version: ${project.version}
 name: ${project.artifactId}
 author: NJDaeger

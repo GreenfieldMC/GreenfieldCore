@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class TemplateServiceImpl extends ModuleService<ITemplateService> implements ITemplateService {
 
@@ -50,6 +51,11 @@ public class TemplateServiceImpl extends ModuleService<ITemplateService> impleme
     }
 
     @Override
+    public List<Template> getTemplates(Predicate<Template> filter) {
+        return storageService.getTemplates(filter);
+    }
+
+    @Override
     public Template getTemplate(String name) {
         return storageService.getTemplate(name);
     }
@@ -58,6 +64,7 @@ public class TemplateServiceImpl extends ModuleService<ITemplateService> impleme
     public Template createTemplate(String templateName, String schematicFile, List<String> attributes) {
         Template template = new Template(templateName, schematicFile, attributes);
         storageService.saveTemplate(template);
+        storageService.saveDatabase();
         return template;
     }
 
@@ -73,17 +80,34 @@ public class TemplateServiceImpl extends ModuleService<ITemplateService> impleme
             templateToUpdate.setAttributes(attributes);
         }
         storageService.saveTemplate(templateToUpdate);
+        storageService.saveDatabase();
         return templateToUpdate;
     }
 
     @Override
     public Template deleteTemplate(@NotNull Template templateToDelete) {
         storageService.deleteTemplate(templateToDelete.getTemplateName());
+        storageService.saveDatabase();
         return templateToDelete;
     }
 
     @Override
-    public TemplateBrush createBrush() {
-        return new TemplateBrush();
+    public TemplateBrush createBrush(UUID forUser) {
+        var session = getSession(forUser);
+        if (session == null) {
+            session = createSession(forUser);
+        }
+        var brush = new TemplateBrush();
+        session.addBrush(brush);
+        return brush;
+    }
+
+    @Override
+    public void updateBrush(UUID forUser, TemplateBrush updatedBrush) {
+        var session = getSession(forUser);
+        if (session == null) {
+            session = createSession(forUser);
+        }
+        session.updateBrush(updatedBrush);
     }
 }

@@ -30,17 +30,28 @@ public class WorldEditTemplateBrush implements Brush {
         this.templateService = templateService;
     }
 
+    public int getBrushId() {
+        return brushId;
+    }
+
     @Override
     public void build(EditSession editSession, BlockVector3 position, Pattern pattern, double size) throws MaxChangedBlocksException {
         var brush = templateService.getSession(uuid).getBrush(brushId);
         if (brush == null) return;
+        var player = Bukkit.getPlayer(uuid);
+        if (player == null) throw new IllegalStateException("Player is null");
+
+        if (!brush.hasNextTemplate()) brush.randomizeNextTemplate();
+        if (!brush.hasNextTemplate()) {
+            player.sendMessage(TemplateMessages.ERROR_NO_TEMPLATES_SELECTED);
+            return;
+        }
 
         var templateInstance = brush.getNextTemplate();
         var template = templateService.getTemplate(templateInstance.getCurrentTemplateName());
-        var player = Bukkit.getPlayer(uuid);
-        if (player == null) throw new IllegalStateException("Player is null");
+
         if (template == null) {
-            player.sendMessage(Component.text("Template " + templateInstance.getCurrentTemplateName() + " not found. It is being removed from your template list. This could indicate the template name has changed.", NamedTextColor.RED));
+            player.sendMessage(TemplateMessages.ERROR_TEMPLATE_NOT_FOUND.apply(templateInstance.getCurrentTemplateName()));
             brush.removeTemplate(templateInstance.getCurrentTemplateName());
             return;
         }
@@ -58,18 +69,21 @@ public class WorldEditTemplateBrush implements Brush {
 
         var transform = new AffineTransform();
         if (templateInstance.hasRotationOption()) {
-            if (templateInstance.getCurrentRotationOption() == RotationOption.SELF) transform.rotateY(getRotationFromPlayer(player));
-            else transform.rotateY(templateInstance.getCurrentRotationOption().getRotation());
+            if (templateInstance.getCurrentRotationOption() == RotationOption.SELF) transform = transform.rotateY(getRotationFromPlayer(player));
+            else transform = transform.rotateY(templateInstance.getCurrentRotationOption().getRotation());
         }
 
         if (templateInstance.hasFlipOption()) {
             var blockVector = BukkitAdapter.adapt(templateInstance.getCurrentFlipOption().getFlipDirection()).toBlockVector();
-            transform.scale(blockVector.abs().multiply(-2).add(1,1,1).toVector3());
+            transform = transform.scale(blockVector.abs().multiply(-2).add(1,1,1).toVector3());
         }
 
-        var operation = new ClipboardHolder(clipboard)
+        var holder = new ClipboardHolder(clipboard);
+        holder.setTransform(transform);
+
+        var operation = holder
                 .createPaste(editSession)
-                .to(clipboard.getOrigin())
+                .to(position)
                 .ignoreAirBlocks(templateInstance.ignoreAirBlocks())
                 .copyBiomes(templateInstance.pasteBiomes())
                 .copyEntities(templateInstance.pasteEntities())
@@ -83,9 +97,9 @@ public class WorldEditTemplateBrush implements Brush {
         var facing = BukkitAdapter.adapt(player.getFacing());
         return switch (facing) {
             case NORTH -> 0;
-            case EAST -> 90;
+            case WEST -> 90;
             case SOUTH -> 180;
-            case WEST -> 270;
+            case EAST -> 270;
             default -> throw new IllegalStateException("Unexpected value: " + facing);
         };
     }

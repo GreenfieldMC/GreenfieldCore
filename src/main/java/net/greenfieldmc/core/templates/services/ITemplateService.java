@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public interface ITemplateService extends IModuleService<ITemplateService> {
 
@@ -31,6 +32,13 @@ public interface ITemplateService extends IModuleService<ITemplateService> {
      * @return a list of all templates
      */
     List<Template> getTemplates();
+
+    /**
+     * Get all templates that match the given filter
+     * @param filter the filter to apply to the templates
+     * @return a list of all templates that match the filter
+     */
+    List<Template> getTemplates(Predicate<Template> filter);
 
     /**
      * Get a template by name
@@ -66,8 +74,17 @@ public interface ITemplateService extends IModuleService<ITemplateService> {
     Template deleteTemplate(@NotNull Template templateToDelete);
 
     /**
-     * Create a new template brush with no templates or options included by default. This will need added to a session once it is built.
+     * Create a new template brush with no templates or options included by default.
+     * @param forUser the user to create the brush for
+     * @return a new template brush
      */
-    TemplateBrush createBrush();
+    TemplateBrush createBrush(UUID forUser);
+
+    /**
+     * Update a template brush
+     * @param forUser the user to update the brush for
+     * @param updatedBrush the updated template brush
+     */
+    void updateBrush(UUID forUser, TemplateBrush updatedBrush);
 
 }

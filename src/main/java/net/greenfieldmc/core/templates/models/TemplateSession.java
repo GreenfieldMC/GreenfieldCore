@@ -38,6 +38,11 @@ public class TemplateSession {
         return brush;
     }
 
+    public void updateBrush(TemplateBrush brush) {
+        brushes.removeIf(b -> b.getBrushId() == brush.getBrushId());
+        brushes.add(brush);
+    }
+
     public TemplateBrush removeBrush(TemplateBrush brush) {
         this.brushes.remove(brush);
         return brush;

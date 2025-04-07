@@ -4,6 +4,7 @@ import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.templates.models.Template;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public interface ITemplateStorageService extends IModuleService<ITemplateStorageService> {
 
@@ -18,7 +19,16 @@ public interface ITemplateStorageService extends IModuleService<ITemplateStorage
      * Get all templates
      * @return a list of all templates
      */
-    List<Template> getTemplates();
+    default List<Template> getTemplates() {
+        return getTemplates(template -> true);
+    }
+
+    /**
+     * Get all templates that match the given filter
+     * @param filter the filter to apply to the templates
+     * @return a list of all templates that match the filter
+     */
+    List<Template> getTemplates(Predicate<Template> filter);
 
     /**
      * Save a template to the database. Will overwrite the existing template if it exists

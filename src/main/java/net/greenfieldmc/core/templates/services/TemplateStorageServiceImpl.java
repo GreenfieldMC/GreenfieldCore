@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageService> implements ITemplateStorageService {
 
@@ -50,8 +51,10 @@ public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageSe
     }
 
     @Override
-    public List<Template> getTemplates() {
-        return new ArrayList<>(templates.values());
+    public List<Template> getTemplates(Predicate<Template> filter) {
+        return new ArrayList<>(templates.values()).stream()
+                .filter(filter)
+                .toList();
     }
 
     @Override

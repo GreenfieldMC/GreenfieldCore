@@ -18,6 +18,7 @@ public class ModuleConfig extends Configuration {
     private final boolean testResults;
     private final boolean utilities;
     private final boolean authHub;
+    private final boolean templates;
 
     public ModuleConfig(Plugin plugin) {
         super(plugin, ConfigType.YML, "moduleConfig");
@@ -35,6 +36,7 @@ public class ModuleConfig extends Configuration {
         addEntry("modules.testResults", true);
         addEntry("modules.utilities", true);
         addEntry("modules.authHub", true);
+        addEntry("modules.templates", true);
 
         save();
 
@@ -50,6 +52,7 @@ public class ModuleConfig extends Configuration {
         testResults = getBoolean("modules.testResults");
         utilities = getBoolean("modules.utilities");
         authHub = getBoolean("modules.authHub");
+        templates = getBoolean("modules.templates");
 
     }
 
@@ -99,6 +102,10 @@ public class ModuleConfig extends Configuration {
 
     public boolean isAuthHubEnabled() {
         return authHub;
+    }
+
+    public boolean isTemplatesEnabled() {
+        return templates;
     }
 
 }

@@ -20,7 +20,7 @@ public class TemplateBrush {
     }
 
     public boolean hasNextTemplate() {
-        return nextTemplate != null;
+        return nextTemplate != null && !templates.isEmpty();
     }
 
     public TemplateInstance getNextTemplate() {

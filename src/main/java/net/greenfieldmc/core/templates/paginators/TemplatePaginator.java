@@ -34,21 +34,21 @@ public class TemplatePaginator extends ChatPaginatorBuilder<Template, Triple<Tem
         
         // Add page navigation
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/tlist" + ctx.getFirst() + " -page 1",
-                (ctx, res, pg) -> "/tlist" + ctx.getFirst() + " -page " + (pg - 1),
-                (ctx, res, pg) -> "/tlist" + ctx.getFirst() + " -page " + (pg + 1),
-                (ctx, res, pg) -> "/tlist" + ctx.getFirst() + " -page " + ((int) Math.ceil(res.size() / (ctx.getFirst() == TemplatePaginatorMode.BRUSH_MODIFY ? 4.0 : 8.0)))
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page 1",
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + (pg - 1),
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + (pg + 1),
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + ((int) Math.ceil(res.size() / (ctx.getFirst() == TemplatePaginatorMode.BRUSH_MODIFY ? 4.0 : 8.0)))
         ), ComponentPosition.BOTTOM_CENTER);
         
         // Add a find button at the bottom right
         addComponent((ctx, paginator, results, pg) -> Component.text("[☀]", paginator.getHighlightColor())
                 .hoverEvent(HoverEvent.showText(Component.text("Search for a template", NamedTextColor.GRAY)))
-                .clickEvent(ClickEvent.suggestCommand("/tlist \""))
+                .clickEvent(ClickEvent.suggestCommand("/tlist \"\" " + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page 1"))
         , ComponentPosition.BOTTOM_RIGHT);
         
         // Line wrapping mode
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
-        setResultsPerPage(mode == TemplatePaginatorMode.BRUSH_MODIFY ? 4 : 8);
+        setResultsPerPage(mode == TemplatePaginatorMode.BRUSH_MODIFY ? 7 : 8);
     }
 
     private TextComponent createFilterComponent(Triple<TemplatePaginatorMode, ICommandContext, TemplateBrush> templatePaginatorModeICommandContextTemplateBrushTriple, ChatPaginator<Template, Triple<TemplatePaginatorMode, ICommandContext, TemplateBrush>> templateTripleChatPaginator, List<Template> templates, int i) {

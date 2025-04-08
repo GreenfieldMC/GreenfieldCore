@@ -50,6 +50,8 @@ public class TemplateBrush {
     }
 
     public void addRotationOption(RotationOption rotationOption) {
+        if (rotationOption == RotationOption.SELF) this.rotationOptions.clear();
+        else this.rotationOptions.remove(RotationOption.SELF);
         this.rotationOptions.add(rotationOption);
     }
 

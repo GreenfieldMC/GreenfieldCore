@@ -70,11 +70,11 @@ public class WorldEditTemplateBrush implements Brush {
         var transform = new AffineTransform();
         if (templateInstance.hasRotationOption()) {
             if (templateInstance.getCurrentRotationOption() == RotationOption.SELF) transform = transform.rotateY(getRotationFromPlayer(player));
-            else transform = transform.rotateY(templateInstance.getCurrentRotationOption().getRotation());
+            else transform = transform.rotateY(templateInstance.getCurrentRotationOption().getAdjustmentValue());
         }
 
         if (templateInstance.hasFlipOption()) {
-            var blockVector = BukkitAdapter.adapt(templateInstance.getCurrentFlipOption().getFlipDirection()).toBlockVector();
+            var blockVector = BukkitAdapter.adapt(templateInstance.getCurrentFlipOption().getAdjustmentValue()).toBlockVector();
             transform = transform.scale(blockVector.abs().multiply(-2).add(1,1,1).toVector3());
         }
 

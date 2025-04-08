@@ -16,12 +16,20 @@ import net.greenfieldmc.core.templates.arguments.FilterArgument;
 import net.greenfieldmc.core.templates.arguments.NewTemplateNameArgument;
 import net.greenfieldmc.core.templates.arguments.SchematicFileArgument;
 import net.greenfieldmc.core.templates.arguments.TemplateNameArgument;
+import net.greenfieldmc.core.templates.models.AdjustableOption;
 import net.greenfieldmc.core.templates.models.FlipOption;
 import net.greenfieldmc.core.templates.models.PasteOption;
 import net.greenfieldmc.core.templates.models.RotationOption;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
 import net.greenfieldmc.core.templates.paginators.TemplatePaginator;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.plugin.Plugin;
 
 import java.nio.file.Path;
@@ -46,8 +54,8 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
     private void create(ICommandContext ctx) {
         var templateName = ctx.getTyped("templateName", String.class);
         var schematicFile = ctx.getTyped("schematicFile", Path.class);
-        var attributes = ctx.getTyped("attributes", String.class);
-        var createdTemplate = templateService.createTemplate(templateName, schematicFile.toString(), Arrays.stream(attributes.split(" ")).toList());
+        var attributes = ctx.getTyped("attributes", String.class, null);
+        var createdTemplate = templateService.createTemplate(templateName, schematicFile.toString(), attributes == null ? List.of() : Arrays.stream(attributes.split(" ")).toList());
         ctx.send(TemplateMessages.TEMPLATE_CREATED.apply(createdTemplate));
     }
 
@@ -104,7 +112,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
             }
         }
 
-        BRUSH_MODIFY_PAGINATOR.generatePage(Triple.of(TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY, ctx, templateBrush), templateService.getTemplates(), 1).sendTo(TemplateMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.asPlayer());
+        showBrushModifyPages(ctx, templateBrush, templateService.getTemplates(), 1);
     }
 
     private void brushAdd(ICommandContext ctx) throws PDKCommandException {
@@ -112,6 +120,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         var flipOption = ctx.getTyped("flipOption", FlipOption.class, null);
         var rotateOption = ctx.getTyped("rotateOption", RotationOption.class, null);
         var pasteOption = ctx.getTyped("pasteOption", PasteOption.class, null);
+        var page = ctx.getFlag("page", 1);
 
         var templateBrush = resolveBrush(ctx);
 
@@ -121,7 +130,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         else if (pasteOption != null) templateBrush.addPasteOption(pasteOption);
         templateService.updateBrush(ctx.asPlayer().getUniqueId(), templateBrush);
 
-        BRUSH_MODIFY_PAGINATOR.generatePage(Triple.of(TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY, ctx, templateBrush), templateService.getTemplates(), 1).sendTo(TemplateMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.asPlayer());
+        showBrushModifyPages(ctx, templateBrush, templateService.getTemplates(), page);
     }
 
     private void brushRemove(ICommandContext ctx) throws PDKCommandException {
@@ -129,6 +138,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         var flipOption = ctx.getTyped("flipOption", FlipOption.class, null);
         var rotateOption = ctx.getTyped("rotateOption", RotationOption.class, null);
         var pasteOption = ctx.getTyped("pasteOption", PasteOption.class, null);
+        var page = ctx.getFlag("page", 1);
 
         var templateBrush = resolveBrush(ctx);
 
@@ -138,7 +148,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         else if (pasteOption != null) templateBrush.removePasteOption(pasteOption);
         templateService.updateBrush(ctx.asPlayer().getUniqueId(), templateBrush);
 
-        BRUSH_MODIFY_PAGINATOR.generatePage(Triple.of(TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY, ctx, templateBrush), templateService.getTemplates(), 1).sendTo(TemplateMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.asPlayer());
+        showBrushModifyPages(ctx, templateBrush, templateService.getTemplates(), page);
     }
 
     private void brushNext(ICommandContext ctx) throws PDKCommandException {
@@ -158,47 +168,78 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
     private void list(ICommandContext ctx) throws PDKCommandException {
         var isBrushMode = ctx.hasFlag("brush");
         var filter = ctx.getTyped("filter", String.class, null);
-        var templateNameFilters = new ArrayList<String>();
-        var attributeFilters = new ArrayList<String>();
-
-        if (filter != null && !filter.isBlank()) {
-            Arrays.stream(filter.split(" ")).forEach(f -> {
-                if (f.toLowerCase().startsWith("attribute:")) {
-                    attributeFilters.add(f.substring(10));
-                } else {
-                    templateNameFilters.add(f);
-                }
-            });
-        }
+        var page = ctx.getFlag("page", 1);
+        var filters = (filter == null || filter.isEmpty()) ? new ArrayList<String>() : new ArrayList<>(Arrays.asList(filter.split(" ")));
 
         var templates = templateService.getTemplates(template -> {
-            if (filter == null || filter.isEmpty()) return true;
-            if (!templateNameFilters.isEmpty()) {
-                if (templateNameFilters.stream().anyMatch(name -> template.getTemplateName().toLowerCase().contains(name.toLowerCase()))) {
-                    return true;
-                }
-            }
-
-            if (!attributeFilters.isEmpty()) {
-                if (attributeFilters.stream().anyMatch(attribute -> template.getAttributes().stream().anyMatch(attr -> attr.toLowerCase().contains(attribute.toLowerCase())))) {
-                    return true;
-                }
-            }
-            return false;
+            if (filters.isEmpty()) return true;
+            return filters.stream().anyMatch(f -> template.getTemplateName().toLowerCase().contains(f.toLowerCase())) || template.getAttributes().stream().anyMatch(attr -> filters.stream().anyMatch(f -> attr.toLowerCase().contains(f.toLowerCase())));
         });
 
         if (isBrushMode) {
             var templateBrush = resolveBrush(ctx);
-            BRUSH_MODIFY_PAGINATOR.generatePage(Triple.of(TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY, ctx, templateBrush), templates, 1).sendTo(TemplateMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
+            showBrushModifyPages(ctx, templateBrush, templates, page);
             return;
         }
 
-        LIST_PAGINATOR.generatePage(Triple.of(TemplatePaginator.TemplatePaginatorMode.LIST, ctx, null), templates, 1).sendTo(TemplateMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
+        LIST_PAGINATOR.generatePage(Triple.of(TemplatePaginator.TemplatePaginatorMode.LIST, ctx, null), templates, page).sendTo(TemplateMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
     }
 
     private void showBrushModifyPages(ICommandContext ctx, TemplateBrush templateBrush, List<Template> templates, int page) {
+        var grayColor = BRUSH_MODIFY_PAGINATOR.getGrayColor();
+
+        var line = Component.text("= ", grayColor).toBuilder();
+        line.append(generateAdjustableOption("rotate", templateBrush.getRotationOptions(), RotationOption.class));
+        line.resetStyle().append(Component.text(" ==== ", grayColor));
+        line.append(generateAdjustableOption("flip", templateBrush.getFlipOptions(), FlipOption.class));
+        line.resetStyle().append(Component.text(" ==== ", grayColor));
+        line.append(generateAdjustableOption("paste", templateBrush.getPasteOptions(), PasteOption.class));
+        line.resetStyle().append(Component.text(" =", grayColor));
+
         BRUSH_MODIFY_PAGINATOR.generatePage(Triple.of(TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY, ctx, templateBrush), templates, page).sendTo(TemplateMessages.ERROR_NO_RESULTS_TO_DISPLAY, ctx.getSender());
-//        ctx.send(); todo: write the option buttons
+        ctx.send(line.build());
+    }
+
+    private <O, T extends Enum<T> & AdjustableOption<O>> TextComponent generateAdjustableOption(String adjustableOptionName, List<T> selectedOptions, Class<T> optionEnum) {
+        var highlightColor = BRUSH_MODIFY_PAGINATOR.getHighlightColor();
+        var grayColor = BRUSH_MODIFY_PAGINATOR.getGrayColor();
+        var grayedOutColor = BRUSH_MODIFY_PAGINATOR.getGrayedOutColor();
+
+        TextComponent.Builder builder = Component.text("[", grayColor).decorate(TextDecoration.BOLD).toBuilder();
+
+        // Get all possible enum values
+        T[] allOptions = optionEnum.getEnumConstants();
+
+        // Add each option with appropriate formatting
+        for (int i = 0; i < allOptions.length; i++) {
+            T option = allOptions[i];
+            boolean isSelected = selectedOptions.contains(option);
+
+            String commandAction = isSelected ? "remove" : "add";
+            String hoverAction = isSelected ? "Click to remove" : "Click to add";
+
+            // Create the option component with appropriate color and decoration
+            Component optionComponent = Component.text(option.getChatName(), isSelected ? grayedOutColor : highlightColor)
+                    .decorate(TextDecoration.BOLD)
+                    .decorate(isSelected ? new TextDecoration[]{ TextDecoration.UNDERLINED } : new TextDecoration[] {} )
+                    .hoverEvent(HoverEvent.showText(
+                            Component.text(hoverAction, highlightColor).appendNewline().append(Component.text(option.getDescription(), grayColor))
+                    ))
+                    .clickEvent(ClickEvent.runCommand(
+                            "/tbrush " + commandAction + " option " + adjustableOptionName + " " + option.name()
+                    ));
+
+            builder.append(optionComponent);
+
+            // Add a space between options, but not after the last one
+            if (i < allOptions.length - 1) {
+                builder.append(Component.text(" ", grayColor).decorate(TextDecoration.BOLD));
+            }
+        }
+
+        // Add right bracket
+        builder.append(Component.text("]", grayColor).decorate(TextDecoration.BOLD));
+        return builder.build();
     }
 
     private TemplateBrush silentResolveBrush(ICommandContext ctx) {
@@ -228,8 +269,8 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         CommandBuilder.of("tcreate", "createtemplate")
                 .permission("greenfieldcore.template.create")
                 .description("Create a new template.")
-                .then("templateName", new NewTemplateNameArgument(templateService))
-                    .then("schematicFile", new SchematicFileArgument(worldEditService)).canExecute(this::create)
+                .then("schematicFile", new SchematicFileArgument(worldEditService))
+                    .then("templateName", new NewTemplateNameArgument(templateService)).canExecute(this::create)
                         .then("attributes", PdkArgumentTypes.greedyString((ctx) -> templateService.getTemplates().stream().map(Template::getAttributes).flatMap(List::stream).distinct().toList(), () -> "Add any attributes to this template.")).executes(this::create)
                     .end()
                 .end()
@@ -257,6 +298,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         CommandBuilder.of("tbrush", "templatebrush")
                 .permission("greenfieldcore.template.brush")
                 .description("Edit the template brush.")
+                .hiddenFlag("page", "The page to view.", PdkArgumentTypes.integer(1, () -> "The page to view."))
                 .canExecute(this::brush)
                 .then("next").executes(this::brushNext)
                 .then("add")
@@ -310,8 +352,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
                 .description("List all templates.")
                 .hiddenFlag("brush", "When the brush is being modified.")
                 .flag("page", "The page to view.", PdkArgumentTypes.integer(1, () -> "The page to view."))
-                .canExecute(this::list)
-                .then("filter", new FilterArgument(templateService)).executes()
+                .then("filter", new FilterArgument(templateService)).executes(this::list)
                 .register(plugin);
 
     }

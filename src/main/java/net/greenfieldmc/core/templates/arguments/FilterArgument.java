@@ -1,20 +1,18 @@
 package net.greenfieldmc.core.templates.arguments;
 
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
-import com.njdaeger.pdk.command.brigadier.arguments.AbstractQuotedTypedArgument;
+import com.njdaeger.pdk.command.brigadier.arguments.AbstractTokenizedQuotedTypedArgument;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.services.ITemplateService;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
-public class FilterArgument extends AbstractQuotedTypedArgument<String> {
+public class FilterArgument extends AbstractTokenizedQuotedTypedArgument<String> {
 
     private final ITemplateService templateService;
 
@@ -24,7 +22,7 @@ public class FilterArgument extends AbstractQuotedTypedArgument<String> {
     }
 
     @Override
-    public Map<String, Message> listSuggestions(ICommandContext commandContext) {
+    public List<String> listBasicSuggestions(ICommandContext commandContext) {
         var attributes = templateService.getTemplates().stream()
                 .flatMap(template -> template.getAttributes().stream())
                 .distinct()
@@ -34,12 +32,9 @@ public class FilterArgument extends AbstractQuotedTypedArgument<String> {
                 .distinct()
                 .toList();
 
-        var list = new ArrayList<>(attributes.stream()
-                .map(attribute -> "attribute:" + attribute)
-                .toList());
+        var list = new ArrayList<>(attributes);
         list.addAll(templates);
-        return list.stream()
-                .collect(Collectors.toMap(s -> s, (s) -> () -> s.startsWith("attribute:") ? "Look for templates with attribute: " + s.substring(9) : "Look for templates with names that contain: " + s));
+        return list;
     }
 
     @Override
@@ -49,7 +44,7 @@ public class FilterArgument extends AbstractQuotedTypedArgument<String> {
 
     @Override
     public String convertToCustom(@Nullable CommandSender source, String nativeType, StringReader reader) throws CommandSyntaxException {
-        return null;
+        return nativeType;
     }
 
 }

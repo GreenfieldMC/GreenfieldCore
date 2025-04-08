@@ -145,9 +145,9 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
         BlockVector3 min = clipboard.getMinimumPoint();
         BlockVector3 max = clipboard.getMaximumPoint();
         
-        int width = max.getBlockX() - min.getBlockX() + 1;
-        int height = max.getBlockY() - min.getBlockY() + 1;
-        int depth = max.getBlockZ() - min.getBlockZ() + 1;
+        int width = max.x() - min.x() + 1;
+        int height = max.y() - min.y() + 1;
+        int depth = max.z() - min.z() + 1;
         
         return width + "x" + height + "x" + depth;
     }
@@ -189,45 +189,36 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
         var line = Component.text();
         line.append(questionMark).resetStyle().appendSpace();
         line.append(Component.text("[", NamedTextColor.GRAY, TextDecoration.BOLD));
-        
+
+        if (context.hasPermission("greenfieldcore.template.view")) {
+            line.append(Component.text("V", NamedTextColor.DARK_GREEN, TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand("/tview " + getTemplateName()))
+                    .hoverEvent(HoverEvent.showText(Component.text("View this template", NamedTextColor.GRAY))));
+
+            line.appendSpace();
+        }
+
+        if (context.hasPermission("greenfieldcore.template.copy")) {
+            line.append(Component.text("C", NamedTextColor.GOLD, TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand("/tcopy " + getTemplateName()))
+                    .hoverEvent(HoverEvent.showText(Component.text("Copy this template", NamedTextColor.GRAY))));
+        }
+
         // Add buttons based on mode
         if (mode == TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY) {
-
-            if (context.hasPermission("greenfieldcore.template.view")) {
-                line.append(Component.text("V", NamedTextColor.DARK_GREEN, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tview " + getTemplateName()))
-                        .hoverEvent(HoverEvent.showText(Component.text("View this template", NamedTextColor.GRAY))));
-
-                line.appendSpace();
-            }
-
-            if (context.hasPermission("greenfieldcore.template.copy")) {
-                line.append(Component.text("C", NamedTextColor.GOLD, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tcopy " + getTemplateName()))
-                        .hoverEvent(HoverEvent.showText(Component.text("Copy this template", NamedTextColor.GRAY))));
-
-                line.appendSpace();
-            }
-            
+            line.appendSpace();
             // Add/Remove template button
             if (isSelected) {
                 // Template is in brush, show remove option
                 line.append(Component.text("X", NamedTextColor.RED, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush remove template " + getTemplateName()))
+                        .clickEvent(ClickEvent.runCommand("/tbrush remove template " + getTemplateName() + " -page " + generatorInfo.getSecond().getFlag("page", 1)))
                         .hoverEvent(HoverEvent.showText(Component.text("Remove this template from brush", NamedTextColor.GRAY))));
             } else {
                 // Template is not in brush, show add option
                 line.append(Component.text("S", NamedTextColor.BLUE, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush add template " + getTemplateName()))
+                        .clickEvent(ClickEvent.runCommand("/tbrush add template " + getTemplateName() + " -page " + generatorInfo.getSecond().getFlag("page", 1)))
                         .hoverEvent(HoverEvent.showText(Component.text("Add this template to brush", NamedTextColor.GRAY))));
             }
-
-        } else {
-
-            // Just the view button in normal list mode
-            line.append(Component.text("V", NamedTextColor.DARK_GREEN, TextDecoration.BOLD)
-                    .clickEvent(ClickEvent.runCommand("/tview " + getTemplateName()))
-                    .hoverEvent(HoverEvent.showText(Component.text("View this template", NamedTextColor.GRAY))));
         }
 
         line.append(Component.text("] - ", NamedTextColor.GRAY, TextDecoration.BOLD));

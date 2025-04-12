@@ -21,10 +21,10 @@ public class TestAttemptPaginator extends ChatPaginatorBuilder<TestAttempt, ICom
         addComponent(Component.text("User Test Build Attempts", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         addComponent(new ResultCountComponent<>(false), ComponentPosition.TOP_LEFT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " -page 1",
-                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " -page " + (pg - 1),
-                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " -page " + (pg + 1),
-                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " -page " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " flags: -page 1",
+                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " flags: -page " + (pg - 1),
+                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " flags: -page " + (pg + 1),
+                (ctx, res, pg) -> "/attempts user " + userFromContext(ctx) + " flags: -page " + ((int) Math.ceil(res.size() / 8.0))
         ), ComponentPosition.BOTTOM_CENTER);
     }
 

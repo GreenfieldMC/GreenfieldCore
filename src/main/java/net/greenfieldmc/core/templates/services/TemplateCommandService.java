@@ -3,6 +3,7 @@ package net.greenfieldmc.core.templates.services;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
+import com.njdaeger.pdk.command.exception.CommandSenderTypeException;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import net.greenfieldmc.core.IModuleService;
@@ -16,6 +17,7 @@ import net.greenfieldmc.core.templates.arguments.FilterArgument;
 import net.greenfieldmc.core.templates.arguments.NewTemplateNameArgument;
 import net.greenfieldmc.core.templates.arguments.SchematicFileArgument;
 import net.greenfieldmc.core.templates.arguments.TemplateNameArgument;
+import net.greenfieldmc.core.templates.arguments.ViewScaleArgument;
 import net.greenfieldmc.core.templates.models.AdjustableOption;
 import net.greenfieldmc.core.templates.models.FlipOption;
 import net.greenfieldmc.core.templates.models.PasteOption;
@@ -28,8 +30,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.nio.file.Path;
@@ -124,7 +126,19 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
 
         var templateBrush = resolveBrush(ctx);
 
-        if (template != null) templateBrush.addTemplate(template.getTemplateName());
+        if (template != null) {
+            templateBrush.addTemplate(template.getTemplateName());
+            Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+                try {
+                    template.loadClipboard();
+                } catch (CommandSenderTypeException e) {
+                    ctx.send(Component.text(e.getMessage(), NamedTextColor.RED));
+                } catch (Exception e) {
+                    if (e instanceof RuntimeException ex) throw ex;
+                    ctx.send(Component.text(e.getMessage(), NamedTextColor.RED));
+                }
+            });
+        }
         else if (flipOption != null) templateBrush.addFlipOption(flipOption);
         else if (rotateOption != null) templateBrush.addRotationOption(rotateOption);
         else if (pasteOption != null) templateBrush.addPasteOption(pasteOption);
@@ -157,12 +171,43 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         ctx.send(TemplateMessages.TEMPLATE_NEXT_RANDOMIZED);
     }
 
-    private void view(ICommandContext ctx) {
+    private void view(ICommandContext ctx) throws PDKCommandException {
+        if (!ctx.hasTyped("templateName")) {
+            var destroyed = templateService.destroyTemplateView(ctx.asPlayer());
+            if (destroyed) ctx.send(TemplateMessages.TEMPLATE_VIEW_ENDED);
+            else ctx.error(TemplateMessages.ERROR_TEMPLATE_NOT_BEING_VIEWED);
+            return;
+        }
 
+        var template = ctx.getTyped("templateName", Template.class);
+        var scale = ctx.getTyped("scale", Double.class, 1 / 16.0);
+        var force = ctx.hasFlag("force");
+
+        if (force && !ctx.hasPermission("greenfieldcore.template.view.force")) ctx.error(TemplateMessages.ERROR_TEMPLATE_TOO_LARGE);
+
+        if (!template.isLoaded()) ctx.send(TemplateMessages.TEMPLATE_LOADING.apply(template));
+        templateService.startTemplateView(ctx.asPlayer(), template, scale, force, ex -> {
+            if (ex != null) {
+                ctx.send(Component.text(ex.getMessage(), NamedTextColor.RED));
+                return;
+            }
+            ctx.send(TemplateMessages.TEMPLATE_VIEW_STARTED.apply(template));
+        });
     }
 
     private void copy(ICommandContext ctx) {
-
+        var template = ctx.getTyped("templateName", Template.class);
+        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+            try {
+                worldEditService.loadToClipboard(template, ctx.asPlayer());
+                ctx.send(TemplateMessages.TEMPLATE_COPIED.apply(template));
+            } catch (CommandSenderTypeException e) {
+                ctx.send(Component.text(e.getMessage(), NamedTextColor.RED));
+            } catch (Exception e) {
+                if (e instanceof RuntimeException ex) throw ex;
+                ctx.send(Component.text(e.getMessage(), NamedTextColor.RED));
+            }
+        });
     }
 
     private void list(ICommandContext ctx) throws PDKCommandException {
@@ -258,15 +303,15 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
             ctx.error(e.getMessage());
         }
         var session = templateService.getSession(ctx.asPlayer().getUniqueId());
-        if (session == null) ctx.error(TemplateMessages.TEMPLATE_SESSION_NOT_FOUND);
+        if (session == null) ctx.error(TemplateMessages.ERROR_TEMPLATE_SESSION_NOT_FOUND);
         var templateBrush = session.getBrush(worldEditBrush.getBrushId());
-        if (templateBrush == null) ctx.error(TemplateMessages.TEMPLATE_SESSION_NOT_FOUND);
+        if (templateBrush == null) ctx.error(TemplateMessages.ERROR_TEMPLATE_SESSION_NOT_FOUND);
         return templateBrush;
     }
 
     @Override
     public void tryEnable(Plugin plugin, Module module) throws Exception {
-        CommandBuilder.of("tcreate", "createtemplate")
+        CommandBuilder.of("tcreate", "createtemplate", "ct")
                 .permission("greenfieldcore.template.create")
                 .description("Create a new template.")
                 .then("schematicFile", new SchematicFileArgument(worldEditService))
@@ -276,7 +321,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
                 .end()
                 .register(plugin);
 
-        CommandBuilder.of("tedit", "edittemplate")
+        CommandBuilder.of("tedit", "edittemplate", "et")
                 .permission("greenfieldcore.template.edit")
                 .description("Edit an existing template.")
                 .then("templateName", new TemplateNameArgument(templateService))
@@ -295,7 +340,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
                 .then("templateName", new TemplateNameArgument(templateService)).executes(this::delete)
                 .register(plugin);
 
-        CommandBuilder.of("tbrush", "templatebrush")
+        CommandBuilder.of("tbrush", "templatebrush", "tb")
                 .permission("greenfieldcore.template.brush")
                 .description("Edit the template brush.")
                 .hiddenFlag("page", "The page to view.", PdkArgumentTypes.integer(1, () -> "The page to view."))
@@ -335,23 +380,28 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
                 .end()
                 .register(plugin);
 
-        CommandBuilder.of("tview", "viewtemplate")
+        CommandBuilder.of("tview", "viewtemplate", "templateview", "vt")
                 .permission("greenfieldcore.template.view")
                 .description("View an existing template.")
-                .then("templateName", new TemplateNameArgument(templateService)).executes(this::view)
+                .flag("force", "Force the template to be viewed even if it is too large.")
+                .canExecute(this::view)
+                .then("templateName", new TemplateNameArgument(templateService)).canExecute(this::view)
+                    .then("scale", new ViewScaleArgument()).executes(this::view)
+                .end()
                 .register(plugin);
 
         CommandBuilder.of("tcopy", "copytemplate")
                 .permission("greenfieldcore.template.copy")
-                .description("Copy an existing template.")
+                .description("Copy an existing template to your WorldEdit clipboard.")
                 .then("templateName", new TemplateNameArgument(templateService)).executes(this::copy)
                 .register(plugin);
 
-        CommandBuilder.of("tlist", "listtemplates")
+        CommandBuilder.of("tlist", "listtemplates", "templatelist", "lt")
                 .permission("greenfieldcore.template.list")
                 .description("List all templates.")
                 .hiddenFlag("brush", "When the brush is being modified.")
                 .flag("page", "The page to view.", PdkArgumentTypes.integer(1, () -> "The page to view."))
+                .canExecute(this::list)
                 .then("filter", new FilterArgument(templateService)).executes(this::list)
                 .register(plugin);
 

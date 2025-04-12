@@ -2,10 +2,12 @@ package net.greenfieldmc.core.templates.services;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.command.tool.InvalidToolBindException;
+import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.HandSide;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.shared.services.WorldEditServiceImpl;
 import net.greenfieldmc.core.templates.WorldEditTemplateBrush;
+import net.greenfieldmc.core.templates.models.Template;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -90,6 +92,17 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
     public List<Path> getSchematicFiles() {
         if (!isEnabled()) return new ArrayList<>();
         return schematicFiles;
+    }
+
+    @Override
+    public void loadToClipboard(Template template, Player player) throws Exception {
+        if (!isEnabled()) throw new Exception("WorldEdit is not enabled.");
+        var bukkitPlayer = BukkitAdapter.adapt(player);
+        var localSession = impl.getWorldEdit().getSessionManager().getIfPresent(bukkitPlayer);
+        if (localSession == null) throw new Exception("The player is not in a WorldEdit session.");
+        if (!template.isLoaded()) template.loadClipboard();
+        var holder = new ClipboardHolder(template.getClipboard());
+        localSession.setClipboard(holder);
     }
 
     @Override

@@ -36,7 +36,7 @@ public class RedblockMessages {
     public static final Function<Integer, TextComponent> REDBLOCK_JOIN_NOTIFICATION = count -> MODULE.append(Component.text("You have ", NamedTextColor.GRAY))
             .append(Component.text(count, NamedTextColor.LIGHT_PURPLE))
             .append(Component.text(" RedBlocks assigned to you. ", NamedTextColor.GRAY))
-            .append(Component.text("\n[Click this to view them]", NamedTextColor.LIGHT_PURPLE, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/rbl -mine -incomplete")));
+            .append(Component.text("\n[Click this to view them]", NamedTextColor.LIGHT_PURPLE, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/rbl flags: -mine -incomplete")));
 
     // Redblock sign messages
     public static final TextComponent[] SIGN_CLICK_THIS_IF_COMPLETED = new TextComponent[] {

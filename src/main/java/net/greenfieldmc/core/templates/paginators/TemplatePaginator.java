@@ -17,6 +17,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class TemplatePaginator extends ChatPaginatorBuilder<Template, Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush>> {
@@ -34,16 +35,16 @@ public class TemplatePaginator extends ChatPaginatorBuilder<Template, Triple<Tem
         
         // Add page navigation
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page 1",
-                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + (pg - 1),
-                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + (pg + 1),
-                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + ((int) Math.ceil(res.size() / (ctx.getFirst() == TemplatePaginatorMode.BRUSH_MODIFY ? 4.0 : 8.0)))
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + " flags:" + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page 1",
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + " flags:" + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + (pg - 1),
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + " flags:" + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + (pg + 1),
+                (ctx, res, pg) -> "/tlist " + ctx.getSecond().getTyped("filter", String.class, "") + " flags:" + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page " + ((int) Math.ceil(res.size() / (ctx.getFirst() == TemplatePaginatorMode.BRUSH_MODIFY ? 4.0 : 8.0)))
         ), ComponentPosition.BOTTOM_CENTER);
         
         // Add a find button at the bottom right
         addComponent((ctx, paginator, results, pg) -> Component.text("[☀]", paginator.getHighlightColor())
                 .hoverEvent(HoverEvent.showText(Component.text("Search for a template", NamedTextColor.GRAY)))
-                .clickEvent(ClickEvent.suggestCommand("/tlist \"\" " + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page 1"))
+                .clickEvent(ClickEvent.suggestCommand("/tlist \"\" flags:" + (mode == TemplatePaginatorMode.BRUSH_MODIFY ? " -brush " : "") + " -page 1"))
         , ComponentPosition.BOTTOM_RIGHT);
         
         // Line wrapping mode
@@ -51,12 +52,23 @@ public class TemplatePaginator extends ChatPaginatorBuilder<Template, Triple<Tem
         setResultsPerPage(mode == TemplatePaginatorMode.BRUSH_MODIFY ? 7 : 8);
     }
 
-    private TextComponent createFilterComponent(Triple<TemplatePaginatorMode, ICommandContext, TemplateBrush> templatePaginatorModeICommandContextTemplateBrushTriple, ChatPaginator<Template, Triple<TemplatePaginatorMode, ICommandContext, TemplateBrush>> templateTripleChatPaginator, List<Template> templates, int i) {
-        var mode = templatePaginatorModeICommandContextTemplateBrushTriple.getFirst();
-        var filterText = mode == TemplatePaginatorMode.LIST ? "No Filter" : "Brush Mode";
+    private TextComponent createFilterComponent(Triple<TemplatePaginatorMode, ICommandContext, TemplateBrush> genInfo, ChatPaginator<Template, Triple<TemplatePaginatorMode, ICommandContext, TemplateBrush>> paginator, List<Template> templates, int i) {
+        var filterText = genInfo.getSecond().getTyped("filter", String.class, "");
 
+        var hover = Component.text();
+
+        if (filterText.isBlank()) {
+            hover.append(Component.text("No filter applied", NamedTextColor.GRAY));
+        } else {
+            Arrays.stream(filterText.split(" ")).forEach(filter -> {
+                hover.appendNewline();
+                hover.append(Component.text(filter, NamedTextColor.GRAY));
+            });
+        }
+
+        //noinspection DataFlowIssue
         return Component.text("Query", NamedTextColor.LIGHT_PURPLE, TextDecoration.UNDERLINED)
-                .hoverEvent(HoverEvent.showText(Component.text(filterText, NamedTextColor.GRAY)));
+                .hoverEvent(HoverEvent.showText(hover));
     }
 
     public enum TemplatePaginatorMode {

@@ -10,6 +10,8 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import net.greenfieldmc.core.templates.models.RotationOption;
+import net.greenfieldmc.core.templates.models.Template;
+import net.greenfieldmc.core.templates.models.TemplateInstance;
 import net.greenfieldmc.core.templates.services.ITemplateService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -58,13 +60,27 @@ public class WorldEditTemplateBrush implements Brush {
 
         brush.randomizeNextTemplate();
         if (!template.isLoaded()) {
-            try {
-                template.loadClipboard();
-            } catch (Exception e) {
-                player.sendMessage(Component.text(e.getMessage(), NamedTextColor.RED));
-            }
+            Bukkit.getScheduler().runTaskAsynchronously(templateService.getPlugin(), () -> {
+                player.sendMessage(TemplateMessages.TEMPLATE_LOADING.apply(template));
+                try {
+                    template.loadClipboard();
+                } catch (Exception e) {
+                    player.sendMessage(Component.text(e.getMessage(), NamedTextColor.RED));
+                    return;
+                }
+                try {
+                    performOperation(templateInstance, template, editSession, position, player);
+                } catch (MaxChangedBlocksException e) {
+                    player.sendMessage(Component.text(e.getMessage(), NamedTextColor.RED));
+                }
+            });
+            return;
         }
 
+        performOperation(templateInstance, template, editSession, position, player);
+    }
+
+    private void performOperation(TemplateInstance templateInstance, Template template, EditSession editSession, BlockVector3 position, Player player) throws MaxChangedBlocksException {
         var clipboard = template.getClipboard();
 
         var transform = new AffineTransform();

@@ -4,11 +4,13 @@ import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
 import net.greenfieldmc.core.templates.models.TemplateSession;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public interface ITemplateService extends IModuleService<ITemplateService> {
@@ -86,5 +88,23 @@ public interface ITemplateService extends IModuleService<ITemplateService> {
      * @param updatedBrush the updated template brush
      */
     void updateBrush(UUID forUser, TemplateBrush updatedBrush);
+
+    /**
+     * Start a template view for the given player
+     *
+     * @param player the player to start the view for
+     * @param template the template to view
+     * @param scale the scale of the view
+     * @param ignoreSizeLimit
+     * @param onComplete the callback to call when the view is complete. Exception is passed if the view failed
+     *         to start, null if it started successfully
+     */
+    void startTemplateView(Player player, Template template, double scale, boolean ignoreSizeLimit, Consumer<Exception> onComplete);
+
+    /**
+     * Destroy the template view for the given player
+     * @param player the player to destroy the view for
+     */
+    boolean destroyTemplateView(Player player);
 
 }

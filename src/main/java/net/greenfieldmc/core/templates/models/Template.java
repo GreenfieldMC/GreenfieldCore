@@ -156,9 +156,9 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
      * Get the block count of the template
      * @return the block count
      */
-    public String getBlockCount() {
-        if (!isLoaded()) return "Not yet loaded";
-        return Integer.toString(clipboard.getRegion().getArea());
+    public long getBlockCount() {
+        if (!isLoaded()) return -1;
+        return clipboard.getRegion().getVolume();
     }
     
     /**
@@ -211,12 +211,12 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
             if (isSelected) {
                 // Template is in brush, show remove option
                 line.append(Component.text("X", NamedTextColor.RED, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush remove template " + getTemplateName() + " -page " + generatorInfo.getSecond().getFlag("page", 1)))
+                        .clickEvent(ClickEvent.runCommand("/tbrush remove template " + getTemplateName() + " flags: -page " + generatorInfo.getSecond().getFlag("page", 1)))
                         .hoverEvent(HoverEvent.showText(Component.text("Remove this template from brush", NamedTextColor.GRAY))));
             } else {
                 // Template is not in brush, show add option
                 line.append(Component.text("S", NamedTextColor.BLUE, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush add template " + getTemplateName() + " -page " + generatorInfo.getSecond().getFlag("page", 1)))
+                        .clickEvent(ClickEvent.runCommand("/tbrush add template " + getTemplateName() + " flags: -page " + generatorInfo.getSecond().getFlag("page", 1)))
                         .hoverEvent(HoverEvent.showText(Component.text("Add this template to brush", NamedTextColor.GRAY))));
             }
         }
@@ -235,7 +235,7 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
         
         // Add block count
         hoverText.append(Component.text("Block Count: ", NamedTextColor.GRAY))
-                .append(Component.text(getBlockCount(), NamedTextColor.BLUE));
+                .append(Component.text(getBlockCount() == -1 ? "Not yet loaded" : Long.toString(getBlockCount()), NamedTextColor.BLUE));
         
         hoverText.appendNewline();
         

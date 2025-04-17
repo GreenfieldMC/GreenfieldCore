@@ -105,6 +105,7 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
 
     @EventHandler(priority = EventPriority.LOW)
     public void onInteract(PlayerInteractEvent e) {
+        if (!e.getPlayer().hasPermission("greenfieldcore.advbuild")) return;
         if (e.getHand() == EquipmentSlot.OFF_HAND && isEnabledFor(e.getPlayer().getUniqueId()) && e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null && e.getClickedBlock().getBlockData() instanceof Candle && e.getPlayer().getInventory().getItemInMainHand().getType().isAir()) {
             e.setCancelled(true);
             e.setUseInteractedBlock(Event.Result.DENY);

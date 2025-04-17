@@ -47,6 +47,7 @@ public class EssentialsServiceImpl extends ModuleService<IEssentialsService> imp
             var userMap = essentials.getUsers();
             getModule().getLogger().info("Loading uuid to username map...");
             Bukkit.getWhitelistedPlayers().stream().map(OfflinePlayer::getUniqueId).map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));
+            userMap.getAllUserUUIDs().stream().map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));
             getModule().getLogger().info("Loaded " + Util.userNameMap.size() + " usernames.");
         });
     }

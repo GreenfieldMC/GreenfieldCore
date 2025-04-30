@@ -11,6 +11,7 @@ import org.bukkit.plugin.Plugin;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageService> implements IHotspotStorageService {
@@ -96,7 +97,7 @@ public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageServ
                             section.getInt("z"),
                             (float) section.getDouble("yaw"),
                             (float) section.getDouble("pitch"),
-                            plugin.getServer().getWorld(section.getString("world")),
+                            plugin.getServer().getWorld(UUID.fromString(section.getString("world"))),
                             section.getString("custom-marker")
                     ));
                 }

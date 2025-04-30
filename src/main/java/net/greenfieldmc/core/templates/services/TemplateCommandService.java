@@ -13,6 +13,7 @@ import net.greenfieldmc.core.Triple;
 import net.greenfieldmc.core.templates.TemplateMessages;
 import net.greenfieldmc.core.templates.WorldEditTemplateBrush;
 import net.greenfieldmc.core.templates.arguments.AttributeArgument;
+import net.greenfieldmc.core.templates.arguments.CreationAttributesArgument;
 import net.greenfieldmc.core.templates.arguments.FilterArgument;
 import net.greenfieldmc.core.templates.arguments.NewTemplateNameArgument;
 import net.greenfieldmc.core.templates.arguments.SchematicFileArgument;
@@ -104,6 +105,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
 
     private void brush(ICommandContext ctx) throws PDKCommandException {
         TemplateBrush templateBrush = silentResolveBrush(ctx);
+        var page = ctx.getFlag("page", 1);
 
         if (templateBrush == null) {
             templateBrush = templateService.createBrush(ctx.asPlayer().getUniqueId());
@@ -114,7 +116,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
             }
         }
 
-        showBrushModifyPages(ctx, templateBrush, templateService.getTemplates(), 1);
+        showBrushModifyPages(ctx, templateBrush, templateService.getTemplates(), page);
     }
 
     private void brushAdd(ICommandContext ctx) throws PDKCommandException {
@@ -316,7 +318,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
                 .description("Create a new template.")
                 .then("schematicFile", new SchematicFileArgument(worldEditService))
                     .then("templateName", new NewTemplateNameArgument(templateService)).canExecute(this::create)
-                        .then("attributes", PdkArgumentTypes.greedyString((ctx) -> templateService.getTemplates().stream().map(Template::getAttributes).flatMap(List::stream).distinct().toList(), () -> "Add any attributes to this template.")).executes(this::create)
+                        .then("attributes", new CreationAttributesArgument(templateService)).executes(this::create)
                     .end()
                 .end()
                 .register(plugin);

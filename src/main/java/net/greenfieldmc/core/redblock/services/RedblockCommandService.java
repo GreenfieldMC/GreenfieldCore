@@ -61,6 +61,18 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
 
     private void deny(ICommandContext ctx) throws PDKCommandException {
         var rb = resolveRedblock(ctx, Redblock::isPending, "pending");
+        //if the command sender is the assigned player or if they are the one who completed the redblock, they can deny the completeness of the redblock themselves if they have the permission greenfieldcore.redblock.deny.self
+        if (!ctx.hasPermission("greenfieldcore.redblock.deny") && ctx.hasPermission("greenfieldcore.redblock.deny.self")) {
+            if ((rb.getAssignedTo() == null || !rb.getAssignedTo().equals(ctx.asPlayer().getUniqueId())) && (rb.getCompletedBy() == null || !rb.getCompletedBy().equals(ctx.asPlayer().getUniqueId()))) {
+                ctx.noPermission();
+            }
+        }
+
+
+//        if ((rb.getAssignedTo() == null || rb.getAssignedTo() != ctx.asPlayer().getUniqueId()) && (rb.getCompletedBy() == null || rb.getCompletedBy() != ctx.asPlayer().getUniqueId())) {
+//        } else {
+//            ctx.error(RedblockMessages.ERROR_REDBLOCK_DENY_SELF);
+//        }
         redblockService.denyRedblock(rb);
         ctx.send(RedblockMessages.REDBLOCK_DENIED.apply(rb.getId()));
     }
@@ -216,7 +228,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
 
         CommandBuilder.of("rbdeny", "rbd")
                 .description("Deny a pending RedBlock")
-                .permission("greenfieldcore.redblock.deny")
+                .permission("greenfieldcore.redblock.deny", "greenfieldcore.redblock.deny.self")
                 .flag("id", "The pending RedBlock to deny", new RedblockArgument(redblockService, Redblock::isPending))
                 .canExecute(this::deny)
                 .register(plugin);

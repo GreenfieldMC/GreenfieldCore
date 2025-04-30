@@ -72,6 +72,7 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            module.getLogger().info("[SchematicWatcher] Stopped watching for schematic file changes.");
         });
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> watcherThread.start(), 120L);
@@ -81,12 +82,6 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
     @Override
     public void tryDisable(Plugin plugin, Module module) throws Exception {
         super.tryDisable(plugin, module);
-        if (isEnabled()) {
-            if (watcherThread != null) {
-                watcherThread.interrupt();
-                watcherThread = null;
-            }
-        }
     }
 
     public List<Path> getSchematicFiles() {

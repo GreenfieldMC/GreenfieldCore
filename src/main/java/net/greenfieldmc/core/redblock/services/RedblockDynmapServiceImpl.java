@@ -27,9 +27,11 @@ public class RedblockDynmapServiceImpl extends DynmapServiceImpl {
     @Override
     public void tryEnable(Plugin plugin, Module module) throws Exception {
         super.tryEnable(plugin, module);
-        if (isEnabled()) {
-            loadRedblocksToDynmap();
-        }
+    }
+
+    @Override
+    public void postTryEnable(Plugin plugin, Module module) throws Exception {
+        loadRedblocksToDynmap();
     }
 
     @Override
@@ -44,7 +46,6 @@ public class RedblockDynmapServiceImpl extends DynmapServiceImpl {
     }
 
     private void loadRedblocksToDynmap() {
-        if (!isEnabled()) return;
         Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
             getPlugin().getLogger().info("Adding RedBlock markers to Dynmap...");
 

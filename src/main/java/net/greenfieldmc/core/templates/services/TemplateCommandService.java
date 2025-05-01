@@ -336,7 +336,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
                 .end()
                 .register(plugin);
 
-        CommandBuilder.of("tdel", "deletetemplate")
+        CommandBuilder.of("tdelete", "tdel", "deletetemplate")
                 .permission("greenfieldcore.template.delete")
                 .description("Delete an existing template.")
                 .then("templateName", new TemplateNameArgument(templateService)).executes(this::delete)

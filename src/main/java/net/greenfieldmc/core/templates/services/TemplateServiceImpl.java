@@ -80,6 +80,10 @@ public class TemplateServiceImpl extends ModuleService<ITemplateService> impleme
     public Template updateTemplate(@NotNull Template templateToUpdate, @Nullable String templateName, @Nullable String schematicFile, @Nullable List<String> attributes) {
         if (templateName != null) {
             templateToUpdate.setTemplateName(templateName);
+            sessions.values().forEach(session -> session.getBrushes().stream().filter(brush -> brush.getTemplates().contains(templateToUpdate.getTemplateName())).forEach(brush -> {
+                brush.removeTemplate(templateToUpdate.getTemplateName());
+                brush.addTemplate(templateName);
+            }));
         }
         if (schematicFile != null) {
             templateToUpdate.setSchematicFile(schematicFile);

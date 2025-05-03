@@ -83,28 +83,28 @@ public class SavedCommand implements PageItem<ICommandContext> {
         line.resetStyle().appendSpace();
         line.append(Component.text("[", NamedTextColor.GRAY, TextDecoration.BOLD));
 
-        if (!isServer || ctx.hasPermission("greenfieldcore.commandstore.remove.server")) {
+        if (!isServer || ctx.hasPermission("greenfieldcore.commandstorage.remove.server")) {
             line.append(Component.text("X", NamedTextColor.RED, TextDecoration.BOLD)
                     .clickEvent(ClickEvent.runCommand("/rcmd " + server + " " + id))
                     .hoverEvent(Component.text("Click to remove this command", NamedTextColor.GRAY)));
             line.resetStyle().appendSpace();
         }
 
-        if (!isServer || ctx.hasPermission("greenfieldcore.commandstore.edit.server")) {
+        if (!isServer || ctx.hasPermission("greenfieldcore.commandstorage.edit.server")) {
             line.append(Component.text("E", NamedTextColor.GOLD, TextDecoration.BOLD)
                     .clickEvent(ClickEvent.suggestCommand("/ecmd " + server + " " + id + " "))
                     .hoverEvent(Component.text("Click to edit this command", NamedTextColor.GRAY)));
             line.resetStyle().appendSpace();
         }
 
-        if (!isServer || ctx.hasPermission("greenfieldcore.commandstore.copy.server")) {
+        if (!isServer || ctx.hasPermission("greenfieldcore.commandstorage.copy.server")) {
             line.append(Component.text("C", NamedTextColor.GREEN, TextDecoration.BOLD)
                     .clickEvent(ClickEvent.copyToClipboard(command))
                     .hoverEvent(Component.text("Click to copy this command", NamedTextColor.GRAY)));
             line.resetStyle().appendSpace();
         }
 
-        if (!isServer || ctx.hasPermission("greenfieldcore.commandstore.run.server")) {
+        if (!isServer || ctx.hasPermission("greenfieldcore.commandstorage.run.server")) {
             line.append(Component.text("R", NamedTextColor.BLUE, TextDecoration.BOLD)
                     .clickEvent(ClickEvent.runCommand("/wcmd " + server + " " + id))
                     .hoverEvent(Component.text("Click to run this command", NamedTextColor.GRAY)));

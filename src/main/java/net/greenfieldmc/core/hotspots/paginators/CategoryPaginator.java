@@ -17,10 +17,10 @@ public class CategoryPaginator extends ChatPaginatorBuilder<Category, CategoryPa
         addComponent(Component.text("Category List", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/hslist categories " + getListMode(ctx) + " -page 1",
-                (ctx, res, pg) -> "/hslist categories " + getListMode(ctx) + " -page " + (pg - 1),
-                (ctx, res, pg) -> "/hslist categories " + getListMode(ctx) + " -page " + (pg + 1),
-                (ctx, res, pg) -> "/rblist categories " + getListMode(ctx) + " -page " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, res, pg) -> "/hslist categories " + " flags: -page 1" + getListMode(ctx),
+                (ctx, res, pg) -> "/hslist categories " + " flags: -page " + (pg - 1) + getListMode(ctx),
+                (ctx, res, pg) -> "/hslist categories " + " flags: -page " + (pg + 1) + getListMode(ctx),
+                (ctx, res, pg) -> "/rblist categories " + " flags: -page " + ((int) Math.ceil(res.size() / 8.0)) + getListMode(ctx)
         ), ComponentPosition.BOTTOM_CENTER);
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
     }

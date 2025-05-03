@@ -89,7 +89,6 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new MangroveRootsInteraction(worldEditService, coreProtectService),
                 new DirectionalInteraction(worldEditService, coreProtectService),
                 new PitcherPodInteraction(worldEditService, coreProtectService),
-                new VineInteraction(worldEditService, coreProtectService),
                 new CommandBlockInteraction(worldEditService, coreProtectService),
                 new TorchInteraction(worldEditService, coreProtectService),
                 new SwitchInteraction(worldEditService, coreProtectService),
@@ -99,12 +98,12 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new NetherWartInteraction(worldEditService, coreProtectService),
                 new CocoaBeanInteraction(worldEditService, coreProtectService),
                 new LightningRodInteraction(worldEditService, coreProtectService)
-                //sus sand and gravel handler
         );
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onInteract(PlayerInteractEvent e) {
+        if (!e.getPlayer().hasPermission("greenfieldcore.advbuild")) return;
         if (e.getHand() == EquipmentSlot.OFF_HAND && isEnabledFor(e.getPlayer().getUniqueId()) && e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null && e.getClickedBlock().getBlockData() instanceof Candle && e.getPlayer().getInventory().getItemInMainHand().getType().isAir()) {
             e.setCancelled(true);
             e.setUseInteractedBlock(Event.Result.DENY);

@@ -18,10 +18,10 @@ public class TestSetPaginator extends ChatPaginatorBuilder<TestSet, ICommandCont
         addComponent(Component.text("All Conducted Tests", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         addComponent(new ResultCountComponent<>(false), ComponentPosition.TOP_LEFT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/attempts all -page 1",
-                (ctx, res, pg) -> "/attempts all -page " + (pg - 1),
-                (ctx, res, pg) -> "/attempts all -page " + (pg + 1),
-                (ctx, res, pg) -> "/attempts all -page " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, res, pg) -> "/attempts all flags: -page 1",
+                (ctx, res, pg) -> "/attempts all flags: -page " + (pg - 1),
+                (ctx, res, pg) -> "/attempts all flags: -page " + (pg + 1),
+                (ctx, res, pg) -> "/attempts all flags: -page " + ((int) Math.ceil(res.size() / 8.0))
         ), ComponentPosition.BOTTOM_CENTER);
     }
 

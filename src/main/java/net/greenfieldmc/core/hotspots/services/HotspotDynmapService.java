@@ -19,13 +19,14 @@ public class HotspotDynmapService extends DynmapServiceImpl {
     @Override
     public void tryEnable(Plugin plugin, Module module) throws Exception {
         super.tryEnable(plugin, module);
-        if (isEnabled()) {
-            getModule().getLogger().info("Loading hotspots to Dynmap...");
-            loadCategoriesToDynmap();
-            loadHotspotsToDynmap();
-        }
     }
 
+    @Override
+    public void postTryEnable(Plugin plugin, Module module) throws Exception {
+        getModule().getLogger().info("Loading hotspots to Dynmap...");
+        loadCategoriesToDynmap();
+        loadHotspotsToDynmap();
+    }
 
     @Override
     public void tryDisable(Plugin plugin, Module module) throws Exception {

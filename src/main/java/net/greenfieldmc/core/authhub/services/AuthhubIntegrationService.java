@@ -77,6 +77,10 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             e.allow();
             if (vaultService.isEnabled()) {
                 Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+                    if (e.getUser().getPledgingAmount() < authhubService.getRequiredPatreonPledge()) {
+                        getModule().getLogger().info("User " + e.getPlayer().getName() + " is not a patron, skipping prefix setting.");
+                        return;
+                    }
                     var prefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
                     var currentPrefix = prefix == null ? "" : prefix;
                     if (currentPrefix.contains("&3[$]")) {

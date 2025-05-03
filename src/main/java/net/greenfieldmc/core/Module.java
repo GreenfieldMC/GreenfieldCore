@@ -21,6 +21,7 @@ public abstract class Module {
         try {
             integration.tryEnable(plugin, this);
             integration.setEnabled(true);
+            integration.postTryEnable(plugin, this);
             return (T) integration;
         } catch (Exception e) {
             if (required) throw new RuntimeException(e);

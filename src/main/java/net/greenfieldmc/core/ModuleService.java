@@ -38,6 +38,11 @@ public abstract class ModuleService<T extends IModuleService<T>> implements IMod
     public abstract void tryEnable(Plugin plugin, Module module) throws Exception;
 
     @Override
+    public void postTryEnable(Plugin plugin, Module module) throws Exception {
+
+    }
+
+    @Override
     public abstract void tryDisable(Plugin plugin, Module module) throws Exception;
 
 }

@@ -253,7 +253,7 @@ public class Redblock implements PageItem<ICommandContext> {
             case APPROVED -> NamedTextColor.GREEN;
         }, TextDecoration.BOLD).hoverEvent(HoverEvent.showText(hover));
         var teleport = Component.text("[T]", NamedTextColor.BLUE, TextDecoration.BOLD)
-                .clickEvent(ClickEvent.runCommand("/rbtp -id " + getId()))
+                .clickEvent(ClickEvent.runCommand("/rbtp flags: -id " + getId()))
                 .hoverEvent(HoverEvent.showText(Component.text("Teleport to this RedBlock", NamedTextColor.GRAY)));
 
         var line = Component.text();

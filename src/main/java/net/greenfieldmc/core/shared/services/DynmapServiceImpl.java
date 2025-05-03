@@ -64,7 +64,7 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
         if (set != null) return false; // already exists
         set = markerApi.createMarkerSet(setId, setName, null, false);
         if (set == null) {
-            getPlugin().getLogger().warning("Unable to create marker set " + setId);
+            getModule().getLogger().warning("Unable to create marker set " + setId);
             return false;
         }
         if (icon != null) {
@@ -72,7 +72,7 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
             if (markerIcon != null) {
                 set.setDefaultMarkerIcon(markerIcon);
             } else {
-                getPlugin().getLogger().warning("Unable to load icon " + icon + " for marker set " + setId);
+                getModule().getLogger().warning("Unable to load icon " + icon + " for marker set " + setId);
             }
         }
         return true;
@@ -106,23 +106,28 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
     }
 
     protected MarkerSet getOrCreateMarkerSet(String setName) {
-        if (!isEnabled()) return null;
         var set = markerApi.getMarkerSet(setName);
         if (set == null) {
             set = markerApi.createMarkerSet(setName, setName, null, false);
-            if (set == null) getPlugin().getLogger().warning("Unable to create marker set " + setName);
+            if (set == null) getModule().getLogger().warning("Unable to create marker set " + setName);
         }
         return set;
     }
 
     protected MarkerIcon getOrCreateMarkerIcon(String iconName) {
-        if (!isEnabled()) return null;
-        var icon = markerApi.getMarkerIcon(iconName);
-        var stream = getPlugin().getResource(iconName + ".png");
-        if (icon == null) {
-            if (stream != null) icon = markerApi.createMarkerIcon(iconName, iconName, stream);
-            else getPlugin().getLogger().warning("Unable to load icon " + iconName);
-        } else if (stream != null) icon.setMarkerIconImage(stream);
+        var icon = markerApi.getMarkerIcon(iconName.endsWith(".png") ? iconName.split("\\.")[0] : iconName);
+        var stream = getPlugin().getResource(iconName);
+        if (icon != null) {
+            if (stream != null) {
+                icon.setMarkerIconImage(stream);
+            }
+        } else {
+            if (stream == null) {
+                getModule().getLogger().warning("Unable to load icon " + iconName);
+                return null;
+            }
+            icon = markerApi.createMarkerIcon(iconName, iconName, stream);
+        }
         return icon;
     }
 }

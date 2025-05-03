@@ -1,15 +1,15 @@
 package net.greenfieldmc.core.shared.services;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.plugin.Plugin;
 
 public class WorldEditServiceImpl extends ModuleService<IWorldEditService> implements IWorldEditService {
 
-    private WorldEditServiceActualImpl impl;
+    protected WorldEditServiceActualImpl impl;
 
     public WorldEditServiceImpl(Plugin plugin, Module module) {
         super(plugin, module);

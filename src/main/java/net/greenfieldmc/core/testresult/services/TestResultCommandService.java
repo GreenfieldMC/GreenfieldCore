@@ -142,7 +142,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
         CommandBuilder.of("start")
                 .description("Start a test build attempt.")
                 .permission("greenfieldcore.testresult.start")
-                .then("userToStart", PdkArgumentTypes.player((Predicate<Player>)(p -> p.hasPermission("group.spectator"))))
+                .then("userToStart", PdkArgumentTypes.player((Predicate<Player>)(p -> p.hasPermission("group." + testResultService.getFailingGroup().toLowerCase()))))
                     .executes(this::start)
                 .register(plugin);
 
@@ -150,11 +150,11 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
                 .description("View test build attempts.")
                 .permission("greenfieldcore.testresult.list")
                 .flag("page", "The page to view", PdkArgumentTypes.integer(1, Integer.MAX_VALUE))
-                .then("user")
-                    .then("user", new OfflinePlayerArgument())
-                        .executes(this::listUserAttempts).end()
-                .then("all")
-                    .executes(this::listAllAttempts)
+//                .then("user")
+                .then("user", new OfflinePlayerArgument())
+                    .executes(this::listUserAttempts)//.end()
+//                .then("all")
+                .canExecute(this::listAllAttempts)
                 .register(plugin);
 
         CommandBuilder.of("testinfo")

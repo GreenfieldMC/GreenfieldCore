@@ -9,6 +9,7 @@ import net.greenfieldmc.core.hotspots.HotspotModule;
 import net.greenfieldmc.core.paintingswitch.PaintingSwitchModule;
 import net.greenfieldmc.core.powershovel.PowerShovelModule;
 import net.greenfieldmc.core.redblock.RedblockModule;
+import net.greenfieldmc.core.templates.TemplatesModule;
 import net.greenfieldmc.core.testresult.TestResultModule;
 import net.greenfieldmc.core.utilities.UtilitiesModule;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,7 +37,8 @@ public final class GreenfieldCore extends JavaPlugin {
                 new PowerShovelModule(this, ModuleConfig::isPowerShovelEnabled),
                 new AdvancedBuildModule(this, ModuleConfig::isAdvancedBuildModeEnabled),
                 new RedblockModule(this, ModuleConfig::isRedblockEnabled),
-                new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled)
+                new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled),
+                new TemplatesModule(this, ModuleConfig::isTemplatesEnabled)
         ));
 
         MODULES.forEach(Module::enable);

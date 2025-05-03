@@ -89,7 +89,6 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new MangroveRootsInteraction(worldEditService, coreProtectService),
                 new DirectionalInteraction(worldEditService, coreProtectService),
                 new PitcherPodInteraction(worldEditService, coreProtectService),
-                new VineInteraction(worldEditService, coreProtectService),
                 new CommandBlockInteraction(worldEditService, coreProtectService),
                 new TorchInteraction(worldEditService, coreProtectService),
                 new SwitchInteraction(worldEditService, coreProtectService),
@@ -99,7 +98,6 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new NetherWartInteraction(worldEditService, coreProtectService),
                 new CocoaBeanInteraction(worldEditService, coreProtectService),
                 new LightningRodInteraction(worldEditService, coreProtectService)
-                //sus sand and gravel handler
         );
     }
 

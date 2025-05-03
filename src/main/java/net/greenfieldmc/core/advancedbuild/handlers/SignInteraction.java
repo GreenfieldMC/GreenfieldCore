@@ -28,6 +28,7 @@ public class SignInteraction extends InteractionHandler {
                 Material.WARPED_SIGN,
                 Material.CHERRY_SIGN,
                 Material.MANGROVE_SIGN,
+                Material.PALE_OAK_SIGN,
                 Material.ACACIA_HANGING_SIGN,
                 Material.BAMBOO_HANGING_SIGN,
                 Material.BIRCH_HANGING_SIGN,
@@ -38,7 +39,8 @@ public class SignInteraction extends InteractionHandler {
                 Material.SPRUCE_HANGING_SIGN,
                 Material.WARPED_HANGING_SIGN,
                 Material.CHERRY_HANGING_SIGN,
-                Material.MANGROVE_HANGING_SIGN
+                Material.MANGROVE_HANGING_SIGN,
+                Material.PALE_OAK_HANGING_SIGN
         );
     }
 

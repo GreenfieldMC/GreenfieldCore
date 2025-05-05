@@ -6,7 +6,6 @@ import com.njdaeger.authenticationhub.patreon.PatreonUserLoginEvent;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
-import net.greenfieldmc.core.shared.services.IVaultService;
 import io.papermc.paper.ban.BanListType;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -21,13 +20,13 @@ import java.util.UUID;
 
 public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationService> implements IModuleService<AuthhubIntegrationService>, Listener {
 
-    private final IVaultService vaultService;
     private final IAuthhubService authhubService;
     private final List<UUID> prefixedUsers = new ArrayList<>();
 
-    public AuthhubIntegrationService(Plugin plugin, Module module, IVaultService vaultService, IAuthhubService authhubService) {
+    private static final int PREFIX_PRIORITY = 3;
+
+    public AuthhubIntegrationService(Plugin plugin, Module module, IAuthhubService authhubService) {
         super(plugin, module);
-        this.vaultService = vaultService;
         this.authhubService = authhubService;
     }
 
@@ -49,18 +48,21 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
 
     @Override
     public void tryDisable(Plugin plugin, Module module) throws Exception {
-        if (!vaultService.isEnabled()) return;
         // Remove prefixes for all users that had them set
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-            for (UUID uuid : prefixedUsers) {
-                var currentPrefix = vaultService.getUserPrefix(uuid).join();
-                if (currentPrefix != null && currentPrefix.contains("&3[$]")) {
-                    var newPfx = currentPrefix.replace("&3[$]", "").trim();
-                    if (newPfx.isEmpty()) newPfx = null;
-                    var result = vaultService.setUserPrefix(uuid, newPfx).join();
-                    if (!result) getModule().getLogger().warning("Failed to remove prefix for player with UUID " + uuid);
-                }
-            }
+//        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+//            for (UUID uuid : prefixedUsers) {
+//                var currentPrefix = vaultService.getUserPrefix(uuid).join();
+//                if (currentPrefix != null && currentPrefix.contains("&3[$]")) {
+//                    var newPfx = currentPrefix.replace("&3[$]", "").trim();
+//                    if (newPfx.isEmpty()) newPfx = null;
+//                    var result = vaultService.setUserPrefix(uuid, newPfx).join();
+//                    if (!result) getModule().getLogger().warning("Failed to remove prefix for player with UUID " + uuid);
+//                }
+//            }
+//        });
+
+        prefixedUsers.forEach(uuid -> {
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + uuid + " meta removeprefix " + PREFIX_PRIORITY);
         });
     }
 
@@ -75,41 +77,55 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             e.disallow("Your patron account currently pledges " + e.getUser().getPledgingAmount() + " cents, which is less than the required " + authhubService.getRequiredPatreonPledge() + " cents. Please upgrade your patronage to continue.");
         } else {
             e.allow();
-            if (vaultService.isEnabled()) {
-                Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-                    if (e.getUser().getPledgingAmount() < authhubService.getRequiredPatreonPledge()) {
-                        getModule().getLogger().info("User " + e.getPlayer().getName() + " is not a patron, skipping prefix setting.");
-                        return;
-                    }
-                    var prefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
-                    var currentPrefix = prefix == null ? "" : prefix;
-                    if (currentPrefix.contains("&3[$]")) {
-                        if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) prefixedUsers.add(e.getPlayer().getUniqueId());
-                        getModule().getLogger().info("Prefix is " + currentPrefix + " for player " + e.getPlayer().getName());
-                        return;
-                    }
-                    var newPfx = currentPrefix.isEmpty() ? "&3[$]" : "&3[$] " + currentPrefix;
-                    var result = vaultService.setUserPrefix(e.getPlayer().getUniqueId(), newPfx).join();
-                    if (!result)
-                        getModule().getLogger().warning("Failed to set prefix for player " + e.getPlayer().getName());
-                    else if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) prefixedUsers.add(e.getPlayer().getUniqueId());
-                });
-            } else getModule().getLogger().warning("Vault service is not enabled, prefixes will not be set for Patrons.");
+            //going to just use raw LP commands instead of trying to use their api
+
+            if (e.getUser().getPledgingAmount() < authhubService.getRequiredPatreonPledge()) {
+                getModule().getLogger().info("User " + e.getPlayer().getName() + " is not a patron, skipping prefix setting.");
+                return;
+            }
+
+            if (prefixedUsers.contains(e.getPlayer().getUniqueId())) return;
+
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + e.getPlayer().getUniqueId() + " meta setprefix " + PREFIX_PRIORITY + " \"&3[$] \"");
+            prefixedUsers.add(e.getPlayer().getUniqueId());
+
+//            if (vaultService.isEnabled()) {
+//                Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+//                    if (e.getUser().getPledgingAmount() < authhubService.getRequiredPatreonPledge()) {
+//                        getModule().getLogger().info("User " + e.getPlayer().getName() + " is not a patron, skipping prefix setting.");
+//                        return;
+//                    }
+//                    var prefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
+//                    var currentPrefix = prefix == null ? "" : prefix;
+//                    if (currentPrefix.contains("&3[$]")) {
+//                        if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) prefixedUsers.add(e.getPlayer().getUniqueId());
+//                        getModule().getLogger().info("Prefix is " + currentPrefix + " for player " + e.getPlayer().getName());
+//                        return;
+//                    }
+//                    var newPfx = currentPrefix.isEmpty() ? "&3[$]" : "&3[$] " + currentPrefix;
+//                    var result = vaultService.setUserPrefix(e.getPlayer().getUniqueId(), newPfx).join();
+//                    if (!result)
+//                        getModule().getLogger().warning("Failed to set prefix for player " + e.getPlayer().getName());
+//                    else if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) prefixedUsers.add(e.getPlayer().getUniqueId());
+//                });
+//            } else getModule().getLogger().warning("Vault service is not enabled, prefixes will not be set for Patrons.");
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLeave(PlayerQuitEvent e) {
-        if (!vaultService.isEnabled() || prefixedUsers.contains(e.getPlayer().getUniqueId())) return;
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-            var currentPrefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
-            if (currentPrefix != null && currentPrefix.contains("&3[$]")) {
-                var newPfx = currentPrefix.replace("&3[$]", "").trim();
-                if (newPfx.isEmpty()) newPfx = null;
-                var result = vaultService.setUserPrefix(e.getPlayer().getUniqueId(), newPfx).join();
-                if (!result) getModule().getLogger().warning("Failed to remove prefix for player " + e.getPlayer().getName());
-            }
-        });
+        if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) return;
+        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + e.getPlayer().getUniqueId() + " meta removeprefix " + PREFIX_PRIORITY);
+
+//        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+//            var currentPrefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
+//            if (currentPrefix != null && currentPrefix.contains("&3[$]")) {
+//                var newPfx = currentPrefix.replace("&3[$]", "").trim();
+//                if (newPfx.isEmpty()) newPfx = null;
+//                var result = vaultService.setUserPrefix(e.getPlayer().getUniqueId(), newPfx).join();
+//                if (!result) getModule().getLogger().warning("Failed to remove prefix for player " + e.getPlayer().getName());
+//            }
+//        });
     }
 
     private void createConnectionRequirement() {

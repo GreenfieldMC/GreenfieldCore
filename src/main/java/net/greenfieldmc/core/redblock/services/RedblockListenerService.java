@@ -52,12 +52,12 @@ public class RedblockListenerService extends ModuleService<RedblockListenerServi
                 e.setUseItemInHand(Event.Result.DENY);
                 if (block.getType() == Material.OAK_SIGN) {
                     if (found.get().isIncomplete())
-                        e.getPlayer().performCommand("rbcomplete -id " + found.get().getId());
+                        e.getPlayer().performCommand("rbcomplete flags: -id " + found.get().getId());
                     else if (found.get().isPending()) {
                         if (e.getAction() == Action.LEFT_CLICK_BLOCK)
-                            e.getPlayer().performCommand("rbapprove -id " + found.get().getId());
+                            e.getPlayer().performCommand("rbapprove flags: -id " + found.get().getId());
                         else if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
-                            e.getPlayer().performCommand("rbdeny -id " + found.get().getId());
+                            e.getPlayer().performCommand("rbdeny flags: -id " + found.get().getId());
                     }
                     return;
                 }

@@ -13,6 +13,8 @@ import net.greenfieldmc.core.redblock.services.RedblockCommandService;
 import net.greenfieldmc.core.redblock.services.RedblockListenerService;
 import net.greenfieldmc.core.redblock.services.RedblockServiceImpl;
 import net.greenfieldmc.core.redblock.services.RedblockStorageServiceImpl;
+import net.greenfieldmc.core.shared.services.IVaultService;
+import net.greenfieldmc.core.shared.services.VaultServiceImpl;
 
 import java.util.function.Predicate;
 
@@ -22,6 +24,7 @@ public class RedblockModule extends Module {
     private IRedblockService redblockService;
     private IEssentialsService essentialsService;
     private IDynmapService dynmapService;
+    private IVaultService vaultService;
 
     public RedblockModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
         super(plugin, canEnable);
@@ -31,9 +34,10 @@ public class RedblockModule extends Module {
     public void tryEnable() {
         storageService = enableIntegration(new RedblockStorageServiceImpl(plugin, this), true);
         essentialsService = enableIntegration(new EssentialsServiceImpl(plugin, this), false);
+        vaultService = enableIntegration(new VaultServiceImpl(plugin, this), false);
         dynmapService = enableIntegration(new RedblockDynmapServiceImpl(plugin, this, storageService), false);
         redblockService = enableIntegration(new RedblockServiceImpl(plugin, this, dynmapService, storageService), true);
-        enableIntegration(new RedblockCommandService(plugin, this, redblockService, essentialsService), true);
+        enableIntegration(new RedblockCommandService(plugin, this, redblockService, essentialsService, vaultService), true);
         enableIntegration(new RedblockListenerService(plugin, this, redblockService), true);
     }
 

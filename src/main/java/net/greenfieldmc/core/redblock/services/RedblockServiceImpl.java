@@ -47,7 +47,7 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
 
     @Override
     public Redblock createRedblock(String content, Player createdBy, Location location, @Nullable UUID assignedTo, @Nullable String minRank) {
-        createCube(Material.RED_WOOL, location, RedblockMessages.SIGN_CLICK_THIS_IF_COMPLETED);
+        createCube((assignedTo == null && minRank == null) ? Material.ORANGE_WOOL : Material.RED_WOOL, location, RedblockMessages.SIGN_CLICK_THIS_IF_COMPLETED);
         var displayUuid = createDisplay(storageService.getNextId(), minRank, assignedTo == null ? null : resolvePlayerName(assignedTo), location, content);
 
         var redblock = new Redblock(storageService.getNextId(), content, Redblock.Status.INCOMPLETE, location, createdBy.getUniqueId(), System.currentTimeMillis(), null, 0, null, 0, assignedTo, assignedTo != null ? System.currentTimeMillis() : 0, minRank, List.of(displayUuid));
@@ -80,6 +80,7 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
         removeEntities(redblock.getDisplayEntityIds());
         var displayUuid = createDisplay(redblock.getId(), redblock.getMinRank(), redblock.getAssignedTo() == null ? null : resolvePlayerName(redblock.getAssignedTo()), redblock.getLocation(), redblock.getContent());
         redblock.setDisplayEntityIds(List.of(displayUuid));
+        createCube((redblock.getAssignedTo() == null && redblock.getMinRank() == null) ? Material.ORANGE_WOOL : Material.RED_WOOL, redblock.getLocation(), RedblockMessages.SIGN_CLICK_THIS_IF_COMPLETED);
         storageService.saveRedblock(redblock);
         storageService.saveDatabase();
         updateDynmapMarker(redblock);
@@ -121,7 +122,7 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
         redblock.setStatus(Redblock.Status.INCOMPLETE);
         redblock.setCompletedBy(null);
         redblock.setCompletedOn(0);
-        createCube(Material.RED_WOOL, redblock.getLocation(), RedblockMessages.SIGN_CLICK_THIS_IF_COMPLETED);
+        createCube((redblock.getAssignedTo() == null && redblock.getMinRank() == null) ? Material.ORANGE_WOOL : Material.RED_WOOL, redblock.getLocation(), RedblockMessages.SIGN_CLICK_THIS_IF_COMPLETED);
         storageService.saveRedblock(redblock);
         storageService.saveDatabase();
         updateDynmapMarker(redblock);

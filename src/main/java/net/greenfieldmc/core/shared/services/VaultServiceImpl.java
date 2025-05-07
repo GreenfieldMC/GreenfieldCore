@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -64,27 +65,7 @@ public class VaultServiceImpl extends ModuleService<IVaultService> implements IV
     }
 
     @Override
-    public CompletableFuture<String> getUserPrefix(UUID user) {
-        if (!isEnabled()) return null;
-        return CompletableFuture.supplyAsync(() -> {
-            var player = Bukkit.getPlayer(user);
-            if (player != null) {
-                return chat.getPlayerPrefix(player);
-            }
-            return null;
-        });
-    }
-
-    @Override
-    public CompletableFuture<Boolean> setUserPrefix(UUID user, String prefix) {
-        if (!isEnabled()) return CompletableFuture.supplyAsync(() -> false);
-        return CompletableFuture.supplyAsync(() -> {
-            var player = Bukkit.getPlayer(user);
-            if (player != null) {
-                chat.setPlayerPrefix(player, prefix);
-                return true;
-            }
-            return false;
-        });
+    public List<String> getGroupList() {
+        return List.of(permission.getGroups());
     }
 }

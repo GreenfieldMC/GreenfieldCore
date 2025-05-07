@@ -37,7 +37,7 @@ public class RedblockListenerService extends ModuleService<RedblockListenerServi
 
             var location = block.getLocation();
 
-            if (block.getType() == Material.RED_WOOL || block.getType() == Material.LIME_WOOL || block.getType() == Material.OAK_SIGN) {
+            if (block.getType() == Material.RED_WOOL || block.getType() == Material.LIME_WOOL || block.getType() == Material.ORANGE_WOOL || block.getType() == Material.OAK_SIGN) {
                 var possible = redblockService.getRedblocks(rb -> !rb.isDeleted()
                             && !rb.isApproved()
                             && rb.getLocation().getWorld().getUID().equals(location.getWorld().getUID())

@@ -6,6 +6,7 @@ import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
 import net.greenfieldmc.core.redblock.RedblockMessages;
+import net.greenfieldmc.core.redblock.arguments.RankArgument;
 import net.greenfieldmc.core.shared.arguments.OfflinePlayerArgument;
 import net.greenfieldmc.core.redblock.arguments.RedblockArgument;
 import net.greenfieldmc.core.redblock.paginators.RedblockInfoPaginator;
@@ -16,6 +17,7 @@ import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import net.greenfieldmc.core.shared.services.IVaultService;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 
@@ -26,14 +28,16 @@ import java.util.function.Predicate;
 
 public class RedblockCommandService extends ModuleService<RedblockCommandService> implements IModuleService<RedblockCommandService> {
 
+    private final IVaultService vaultService;
     private final IRedblockService redblockService;
     private final IEssentialsService essentialsService;
 
     private final ChatPaginator<Redblock.RedblockInfo, ICommandContext> infoPaginator = new RedblockInfoPaginator().build();
     private final ChatPaginator<Redblock, ICommandContext> listPaginator = new RedblockListPaginator().build();
 
-    public RedblockCommandService(Plugin plugin, Module module, IRedblockService redblockService, IEssentialsService essentialsService) {
+    public RedblockCommandService(Plugin plugin, Module module, IRedblockService redblockService, IEssentialsService essentialsService, IVaultService vaultService) {
         super(plugin, module);
+        this.vaultService = vaultService;
         this.redblockService = redblockService;
         this.essentialsService = essentialsService;
     }
@@ -250,11 +254,12 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
         CommandBuilder.of("rbedit", "rbe")
                 .description("Edit an incomplete RedBlock")
                 .permission("greenfieldcore.redblock.edit")
+                .canExecute(this::edit)
                 .then("description", PdkArgumentTypes.quotedString(true, () -> "Enter a new description for the RedBlock")).executes(this::edit)
                 .flag("id", "The incomplete RedBlock to edit", new RedblockArgument(redblockService, Redblock::isIncomplete))
                 .flag("assign", "Assign this RedBlock to a specific player", new OfflinePlayerArgument())
                 .flag("unassign", "Unassign this RedBlock")
-                .flag("rank", "Assign this RedBlock to a specific rank",  StringArgumentType.word())
+                .flag("rank", "Assign this RedBlock to a specific rank", vaultService != null ? new RankArgument(vaultService) : StringArgumentType.word())
                 .flag("unrank", "Unrank this RedBlock")
                 .register(plugin);
 

@@ -116,7 +116,7 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
     public void onLeave(PlayerQuitEvent e) {
         if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) return;
         Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + e.getPlayer().getUniqueId() + " meta removeprefix " + PREFIX_PRIORITY);
-
+        prefixedUsers.remove(e.getPlayer().getUniqueId());
 //        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
 //            var currentPrefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
 //            if (currentPrefix != null && currentPrefix.contains("&3[$]")) {

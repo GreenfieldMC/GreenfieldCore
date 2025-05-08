@@ -89,7 +89,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
 
     private void edit(ICommandContext ctx) throws PDKCommandException {
         var rb = resolveRedblock(ctx, Redblock::isIncomplete, "incomplete");
-        var description = ctx.getTyped("description", String.class);
+        var description = ctx.getTyped("description", String.class, "");
 
         var unassign = ctx.hasFlag("unassign");
         var unrank = ctx.hasFlag("unrank");

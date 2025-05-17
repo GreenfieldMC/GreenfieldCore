@@ -97,7 +97,8 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new BrushableInteraction(worldEditService, coreProtectService),
                 new NetherWartInteraction(worldEditService, coreProtectService),
                 new CocoaBeanInteraction(worldEditService, coreProtectService),
-                new LightningRodInteraction(worldEditService, coreProtectService)
+                new LightningRodInteraction(worldEditService, coreProtectService),
+                new MaterialMappingInteraction(worldEditService, coreProtectService)
         );
     }
 

@@ -72,11 +72,6 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
             }
         }
 
-
-//        if ((rb.getAssignedTo() == null || rb.getAssignedTo() != ctx.asPlayer().getUniqueId()) && (rb.getCompletedBy() == null || rb.getCompletedBy() != ctx.asPlayer().getUniqueId())) {
-//        } else {
-//            ctx.error(RedblockMessages.ERROR_REDBLOCK_DENY_SELF);
-//        }
         redblockService.denyRedblock(rb);
         ctx.send(RedblockMessages.REDBLOCK_DENIED.apply(rb.getId()));
     }
@@ -178,7 +173,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
     private Redblock resolveRedblock(ICommandContext ctx, Predicate<Redblock> filter, String type) throws PDKCommandException {
         var rb = ctx.getFlag("id", getNearestRedblock(redblockService.getRedblocks(filter), ctx.getLocation(), 10));
         if (rb == null) {
-            ctx.error(ctx.first() != null
+            ctx.error(ctx.firstOrNull() != null
                     ? RedblockMessages.ERROR_REDBLOCK_NOT_FOUND_ID.apply(type, ctx.first())
                     : RedblockMessages.ERROR_REDBLOCK_NOT_FOUND_RADIUS.apply(type, 10));
         }

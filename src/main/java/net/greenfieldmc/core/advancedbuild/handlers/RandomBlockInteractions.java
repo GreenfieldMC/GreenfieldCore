@@ -30,6 +30,7 @@ public class RandomBlockInteractions extends InteractionHandler {
                 Material.WHITE_CARPET,
                 Material.YELLOW_CARPET,
                 Material.MOSS_CARPET,
+                Material.PALE_MOSS_CARPET,
                 Material.ACACIA_PRESSURE_PLATE,
                 Material.BIRCH_PRESSURE_PLATE,
                 Material.CRIMSON_PRESSURE_PLATE,
@@ -43,6 +44,7 @@ public class RandomBlockInteractions extends InteractionHandler {
                 Material.CHERRY_PRESSURE_PLATE,
                 Material.BAMBOO_PRESSURE_PLATE,
                 Material.POLISHED_BLACKSTONE_PRESSURE_PLATE,
+                Material.PALE_OAK_PRESSURE_PLATE,
                 Material.LIGHT_WEIGHTED_PRESSURE_PLATE,
                 Material.HEAVY_WEIGHTED_PRESSURE_PLATE
         );

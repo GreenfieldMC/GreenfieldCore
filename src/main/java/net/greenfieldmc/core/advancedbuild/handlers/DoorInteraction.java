@@ -27,7 +27,16 @@ public class DoorInteraction extends InteractionHandler {
                 Material.BAMBOO_DOOR,
                 Material.CRIMSON_DOOR,
                 Material.WARPED_DOOR,
-                Material.IRON_DOOR);
+                Material.IRON_DOOR,
+                Material.COPPER_DOOR,
+                Material.EXPOSED_COPPER_DOOR,
+                Material.OXIDIZED_COPPER_DOOR,
+                Material.PALE_OAK_DOOR,
+                Material.WAXED_COPPER_DOOR,
+                Material.WAXED_EXPOSED_COPPER_DOOR,
+                Material.WAXED_OXIDIZED_COPPER_DOOR,
+                Material.WAXED_WEATHERED_COPPER_DOOR,
+                Material.WEATHERED_COPPER_DOOR);
     }
 
     @Override

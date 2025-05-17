@@ -54,7 +54,10 @@ public class PlantInteraction extends InteractionHandler {
                 Material.FLOWERING_AZALEA,
                 Material.SCAFFOLDING,
                 Material.WEEPING_VINES,
-                Material.TORCHFLOWER
+                Material.TORCHFLOWER,
+                Material.CLOSED_EYEBLOSSOM,
+                Material.OPEN_EYEBLOSSOM,
+                Material.PALE_OAK_SAPLING
         );
     }
 

@@ -44,4 +44,6 @@ public class WorldEditServiceImpl extends ModuleService<IWorldEditService> imple
         //had to do this weird workaround due to getting a NoClassDefFoundError from some of the worldedit api classes if they were referenced in this class.
         if (impl != null) impl.setBlock(location, data);
     }
+
+
 }

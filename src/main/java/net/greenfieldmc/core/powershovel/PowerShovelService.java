@@ -9,6 +9,7 @@ import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
+import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import net.greenfieldmc.core.shared.services.IWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -43,6 +44,7 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
     private static final Map<UUID, Long> TIMEOUTS = new HashMap<>();
     private static final Map<UUID, Mode> PLAYER_MODES = new HashMap<>();
     private static final Map<UUID, Location> LINE_STARTS = new HashMap<>();
+    private static final Map<UUID, Double> DROOP_STRENGTHS = new HashMap<>();
 
     private final ICoreProtectService coreProtectService;
     private final IWorldEditService worldEditService;
@@ -69,8 +71,7 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
         PROFILE.setTextures(texture);
         PROFILE.complete();
         module.getLogger().info("Custom head loaded.");
-        Bukkit.getPluginManager().registerEvents(this, plugin);
-        CommandBuilder.of("powershovel", "ps")
+        Bukkit.getPluginManager().registerEvents(this, plugin);        CommandBuilder.of("powershovel", "ps")
                 .permission("greenfieldcore.powershovel")
                 .description("Select power shovel mode and receive shovel")
             .then("powerconnector")
@@ -86,9 +87,21 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
                     UUID id = ctx.asPlayer().getUniqueId();
                     PLAYER_MODES.put(id, Mode.POWERLINE);
                     LINE_STARTS.remove(id);
+                    DROOP_STRENGTHS.remove(id); // Reset droop strength to default
                     ctx.send(moduleMessage("PowerShovel", "Mode set to powerline. You now have the power shovel. Left-click to set start, right-click to place line."));
                     ctx.asPlayer().getInventory().addItem(SHOVEL);
                 })
+                .then("droopStrength", PdkArgumentTypes.floatArg(0.1f, 10.0f))
+                    .canExecute(ctx -> {
+                        UUID id = ctx.asPlayer().getUniqueId();
+                        var droopStrength = ctx.getTyped("droopStrength", Float.class);
+                        PLAYER_MODES.put(id, Mode.POWERLINE);
+                        LINE_STARTS.remove(id);
+                        DROOP_STRENGTHS.put(id, Double.valueOf(droopStrength));
+                        ctx.send(moduleMessage("PowerShovel", "Mode set to powerline with droop strength " + droopStrength + ". You now have the power shovel. Left-click to set start, right-click to place line."));
+                        ctx.asPlayer().getInventory().addItem(SHOVEL);
+                    })
+                .end()
             .end()
             .register(plugin);
     }
@@ -135,6 +148,7 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
 
     private void createPowerline(PlayerInteractEvent e, org.bukkit.entity.Player player, UUID id) {
         Location start = LINE_STARTS.get(id);
+        double droopStrength = DROOP_STRENGTHS.getOrDefault(id, 2.4); // Default droop strength if not set
         if (start == null || start.getWorld() != e.getClickedBlock().getWorld()) {
             LINE_STARTS.remove(id);
             player.sendMessage(moduleMessage("PowerShovel", "No start location set."));
@@ -143,7 +157,7 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
         Location end = e.getClickedBlock().getLocation();
         var dist = start.distance(end);
         var dz = end.getBlockY() - start.getBlockY();
-        var C = dist * 2;//to make the dip more pronounced, you can change 2 to a smaller number
+        var C = dist * droopStrength;//to make the dip more pronounced, you can change 2 to a smaller number
         var sinhL2C = Math.sinh(dist / (2.0 * C));
         var asinhArg = (dz) / (2.0 * C * sinhL2C);
         var Lb = dist / 2.0 - C * Math.log(asinhArg + Math.sqrt(asinhArg * asinhArg + 1));
@@ -165,8 +179,6 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
         try (var session = localSession.createEditSession(BukkitAdapter.adapt(player))) {
 
             var block = BukkitAdapter.adapt(Material.COBWEB.createBlockData()).toBaseBlock();
-            
-            System.out.println("Distance: " + dist + ", XDiff: " + xDiff + ", ZDiff: " + zDiff + ", MinSteps: " + minSteps + ", ArcSteps: " + arcSteps + ", FinalSteps: " + steps);
 
             var placements = createContiguousPath(start, end, steps, yStart, yCatenaryStart, yCatenaryEnd, C, Lb, dist);
             
@@ -182,61 +194,6 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
 
         LINE_STARTS.remove(id);
         player.sendMessage(moduleMessage("PowerShovel", "Powerline created."));
-    }
-
-    private double calculateCatenaryY(Location start, Location end, double droopStrength, double t) {
-        var distance = start.distance(end);
-        var dz = end.getBlockY() - start.getBlockY();
-        var c = distance * droopStrength;
-        var sinhL2C = Math.sinh(distance / (2.0 * c));
-        var asinhArg = (dz) / (2.0 * c * sinhL2C);
-        var lb = distance / 2.0 - c * Math.log(asinhArg + Math.sqrt(asinhArg * asinhArg + 1));
-        var yStart = start.getBlockY();
-        var yCatenaryStart = c * (Math.cosh((-lb) / c) - Math.cosh(lb / c));
-        var yCatenaryEnd = c * (Math.cosh((distance - lb) / c) - Math.cosh(lb / c));
-        var s = distance * t;
-        return yStart + (yCatenaryEnd - yCatenaryStart) * t + c * (Math.cosh((s - lb) / c) - Math.cosh(lb / c)) - yCatenaryStart * (1 - t) - yCatenaryEnd * t;
-    }
-
-    private Location getLocationAtStep(Location startLocation, Location endLocation, int currentStep, int stepCount) {
-        double t = (double) currentStep / stepCount;
-        int x = (int) (startLocation.getBlockX() + (endLocation.getBlockX() - startLocation.getBlockX()) * t);
-        int z = (int) (startLocation.getBlockZ() + (endLocation.getBlockZ() - startLocation.getBlockZ()) * t);
-        double y = calculateCatenaryY(startLocation, endLocation, 2.0, t);
-        return new Location(startLocation.getWorld(), x, (int)y, z);
-    }
-
-    private boolean isBlockInNearbySpace(Location sourceBlock, Location targetBlock) {
-        int xDiff = Math.abs(sourceBlock.getBlockX() - targetBlock.getBlockX());
-        int yDiff = Math.abs(sourceBlock.getBlockY() - targetBlock.getBlockY());
-        int zDiff = Math.abs(sourceBlock.getBlockZ() - targetBlock.getBlockZ());
-        return (xDiff <= 1 && yDiff <= 1 && zDiff <= 1);
-    }
-
-    private int blocksInNearbySpace(Location startLocation, Location endLocation, Location sourceBlock, int currentStep, int stepCount) {
-        var lastLastLocation = getLocationAtStep(startLocation, endLocation, currentStep - 2, stepCount);
-        var lastLocation = getLocationAtStep(startLocation, endLocation, currentStep - 1, stepCount);
-//        var nextLocation = getLocationAtStep(startLocation, endLocation, currentStep + 1, stepCount);
-//        var nextNextLocation = getLocationAtStep(startLocation, endLocation, currentStep + 2, stepCount);
-
-        if (lastLocation.equals(sourceBlock) || lastLocation.equals(lastLastLocation)) {
-            lastLocation = getLocationAtStep(startLocation, endLocation, currentStep - 2, stepCount);
-            lastLastLocation = getLocationAtStep(startLocation, endLocation, currentStep - 3, stepCount);
-        }
-
-//        if (nextLocation.equals(sourceBlock) || nextLocation.equals(nextNextLocation)) {
-//            nextLocation = getLocationAtStep(startLocation, endLocation, currentStep + 2, stepCount);
-//            nextNextLocation = getLocationAtStep(startLocation, endLocation, currentStep + 3, stepCount);
-//        }
-
-        int count = 0;
-
-        if (isBlockInNearbySpace(sourceBlock, lastLastLocation)) count++;
-        if (isBlockInNearbySpace(sourceBlock, lastLocation)) count++;
-//        if (!sourceBlock.equals(nextLocation) && isBlockInNearbySpace(sourceBlock, nextLocation)) count++;
-//        if (isBlockInNearbySpace(sourceBlock, nextNextLocation)) count++;
-
-        return count;
     }
 
     private void handleConnectorMode(PlayerInteractEvent e, org.bukkit.entity.Player player) {

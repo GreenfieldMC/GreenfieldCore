@@ -215,7 +215,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
                 .then("description", PdkArgumentTypes.quotedString(false, () -> "Enter a description for the RedBlock"))
                 .executes(this::create)
                 .flag("assign", "Assign this RedBlock to a specific player", new OfflinePlayerArgument())
-                .flag("rank", "Assign this RedBlock to a specific rank",  StringArgumentType.word())
+                .flag("rank", "Assign this RedBlock to a specific rank",  vaultService != null ? new RankArgument(vaultService) : StringArgumentType.word())
                 .register(plugin);
 
         CommandBuilder.of("rbapprove", "rba")

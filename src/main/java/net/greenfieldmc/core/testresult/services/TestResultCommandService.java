@@ -8,6 +8,7 @@ import net.greenfieldmc.core.shared.arguments.OfflinePlayerArgument;
 import net.greenfieldmc.core.testresult.TestAttempt;
 import net.greenfieldmc.core.testresult.TestResultMessages;
 import net.greenfieldmc.core.testresult.TestSet;
+import net.greenfieldmc.core.testresult.arguments.AttemptingUserArgument;
 import net.greenfieldmc.core.testresult.paginators.TestAttemptPaginator;
 import net.greenfieldmc.core.testresult.paginators.TestInfoPaginator;
 import net.greenfieldmc.core.testresult.paginators.TestSetPaginator;
@@ -123,7 +124,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
         CommandBuilder.of("pass")
                 .description("Pass a test build attempt.")
                 .permission("greenfieldcore.testresult.pass")
-                .then("userToPass", PdkArgumentTypes.player((Predicate<Player>)(p -> testResultService.getAttemptsForUser(p.getUniqueId()).stream().filter(att -> !att.isComplete()).toList().isEmpty())))
+                .then("userToPass", new AttemptingUserArgument(testResultService))
                     .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
                     .executes(this::pass)
                 .end()
@@ -133,7 +134,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
                 .description("Fail a test build attempt.")
                 .permission("greenfieldcore.testresult.fail")
                 .flag("final", "Mark this test build attempt as the final attempt. This will remove the user from the server.")
-                .then("userToFail", PdkArgumentTypes.player((Predicate<Player>)(p -> testResultService.getAttemptsForUser(p.getUniqueId()).stream().filter(att -> !att.isComplete()).toList().isEmpty())))
+                .then("userToFail", new AttemptingUserArgument(testResultService))
                     .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
                     .executes(this::fail)
                 .end()
@@ -150,10 +151,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
                 .description("View test build attempts.")
                 .permission("greenfieldcore.testresult.list")
                 .flag("page", "The page to view", PdkArgumentTypes.integer(1, Integer.MAX_VALUE))
-//                .then("user")
-                .then("user", new OfflinePlayerArgument())
-                    .executes(this::listUserAttempts)//.end()
-//                .then("all")
+                .then("user", new OfflinePlayerArgument()).executes(this::listUserAttempts)
                 .canExecute(this::listAllAttempts)
                 .register(plugin);
 

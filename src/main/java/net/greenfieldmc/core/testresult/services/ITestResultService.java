@@ -83,4 +83,14 @@ public interface ITestResultService extends IModuleService<ITestResultService> {
      */
     List<TestSet> getAllAttemptSets();
 
+    /**
+     * Returns a list of all test sets that have pending attempts (attempts that are not complete).
+     * @return A list of all test sets that have pending attempts.
+     */
+    default List<TestSet> getPendingAttemptSets() {
+        return getAllAttemptSets().stream()
+                .filter(ts -> ts.getAttempts().stream().anyMatch(att -> !att.isComplete()))
+                .toList();
+    }
+
 }

@@ -20,6 +20,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -32,6 +33,8 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class ChatFormatModule extends Module {
+
+    private static final PlainTextComponentSerializer plainTextSerializer = PlainTextComponentSerializer.plainText();
 
     private static final NumberFormat compactFormat = CompactNumberFormat.getInstance();
 
@@ -49,7 +52,6 @@ public class ChatFormatModule extends Module {
             .hoverEvent(HoverEvent.showText(Component.text("Click to teleport", NamedTextColor.GRAY)))
             .build();
     private static final Function<Map<IUnit, Double>, Style> unitStyle = (conversions) -> Style.style()
-            .color(TextColor.color(199, 233, 255))
             .hoverEvent(HoverEvent.showText(() -> {
                 var hover = Component.text("Conversions:").toBuilder();
                 conversions.forEach((u, d) -> {
@@ -97,9 +99,9 @@ public class ChatFormatModule extends Module {
             var match = matcher.group(1);
 
             var player = Bukkit.getPlayerExact(match);
-            if (player == null) player = Bukkit.getOnlinePlayers().stream().filter(p -> p.getDisplayName().equalsIgnoreCase(match)).findFirst().orElse(null);
+            if (player == null) player = Bukkit.getOnlinePlayers().stream().filter(p -> plainTextSerializer.serialize(p.displayName()).equalsIgnoreCase(match)).findFirst().orElse(null);
             if (player == null) player = Bukkit.getOnlinePlayers().stream().filter(p -> p.getName().toLowerCase().contains(match.toLowerCase())).findFirst().orElse(null);
-            if (player == null) player = Bukkit.getOnlinePlayers().stream().filter(p -> p.getDisplayName().toLowerCase().contains(match.toLowerCase())).findFirst().orElse(null);
+            if (player == null) player = Bukkit.getOnlinePlayers().stream().filter(p -> plainTextSerializer.serialize(p.displayName()).toLowerCase().contains(match.toLowerCase())).findFirst().orElse(null);
             if (player != null) indices.put(matcher.start(), Pair.of(match, player));
         }
         return indices;
@@ -167,7 +169,7 @@ public class ChatFormatModule extends Module {
                 current = new StringBuilder();
                 var player = mentionIndices.get(i).getSecond();
                 var mention = mentionIndices.get(i).getFirst();
-                var displayName = player.getDisplayName().replaceAll("§.|&.", "");
+                var displayName = plainTextSerializer.serialize(player.displayName()).replaceAll("§.|&.", "");
                 base.append(Component.text('@' + displayName, mentionStyle.apply(displayName)));
                 skipChars += mention.length();
                 base.append();

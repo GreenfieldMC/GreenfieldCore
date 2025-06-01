@@ -70,7 +70,7 @@ public class TestSet implements PageItem<ICommandContext> {
         if (!playerName.equalsIgnoreCase("!!Unknown!!")) {
             viewButton = Component.text("«", NamedTextColor.BLUE, TextDecoration.BOLD).toBuilder()
                     .hoverEvent(HoverEvent.showText(Component.text("View attempts", NamedTextColor.GRAY)))
-                    .clickEvent(ClickEvent.runCommand("/attempts user " + playerName)).build();
+                    .clickEvent(ClickEvent.runCommand("/attempts " + playerName)).build();
         } else {
             viewButton = Component.text("«", paginator.getGrayedOutColor(), TextDecoration.BOLD).toBuilder()
                     .hoverEvent(HoverEvent.showText(Component.text("User not found, no attempts can be viewed.", NamedTextColor.GRAY))).build();

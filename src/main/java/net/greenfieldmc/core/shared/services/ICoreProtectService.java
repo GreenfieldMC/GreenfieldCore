@@ -11,4 +11,6 @@ public interface ICoreProtectService extends IModuleService<ICoreProtectService>
 
     void logRemoval(String player, Location location, Material type, BlockData blockdata);
 
+    void logContainerTransaction(String player, Location location);
+
 }

@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
@@ -98,7 +99,8 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new NetherWartInteraction(worldEditService, coreProtectService),
                 new CocoaBeanInteraction(worldEditService, coreProtectService),
                 new LightningRodInteraction(worldEditService, coreProtectService),
-                new MaterialMappingInteraction(worldEditService, coreProtectService)
+                new MaterialMappingInteraction(worldEditService, coreProtectService),
+                new ItemFrameInteraction(worldEditService, coreProtectService)
         );
     }
 
@@ -126,5 +128,15 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
             case LEFT_CLICK_AIR -> handler.onLeftClickAir(e);
             default -> {}
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onInteractEntity(PlayerInteractEntityEvent e) {
+        if (!e.getPlayer().hasPermission("greenfieldcore.advbuild")) return;
+        if (e.getHand() == EquipmentSlot.OFF_HAND || !isEnabledFor(e.getPlayer().getUniqueId())) return;
+
+        InteractionHandler handler = interactionHandlers.stream().filter(h -> h.handles(e)).findFirst().orElse(interactionHandlers.get(0));
+        e.setCancelled(true);
+        handler.onRightClickEntity(e);
     }
 }

@@ -16,6 +16,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.ArrayList;
@@ -27,8 +28,9 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
 
     protected final List<Material> materials;
     private final Predicate<PlayerInteractEvent> predicate;
+    private final Predicate<PlayerInteractEntityEvent> entityPredicate;
     private final IWorldEditService worldEditService;
-    private final ICoreProtectService coreProtectService;
+    protected final ICoreProtectService coreProtectService;
 
     /**
      * Create an interaction handler for given materials.
@@ -37,6 +39,7 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
     public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, Material... heldMaterials) {
         this.materials = heldMaterials == null ? new ArrayList<>() : Arrays.asList(heldMaterials);
         this.predicate = null;
+        this.entityPredicate = null;
         this.worldEditService = worldEditService;
         this.coreProtectService = coreProtectService;
     }
@@ -49,6 +52,7 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
     public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, Predicate<PlayerInteractEvent> predicate, Material...  materials) {
         this.materials = Arrays.asList(materials);
         this.predicate = predicate;
+        this.entityPredicate = null;
         this.worldEditService = worldEditService;
         this.coreProtectService = coreProtectService;
     }
@@ -106,6 +110,10 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
         return materials.contains(event.getPlayer().getInventory().getItemInMainHand().getType()) || (predicate != null && predicate.test(event));
     }
 
+    public boolean handles(PlayerInteractEntityEvent event) {
+        return materials.contains(event.getPlayer().getInventory().getItemInMainHand().getType()) || (entityPredicate != null && entityPredicate.test(event));
+    }
+
     /**
      * Called when a player right clicks a block.
      * @param event The event.
@@ -141,6 +149,22 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
      */
     public void onLeftClickAir(PlayerInteractEvent event) {
 
+    }
+
+    /**
+     * Called when the player right clicks an entity.
+     * @param event The event.
+     */
+    public void onRightClickEntity(PlayerInteractEntityEvent event) {
+        // Default implementation does nothing
+    }
+
+    /**
+     * Called when the player left clicks an entity.
+     * @param event The event.
+     */
+    public void onLeftClickEntity(PlayerInteractEntityEvent event) {
+        // Default implementation does nothing
     }
 
     /**

@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.advancedbuild.handlers;
 
+import net.greenfieldmc.core.advancedbuild.InteractPredicate;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import net.greenfieldmc.core.shared.services.IWorldEditService;
@@ -20,7 +21,7 @@ public class PinkPetalsInteraction extends InteractionHandler {
     private final Map<UUID, PetalSession> sessions;
 
     public PinkPetalsInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
-        super(worldEditService, coreProtectService, (event) -> {
+        super(worldEditService, coreProtectService, (InteractPredicate) (event) -> {
                     var player = event.getPlayer();
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand == Material.AIR &&

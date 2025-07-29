@@ -16,27 +16,30 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 public abstract class InteractionHandler implements PageItem<ICommandContext> {
 
     protected final List<Material> materials;
-    private final Predicate<PlayerInteractEvent> predicate;
+    private final InteractPredicate interactPredicate;
+    private final EntityInteractPredicate entityPredicate;
     private final IWorldEditService worldEditService;
-    private final ICoreProtectService coreProtectService;
+    protected final ICoreProtectService coreProtectService;
 
     /**
      * Create an interaction handler for given materials.
      * @param heldMaterials The materials to look for in the main hand of the player when interacting.
      */
     public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, Material... heldMaterials) {
+        this.interactPredicate = null;
         this.materials = heldMaterials == null ? new ArrayList<>() : Arrays.asList(heldMaterials);
-        this.predicate = null;
+        this.entityPredicate = null;
         this.worldEditService = worldEditService;
         this.coreProtectService = coreProtectService;
     }
@@ -46,9 +49,23 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
      * @param predicate The predicate to test for to determine if the interaction should be handled by this interaction handler.
      * @param materials The materials to look for in the main hand of the player when interacting.
      */
-    public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, Predicate<PlayerInteractEvent> predicate, Material...  materials) {
+    public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, InteractPredicate interactPredicate, Material...  materials) {
+        this.interactPredicate = interactPredicate;
         this.materials = Arrays.asList(materials);
-        this.predicate = predicate;
+        this.entityPredicate = null;
+        this.worldEditService = worldEditService;
+        this.coreProtectService = coreProtectService;
+    }
+
+    /**
+     * Create an interaction handler for given materials or scenarios.
+     * @param entityPredicate The predicate to test for to determine if the interaction should be handled by this interaction handler.
+     * @param materials The materials to look for in the main hand of the player when interacting.
+     */
+    public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, EntityInteractPredicate entityPredicate, Material...  materials) {
+        this.interactPredicate = null;
+        this.materials = Arrays.asList(materials);
+        this.entityPredicate = entityPredicate;
         this.worldEditService = worldEditService;
         this.coreProtectService = coreProtectService;
     }
@@ -103,7 +120,11 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
      * @return True if this interaction handler handles the event.
      */
     public boolean handles(PlayerInteractEvent event) {
-        return materials.contains(event.getPlayer().getInventory().getItemInMainHand().getType()) || (predicate != null && predicate.test(event));
+        return materials.contains(event.getPlayer().getInventory().getItemInMainHand().getType()) || (interactPredicate != null && interactPredicate.test(event));
+    }
+
+    public boolean handles(PlayerInteractEntityEvent event) {
+        return materials.contains(event.getPlayer().getInventory().getItemInMainHand().getType()) || (entityPredicate != null && entityPredicate.test(event));
     }
 
     /**
@@ -144,11 +165,19 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
     }
 
     /**
+     * Called when the player right clicks an entity.
+     * @param event The event.
+     */
+    public void onRightClickEntity(PlayerInteractEntityEvent event) {
+        // Default implementation does nothing
+    }
+
+    /**
      * Get the material in the player calling the event's hand.
      * @param event The event.
      * @return The material in the player's hand.
      */
-    public final Material getHandMat(PlayerInteractEvent event) {
+    public final Material getHandMat(PlayerEvent event) {
         return event.getPlayer().getInventory().getItemInMainHand().getType();
     }
 

@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.advancedbuild.handlers;
 
+import net.greenfieldmc.core.advancedbuild.InteractPredicate;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import net.greenfieldmc.core.shared.services.IWorldEditService;
@@ -15,7 +16,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class SwitchInteraction extends InteractionHandler {
 
     public SwitchInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
-        super(worldEditService, coreProtectService, (event) -> {
+        super(worldEditService, coreProtectService, (InteractPredicate) (event) -> {
                     var player = event.getPlayer();
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand != Material.AIR &&

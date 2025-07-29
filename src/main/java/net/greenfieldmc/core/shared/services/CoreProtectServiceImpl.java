@@ -52,4 +52,10 @@ public class CoreProtectServiceImpl extends ModuleService<ICoreProtectService> i
         if (!isEnabled()) return;
         coreApi.logRemoval(player, location, type, blockdata);
     }
+
+    @Override
+    public void logContainerTransaction(String player, Location location) {
+        if (!isEnabled()) return;
+        coreApi.logContainerTransaction(player, location);
+    }
 }

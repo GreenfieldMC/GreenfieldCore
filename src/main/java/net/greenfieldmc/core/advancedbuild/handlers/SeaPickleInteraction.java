@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.advancedbuild.handlers;
 
+import net.greenfieldmc.core.advancedbuild.InteractPredicate;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import net.greenfieldmc.core.shared.services.IWorldEditService;
@@ -10,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.block.data.type.SeaPickle;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +22,7 @@ public class SeaPickleInteraction extends InteractionHandler {
     private final Map<UUID, PickleSession> sessions;
 
     public SeaPickleInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
-        super(worldEditService, coreProtectService, (event) -> {
+        super(worldEditService, coreProtectService, (InteractPredicate) (event) -> {
                     var player = event.getPlayer();
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand == Material.AIR &&
@@ -78,11 +80,17 @@ public class SeaPickleInteraction extends InteractionHandler {
 
         private int pickleAmount;
 
-        public PickleSession(int pickleAmount) { this.pickleAmount = pickleAmount; }
+        public PickleSession(int pickleAmount) {
+            this.pickleAmount = pickleAmount;
+        }
 
-        public int getPickleAmount() { return pickleAmount; }
+        public int getPickleAmount() {
+            return pickleAmount;
+        }
 
-        public void setPickleAmount(int pickleAmount) { this.pickleAmount = pickleAmount; }
+        public void setPickleAmount(int pickleAmount) {
+            this.pickleAmount = pickleAmount;
+        }
 
     }
 

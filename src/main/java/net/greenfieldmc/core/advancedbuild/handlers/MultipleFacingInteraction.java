@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.advancedbuild.handlers;
 
+import net.greenfieldmc.core.advancedbuild.InteractPredicate;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import net.greenfieldmc.core.shared.services.IWorldEditService;
@@ -12,7 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class MultipleFacingInteraction extends InteractionHandler {
 
     public MultipleFacingInteraction(IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
-        super(worldEditService, coreProtectService, (event) ->
+        super(worldEditService, coreProtectService, (InteractPredicate) (event) ->
                 (event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof MultipleFacing)
                         || (event.getPlayer().getInventory().getItemInMainHand().getType().isBlock() && event.getPlayer().getInventory().getItemInMainHand().getType().createBlockData() instanceof MultipleFacing));
     }

@@ -25,6 +25,8 @@ public final class GreenfieldCore extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        Util.userNameMap.put(Util.CONSOLE_UUID, "Console");
+        Util.getAllPlayers();
         MODULES.addAll(List.of(
                 new CoreModule(this, (c) -> true),
                 new CodesModule(this, ModuleConfig::isCodesEnabled),
@@ -42,8 +44,6 @@ public final class GreenfieldCore extends JavaPlugin {
         ));
 
         MODULES.forEach(Module::enable);
-        Util.userNameMap.put(Util.CONSOLE_UUID, "Console");
-        Util.getAllPlayers();
     }
 
     @Override

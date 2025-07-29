@@ -18,17 +18,22 @@ public class AttemptingUserArgument extends AbstractStringTypedArgument<UUID> {
 
     private static final DynamicCommandExceptionType USER_NOT_FOUND = new DynamicCommandExceptionType(o -> () -> "User " + o.toString() + " not found");
     private static final DynamicCommandExceptionType USER_HAS_NO_INCOMPLETE_ATTEMPTS = new DynamicCommandExceptionType(o -> () -> "User " + o.toString() + " has no incomplete attempts");
+    private static final DynamicCommandExceptionType USER_HAS_NO_ATTEMPTS = new DynamicCommandExceptionType(o -> () -> "User " + o.toString() + " has no attempts");
 
     private final ITestResultService testResultService;
+    private final ArgumentMode argumentMode;
 
-    public AttemptingUserArgument(ITestResultService testResultService) {
+    public AttemptingUserArgument(ITestResultService testResultService, ArgumentMode argumentMode) {
         super();
         this.testResultService = testResultService;
+        this.argumentMode = argumentMode;
     }
 
     @Override
     public List<UUID> listBasicSuggestions(ICommandContext commandContext) {
-        return testResultService.getPendingAttemptSets().stream().map(TestSet::getUuid).toList();
+        if (argumentMode == ArgumentMode.INCOMPLETE_ATTEMPTS)
+            return testResultService.getPendingAttemptSets().stream().map(TestSet::getUuid).toList();
+        else return testResultService.getAllAttemptSets().stream().map(TestSet::getUuid).toList();
     }
 
     @Override
@@ -42,7 +47,11 @@ public class AttemptingUserArgument extends AbstractStringTypedArgument<UUID> {
         for (var entry : Util.userNameMap.entrySet()) {
             if (entry.getValue().equalsIgnoreCase(nativeType)) {
                 var userId = entry.getKey();
-                if (testResultService.getPendingAttemptSets().stream().noneMatch(ts -> ts.getUuid().equals(userId))) {
+                if (argumentMode == ArgumentMode.ANY_ATTEMPTS && testResultService.getAllAttemptSets().stream().noneMatch(ts -> ts.getUuid().equals(userId))) {
+                    reader.setCursor(reader.getCursor() - nativeType.length());
+                    throw USER_HAS_NO_ATTEMPTS.createWithContext(reader, nativeType);
+                }
+                if (argumentMode == ArgumentMode.INCOMPLETE_ATTEMPTS && testResultService.getPendingAttemptSets().stream().noneMatch(ts -> ts.getUuid().equals(userId))) {
                     reader.setCursor(reader.getCursor() - nativeType.length());
                     throw USER_HAS_NO_INCOMPLETE_ATTEMPTS.createWithContext(reader, nativeType);
                 }
@@ -51,6 +60,11 @@ public class AttemptingUserArgument extends AbstractStringTypedArgument<UUID> {
         }
         reader.setCursor(reader.getCursor() - nativeType.length());
         throw USER_NOT_FOUND.createWithContext(reader, nativeType);
+    }
+
+    public enum ArgumentMode {
+        INCOMPLETE_ATTEMPTS,
+        ANY_ATTEMPTS
     }
 
 }

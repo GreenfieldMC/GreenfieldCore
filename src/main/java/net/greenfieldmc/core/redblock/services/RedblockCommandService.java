@@ -131,6 +131,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
         var incomplete = ctx.hasFlag("incomplete");
         var pending = ctx.hasFlag("pending");
         var approved = ctx.hasFlag("approved");
+        var unassigned = ctx.hasFlag("unassigned");
 
         var assignedTo = ctx.getFlag("assignedTo", ctx.hasFlag("mine") ? ctx.asPlayer().getUniqueId() : null);
         var createdBy = ctx.<UUID>getFlag("createdBy");
@@ -160,6 +161,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
                     if (pending && rb.getStatus() == Redblock.Status.PENDING) return true;
                     return approved && rb.getStatus() == Redblock.Status.APPROVED;
                 })
+                .filter(rb -> !unassigned || (rb.getAssignedTo() == null && rb.getMinRank() == null))
                 .filter(rb -> assignedTo == null || rb.getAssignedTo() != null && rb.getAssignedTo().equals(assignedTo))
                 .filter(rb -> createdBy == null || rb.getCreatedBy() != null && rb.getCreatedBy().equals(createdBy))
                 .filter(rb -> completedBy == null || rb.getCompletedBy() != null && rb.getCompletedBy().equals(completedBy))
@@ -261,7 +263,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
         CommandBuilder.of("rbinfo", "rbi")
                 .description("View information about a RedBlock")
                 .permission("greenfieldcore.redblock.info")
-                .flag("id", "The RedBlock to view", new RedblockArgument(redblockService, rb -> rb.isIncomplete() || rb.isPending()))
+                .flag("id", "The RedBlock to view", new RedblockArgument(redblockService, rb -> true))
                 .canExecute(this::info)
                 .register(plugin);
 
@@ -279,6 +281,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
                 .permission("greenfieldcore.redblock.list")
                 .flag("deleted", "Show deleted RedBlocks")
                 .flag("incomplete", "Show incomplete RedBlocks")
+                .flag("unassigned", "Show unassigned RedBlocks")
                 .flag("pending", "Show pending RedBlocks")
                 .flag("approved", "Show approved RedBlocks")
                 .flag("mine", "Show RedBlocks assigned to you")

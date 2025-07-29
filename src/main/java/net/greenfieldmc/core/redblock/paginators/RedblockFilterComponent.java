@@ -24,6 +24,7 @@ public class RedblockFilterComponent implements IComponent<Redblock, ICommandCon
         var incomplete = context.hasFlag("incomplete");
         var pending = context.hasFlag("pending");
         var approved = context.hasFlag("approved");
+        var unassigned = context.hasFlag("unassigned");
 
         UUID assignedTo;
         if (context.isPlayer() && context.hasFlag("mine")) {
@@ -51,6 +52,7 @@ public class RedblockFilterComponent implements IComponent<Redblock, ICommandCon
                 if (incomplete) text.appendNewline().append(Component.text("- INCOMPLETE", NamedTextColor.BLUE));
                 if (pending) text.appendNewline().append(Component.text("- PENDING", NamedTextColor.BLUE));
                 if (approved) text.appendNewline().append(Component.text("- APPROVED", NamedTextColor.BLUE));
+                if (unassigned) text.appendNewline().append(Component.text("- UNASSIGNED", NamedTextColor.BLUE));
             }
             if (assignedTo != null) text.appendNewline().append(Component.text("Assigned to: ", NamedTextColor.GRAY)).append(Component.text(Bukkit.getOfflinePlayer(assignedTo).getName(), NamedTextColor.BLUE));
             if (createdBy != null) text.appendNewline().append(Component.text("Created by: ", NamedTextColor.GRAY)).append(Component.text(Bukkit.getOfflinePlayer(createdBy).getName(), NamedTextColor.BLUE));

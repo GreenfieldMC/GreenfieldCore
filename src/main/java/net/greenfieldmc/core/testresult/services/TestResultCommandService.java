@@ -55,7 +55,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
 
     // /pass <user> <comments>
     private void pass(ICommandContext ctx) throws PDKCommandException {
-        var playerBeingPassed = ctx.getTyped("userToPass", Player.class).getUniqueId();
+        var playerBeingPassed = ctx.getTyped("userToPass", UUID.class);
         var comments = ctx.getTyped("comments", String.class);
         var onlinePlayer = Bukkit.getPlayer(playerBeingPassed);
         if (onlinePlayer == null) ctx.error(TestResultMessages.ERROR_PLAYER_OFFLINE);
@@ -68,7 +68,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
     // /fail <user> <comments> -final
     // This will fail a user attempt. if the -final flag is set, the user will be removed from the server.
     private void fail(ICommandContext ctx) {
-        var playerBeingFailed = ctx.getTyped("userToFail", Player.class).getUniqueId();
+        var playerBeingFailed = ctx.getTyped("userToFail", UUID.class);
         var comments = ctx.getTyped("comments", String.class);
         var hasFinalFlag = ctx.hasFlag("final");
         if (hasFinalFlag)
@@ -85,7 +85,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
             });
     }
 
-    // /attempts user <user> -page <page>
+    // /attempts <user> -page <page>
     // This lists out all the attempts a user has taken for a testbuild.
     private void listUserAttempts(ICommandContext ctx) {
         var page = ctx.getFlag("page", 1);
@@ -94,7 +94,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
         userAttemptPaginator.generatePage(ctx, attempts, page).sendTo(TestResultMessages.ERROR_INVALID_PAGE, ctx.getSender());
     }
 
-    // /attempts all -page <page>
+    // /attempts -page <page>
     // This lists users and the amount of attempts they have taken in total.
     private void listAllAttempts(ICommandContext ctx) {
         var page = ctx.getFlag("page", 1);
@@ -124,7 +124,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
         CommandBuilder.of("pass")
                 .description("Pass a test build attempt.")
                 .permission("greenfieldcore.testresult.pass")
-                .then("userToPass", new AttemptingUserArgument(testResultService))
+                .then("userToPass", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.INCOMPLETE_ATTEMPTS))
                     .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
                     .executes(this::pass)
                 .end()
@@ -134,7 +134,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
                 .description("Fail a test build attempt.")
                 .permission("greenfieldcore.testresult.fail")
                 .flag("final", "Mark this test build attempt as the final attempt. This will remove the user from the server.")
-                .then("userToFail", new AttemptingUserArgument(testResultService))
+                .then("userToFail", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.INCOMPLETE_ATTEMPTS))
                     .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
                     .executes(this::fail)
                 .end()
@@ -151,7 +151,7 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
                 .description("View test build attempts.")
                 .permission("greenfieldcore.testresult.list")
                 .flag("page", "The page to view", PdkArgumentTypes.integer(1, Integer.MAX_VALUE))
-                .then("user", new OfflinePlayerArgument()).executes(this::listUserAttempts)
+                .then("user", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.ANY_ATTEMPTS)).executes(this::listUserAttempts)
                 .canExecute(this::listAllAttempts)
                 .register(plugin);
 

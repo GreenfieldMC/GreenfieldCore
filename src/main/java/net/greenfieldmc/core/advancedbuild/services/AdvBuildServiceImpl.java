@@ -100,7 +100,9 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new CocoaBeanInteraction(worldEditService, coreProtectService),
                 new LightningRodInteraction(worldEditService, coreProtectService),
                 new MaterialMappingInteraction(worldEditService, coreProtectService),
-                new ItemFrameInteraction(worldEditService, coreProtectService)
+                new ItemFrameInteraction(worldEditService, coreProtectService),
+                new SeaPickleInteraction(worldEditService, coreProtectService),
+                new TurtleEggInteraction(worldEditService, coreProtectService)
         );
     }
 

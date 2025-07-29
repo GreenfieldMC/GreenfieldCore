@@ -80,9 +80,7 @@ public class PinkPetalsInteraction extends InteractionHandler {
 
         private int flowerAmount;
 
-        public PetalSession(int flowerAmount) {
-            this.flowerAmount = flowerAmount;
-        }
+        public PetalSession(int flowerAmount) { this.flowerAmount = flowerAmount; }
 
         public int getFlowerAmount() {
             return flowerAmount;

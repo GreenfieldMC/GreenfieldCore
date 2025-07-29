@@ -39,61 +39,47 @@ public class ItemFrameInteraction extends InteractionHandler {
     public void onRightClickEntity(PlayerInteractEntityEvent event) {
         Entity entity = event.getRightClicked();
         ItemFrame itemFrame = (ItemFrame) entity;
+        Material handMaterial = getHandMat(event);;
         Player player = event.getPlayer();
+        event.setCancelled(true);
 
-        // Inside onRightClickEntity
-        if (itemFrame.getItem() != null && getHandMat(event) == itemFrame.getItem().getType()) {
+        if (handMaterial == Material.AIR) {
+            itemFrame.setVisible(!itemFrame.isVisible());
+            return;
+        }
+
+        // Remove the name of the item in the frame if the hand material matches the item in the frame
+        if (handMaterial == itemFrame.getItem().getType()) {
             var frameItem = itemFrame.getItem();
             var meta = frameItem.getItemMeta();
             if (meta != null && meta.hasDisplayName()) {
                 meta.setDisplayName(null);
                 frameItem.setItemMeta(meta);
                 itemFrame.setItem(frameItem);
-                event.setCancelled(true);
             }
+            return;
         }
 
-        // Swap GlowItemFrame to ItemFrame
-        if (entity instanceof GlowItemFrame && getHandMat(event) == Material.ITEM_FRAME) {
-            coreProtectService.logRemoval(player.getName(), itemFrame.getLocation(), Material.GLOW_ITEM_FRAME, null);
+        // Swap GlowItemFrame to ItemFrame and vice versa
+        boolean rightClickedGlowItemFrame = entity instanceof GlowItemFrame;
+        Class<? extends ItemFrame> itemFrameToPlaceClass = rightClickedGlowItemFrame ? ItemFrame.class : GlowItemFrame.class;
+        Material itemFrameMaterialToPlace = rightClickedGlowItemFrame ? Material.ITEM_FRAME : Material.GLOW_ITEM_FRAME;
+        Material itemFrameMaterialRemoved = rightClickedGlowItemFrame ? Material.GLOW_ITEM_FRAME : Material.ITEM_FRAME;
 
-            itemFrame.remove();
-            ItemFrame newFrame = itemFrame.getWorld().spawn(itemFrame.getLocation(), ItemFrame.class);
+        coreProtectService.logRemoval(player.getName(), itemFrame.getLocation(), itemFrameMaterialRemoved, null);
 
-            newFrame.setRotation(itemFrame.getRotation());
-            newFrame.setFacingDirection(itemFrame.getAttachedFace().getOppositeFace());
-            newFrame.setItem(itemFrame.getItem());
-            newFrame.setItemDropChance(itemFrame.getItemDropChance());
-            newFrame.setVisible(itemFrame.isVisible());
-            newFrame.setFixed(itemFrame.isFixed());
-            newFrame.setGlowing(itemFrame.isGlowing());
+        itemFrame.remove();
+        ItemFrame newFrame = itemFrame.getWorld().spawn(itemFrame.getLocation(), itemFrameToPlaceClass);
 
-            coreProtectService.logPlacement(player.getName(), newFrame.getLocation(), Material.ITEM_FRAME, null);
-            event.setCancelled(true);
-        }
-        // Swap ItemFrame to GlowItemFrame
-        else if (entity instanceof ItemFrame && !(entity instanceof GlowItemFrame) && getHandMat(event) == Material.GLOW_ITEM_FRAME) {
-            coreProtectService.logRemoval(player.getName(), itemFrame.getLocation(), Material.ITEM_FRAME, null);
+        newFrame.setRotation(itemFrame.getRotation());
+        newFrame.setFacingDirection(itemFrame.getAttachedFace().getOppositeFace());
+        newFrame.setItem(itemFrame.getItem());
+        newFrame.setItemDropChance(itemFrame.getItemDropChance());
+        newFrame.setVisible(itemFrame.isVisible());
+        newFrame.setFixed(itemFrame.isFixed());
+        newFrame.setGlowing(itemFrame.isGlowing());
 
-            itemFrame.remove();
-            GlowItemFrame newFrame = itemFrame.getWorld().spawn(itemFrame.getLocation(), GlowItemFrame.class);
-
-            newFrame.setRotation(itemFrame.getRotation());
-            newFrame.setFacingDirection(itemFrame.getAttachedFace().getOppositeFace());
-            newFrame.setItem(itemFrame.getItem());
-            newFrame.setItemDropChance(itemFrame.getItemDropChance());
-            newFrame.setVisible(itemFrame.isVisible());
-            newFrame.setFixed(itemFrame.isFixed());
-            newFrame.setGlowing(itemFrame.isGlowing());
-
-            coreProtectService.logPlacement(player.getName(), newFrame.getLocation(), Material.GLOW_ITEM_FRAME, null);
-            event.setCancelled(true);
-        }
-
-        if (getHandMat(event) == Material.AIR) {
-            itemFrame.setVisible(!itemFrame.isVisible());
-            event.setCancelled(true);
-        }
+        coreProtectService.logPlacement(player.getName(), newFrame.getLocation(), itemFrameMaterialToPlace, null);
 
     }
 

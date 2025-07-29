@@ -16,6 +16,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -172,28 +173,11 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
     }
 
     /**
-     * Called when the player left clicks an entity.
-     * @param event The event.
-     */
-    public void onLeftClickEntity(PlayerInteractEntityEvent event) {
-        // Default implementation does nothing
-    }
-
-    /**
      * Get the material in the player calling the event's hand.
      * @param event The event.
      * @return The material in the player's hand.
      */
-    public final Material getHandMat(PlayerInteractEvent event) {
-        return event.getPlayer().getInventory().getItemInMainHand().getType();
-    }
-
-    /**
-     * Get the material in the player calling the event's hand.
-     * @param event The event.
-     * @return The material in the player's hand.
-     */
-    public final Material getHandMat(PlayerInteractEntityEvent event) {
+    public final Material getHandMat(PlayerEvent event) {
         return event.getPlayer().getInventory().getItemInMainHand().getType();
     }
 

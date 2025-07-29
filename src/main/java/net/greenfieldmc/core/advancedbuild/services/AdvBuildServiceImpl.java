@@ -138,7 +138,6 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
         if (e.getHand() == EquipmentSlot.OFF_HAND || !isEnabledFor(e.getPlayer().getUniqueId())) return;
 
         InteractionHandler handler = interactionHandlers.stream().filter(h -> h.handles(e)).findFirst().orElse(interactionHandlers.get(0));
-        e.setCancelled(true);
         handler.onRightClickEntity(e);
     }
 }

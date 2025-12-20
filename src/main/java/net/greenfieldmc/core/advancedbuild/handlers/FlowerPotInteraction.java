@@ -51,8 +51,11 @@ public class FlowerPotInteraction extends InteractionHandler {
             if (handItem != null && handItem.getType() == Material.FLOWER_POT) {
                 Material last = getSession(uuid).getLastPotted();
                 assert block != null;
-                Block target = block.getRelative(0, 1, 0);
-                target.setType(last != null ? last : Material.FLOWER_POT, false); // place on top (no block update)
+                org.bukkit.Location placeLoc = getPlaceableLocation(block.getLocation(), event.getBlockFace());
+                if (placeLoc != null) {
+                    Block target = placeLoc.getBlock();
+                    target.setType(last != null ? last : Material.FLOWER_POT, false); // place at computed location (no block update)
+                }
                 event.setCancelled(true);
                 event.setUseInteractedBlock(Event.Result.DENY);
                 event.setUseItemInHand(Event.Result.DENY);

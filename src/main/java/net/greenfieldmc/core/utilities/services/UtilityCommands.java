@@ -48,6 +48,28 @@ public class UtilityCommands extends ModuleService<UtilityCommands> implements I
                         player.teleport(new Location(player.getLocation().getWorld(), player.getLocation().getX(), -20000000, player.getLocation().getZ()));
                     }, 54);
                 }).register(plugin);
+
+        CommandBuilder.of("isprime")
+                .permission("greenfieldcore.isprime")
+                .description("Check if a number is prime.")
+                .then("number", PdkArgumentTypes.integer(2,10000))
+                .executes(ctx -> {
+                    int number = ctx.getTyped("number", Integer.class);
+                    java.util.List<Integer> divisors = new java.util.ArrayList<>();
+                    for (int i = 2; i <= Math.sqrt(number); i++) {
+                        if (number % i == 0) {
+                            divisors.add(i);
+                            if (i != number / i) divisors.add(number / i);
+                        }
+                    }
+                    if (divisors.isEmpty()) {
+                        ctx.asPlayer().sendMessage("§a" + number + " is prime!");
+                    } else {
+                        divisors.sort(Integer::compareTo);
+                        ctx.asPlayer().sendMessage("§e" + number + " is not prime. Divisors: " + divisors + ".");
+                    }
+                })
+                .register(plugin);
     }
 
     @Override

@@ -12,6 +12,12 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+# Maven build output
+/target/
+
+# IntelliJ IDEA project files
+/.idea/
+
 # Package Files #
 *.jar
 *.war

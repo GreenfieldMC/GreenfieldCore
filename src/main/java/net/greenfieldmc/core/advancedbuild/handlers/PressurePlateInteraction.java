@@ -25,7 +25,7 @@ public class PressurePlateInteraction extends InteractionHandler {
             if (block != null && isPressurePlate(block.getType())) return true;
             Material mat = event.getMaterial();
             return mat != null && isPressurePlate(mat);
-        }, Material.STONE_PRESSURE_PLATE);
+        });
     }
 
     @Override
@@ -68,6 +68,6 @@ public class PressurePlateInteraction extends InteractionHandler {
 
     private static boolean isPressurePlate(Material mat) {
         String name = mat.name();
-        return name.endsWith("_PRESSURE_PLATE");
+        return name.endsWith("_PRESSURE_PLATE") && !name.startsWith("HEAVY_") && !name.startsWith("LIGHT_");
     }
 }

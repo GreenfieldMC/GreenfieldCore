@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static net.greenfieldmc.core.advancedbuild.handlers.DoorInteraction.getRequiredDirection;
+import static net.greenfieldmc.core.advancedbuild.handlers.DoorInteraction.getRequiredHinge;
+
 public class IronDoorsInteraction extends InteractionHandler {
 
     private final Map<UUID, Boolean> sessions = new HashMap<>();
@@ -88,70 +91,5 @@ public class IronDoorsInteraction extends InteractionHandler {
                 placeBlockAt(player, block.getLocation(), Material.IRON_TRAPDOOR, trapDoor);
             }
         }
-
-        // Shift-place: use saved open state
-        else if (!isEmptyHand && player.isSneaking() && (event.getItem().getType() == Material.IRON_DOOR || event.getItem().getType() == Material.IRON_TRAPDOOR)) {
-            var placeLoc = getPlaceableLocation(event);
-
-            if (placeLoc != null) {
-                event.setCancelled(true);
-                event.setUseInteractedBlock(Event.Result.DENY);
-                event.setUseItemInHand(Event.Result.DENY);
-
-                if (block.getBlockData()instanceof Door) {
-                    var clickedFace = event.getBlockFace();
-                    var playerDirection = event.getPlayer().getFacing();
-                    var placementLocation = getPlaceableLocation(event);
-                    if (placementLocation == null) return;
-
-                    var direction = getRequiredDirection(event.getClickedPosition(), playerDirection, clickedFace);
-                    var hinge = getRequiredHinge(event.getClickedPosition(), playerDirection, direction);
-
-                    var otherPlacementHalf = clickedFace == BlockFace.DOWN ? placementLocation.clone().subtract(0, 1, 0) : placementLocation.clone().add(0, 1, 0);
-                    if (!canPlaceAt(otherPlacementHalf)) return;
-
-                    event.setCancelled(true);
-                    event.setUseInteractedBlock(Event.Result.DENY);
-                    event.setUseItemInHand(Event.Result.DENY);
-
-                    var dataBottom = (Door) getHandMat(event).createBlockData();
-                    dataBottom.setHinge(hinge);
-                    dataBottom.setFacing(direction);
-                    dataBottom.setHalf(clickedFace == BlockFace.DOWN ? Door.Half.TOP : Door.Half.BOTTOM);
-                    placeBlockAt(event.getPlayer(), placementLocation, getHandMat(event), dataBottom);
-
-
-                    var dataTop = (Door) getHandMat(event).createBlockData();
-                    dataTop.setHinge(hinge);
-                    dataTop.setFacing(direction);
-                    dataTop.setHalf(clickedFace == BlockFace.DOWN ? Door.Half.BOTTOM : Door.Half.TOP);
-                    placeBlockAt(event.getPlayer(), otherPlacementHalf, getHandMat(event), dataTop);
-                }
-
-            } else if (block.getBlockData()instanceof TrapDoor) {
-                org.bukkit.block.data.type.TrapDoor trapDoor = (org.bukkit.block.data.type.TrapDoor) Material.IRON_TRAPDOOR.createBlockData();
-                trapDoor.setOpen(sessions.getOrDefault(uuid, false));
-                placeBlockAt(player, placeLoc, Material.IRON_TRAPDOOR, trapDoor);
-            }
-        }
-    }
-
-    private static BlockFace getRequiredDirection(Vector clickedLocation, BlockFace playerDirection, BlockFace clickedFace) {
-        if (clickedFace != BlockFace.UP && clickedFace != BlockFace.DOWN) {
-            return clickedFace;
-        } else {
-            var facingFactor = (playerDirection == BlockFace.NORTH || playerDirection == BlockFace.SOUTH) ?
-                    (playerDirection == BlockFace.SOUTH ? 1 - clickedLocation.getZ() : clickedLocation.getZ()) :
-                    (playerDirection == BlockFace.EAST ? 1 - clickedLocation.getX() : clickedLocation.getX());
-            return facingFactor >= 0.5d ? playerDirection : playerDirection.getOppositeFace();
-        }
-    }
-
-    private static Door.Hinge getRequiredHinge(Vector clickedLocation, BlockFace playerDirection, BlockFace requiredDirection) {
-        var leftHingeFactor = playerDirection == BlockFace.NORTH || playerDirection == BlockFace.SOUTH ?
-                (playerDirection == BlockFace.SOUTH ? 1 - clickedLocation.getX() : clickedLocation.getX()) :
-                (playerDirection == BlockFace.WEST ? 1 - clickedLocation.getZ() : clickedLocation.getZ());
-        if (playerDirection == requiredDirection) return leftHingeFactor >= 0.5d ? Door.Hinge.RIGHT : Door.Hinge.LEFT;
-        else return leftHingeFactor >= 0.5d ? Door.Hinge.LEFT : Door.Hinge.RIGHT;
     }
 }

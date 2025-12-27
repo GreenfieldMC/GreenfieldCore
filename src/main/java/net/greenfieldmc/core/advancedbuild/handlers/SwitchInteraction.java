@@ -27,7 +27,7 @@ public class SwitchInteraction extends InteractionHandler {
             var player = event.getPlayer();
             var mainHand = player.getInventory().getItemInMainHand().getType();
             var clicked = event.getClickedBlock();
-            return (mainHand == Material.AIR && clicked != null && clicked.getType().createBlockData() instanceof Switch) || (mainHand.createBlockData() instanceof Switch);
+            return (mainHand == Material.AIR && clicked != null && clicked.getType().createBlockData() instanceof Switch) || (mainHand.isBlock() && mainHand.createBlockData() instanceof Switch);
         });
     }
 

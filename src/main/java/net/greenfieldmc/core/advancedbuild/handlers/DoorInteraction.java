@@ -28,6 +28,7 @@ public class DoorInteraction extends InteractionHandler {
                 Material.CRIMSON_DOOR,
                 Material.WARPED_DOOR,
                 Material.COPPER_DOOR,
+                Material.IRON_DOOR,
                 Material.EXPOSED_COPPER_DOOR,
                 Material.OXIDIZED_COPPER_DOOR,
                 Material.PALE_OAK_DOOR,
@@ -81,7 +82,7 @@ public class DoorInteraction extends InteractionHandler {
         }
     }
 
-    private static BlockFace getRequiredDirection(Vector clickedLocation, BlockFace playerDirection, BlockFace clickedFace) {
+    static BlockFace getRequiredDirection(Vector clickedLocation, BlockFace playerDirection, BlockFace clickedFace) {
         if (clickedFace != BlockFace.UP && clickedFace != BlockFace.DOWN) {
             return clickedFace;
         } else {
@@ -92,7 +93,7 @@ public class DoorInteraction extends InteractionHandler {
         }
     }
 
-    private static Door.Hinge getRequiredHinge(Vector clickedLocation, BlockFace playerDirection, BlockFace requiredDirection) {
+    static Door.Hinge getRequiredHinge(Vector clickedLocation, BlockFace playerDirection, BlockFace requiredDirection) {
         var leftHingeFactor = playerDirection == BlockFace.NORTH || playerDirection == BlockFace.SOUTH ?
                 (playerDirection == BlockFace.SOUTH ? 1 - clickedLocation.getX() : clickedLocation.getX()) :
                 (playerDirection == BlockFace.WEST ? 1 - clickedLocation.getZ() : clickedLocation.getZ());

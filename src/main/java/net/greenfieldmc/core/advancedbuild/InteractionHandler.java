@@ -46,7 +46,7 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
 
     /**
      * Create an interaction handler for given materials or scenarios.
-     * @param predicate The predicate to test for to determine if the interaction should be handled by this interaction handler.
+     * @param interactPredicate The predicate to test for to determine if the interaction should be handled by this interaction handler.
      * @param materials The materials to look for in the main hand of the player when interacting.
      */
     public InteractionHandler(IWorldEditService worldEditService, ICoreProtectService coreProtectService, InteractPredicate interactPredicate, Material...  materials) {

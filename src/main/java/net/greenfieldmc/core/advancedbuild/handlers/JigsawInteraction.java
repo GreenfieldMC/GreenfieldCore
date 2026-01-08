@@ -39,7 +39,11 @@ public class JigsawInteraction extends InteractionHandler {
 
         Jigsaw j = (Jigsaw) placeMaterial.createBlockData();
         if (!canPlaceAt(placementLocation)) return;
-        j.setOrientation(getJigsawOrientation(clickedFace, player));
+        org.bukkit.block.data.Directional directional = (org.bukkit.block.data.Directional) j;
+        BlockFace facing = (clickedFace == BlockFace.UP || clickedFace == BlockFace.DOWN)
+                ? player.getFacing()
+                : clickedFace;
+        directional.setFacing(facing);
 
         event.setCancelled(true);
         event.setUseInteractedBlock(Event.Result.DENY);

@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.advancedbuild.services;
 
-import net.greenfieldmc.core.GreenfieldCore;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
@@ -21,8 +20,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,6 +104,7 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new SeaPickleInteraction(worldEditService, coreProtectService),
                 new TurtleEggInteraction(worldEditService, coreProtectService),
                 new FlowerPotInteraction(worldEditService, coreProtectService),
+                new DecoratedPotInteraction(worldEditService, coreProtectService, getPlugin(), this),
                 new PressurePlateInteraction(worldEditService, coreProtectService),
                 new IronDoorsInteraction(worldEditService, coreProtectService)
         );

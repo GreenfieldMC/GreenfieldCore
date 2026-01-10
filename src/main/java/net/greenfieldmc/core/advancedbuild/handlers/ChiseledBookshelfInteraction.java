@@ -141,11 +141,6 @@ public class ChiseledBookshelfInteraction extends InteractionHandler implements 
         if (!event.getView().title().equals(Component.text("Select Bookshelf Texture"))) return;
         // Only process clicks in the GUI, not the player's own inventory
         if (event.getClickedInventory() == null || event.getClickedInventory() != event.getInventory()) return;
-        // Only process left/right/shift-left/shift-right clicks
-        switch (event.getClick()) {
-            case LEFT, RIGHT, SHIFT_LEFT, SHIFT_RIGHT -> {}
-            default -> { event.setCancelled(true); return; }
-        }
         event.setCancelled(true); // Prevent item movement
         int slot = event.getRawSlot();
         if (slot < 0) return;

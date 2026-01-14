@@ -7,6 +7,7 @@ import net.greenfieldmc.core.codes.CodesModule;
 import net.greenfieldmc.core.commandstore.CommandStoreModule;
 import net.greenfieldmc.core.hotspots.HotspotModule;
 import net.greenfieldmc.core.paintingswitch.PaintingSwitchModule;
+import net.greenfieldmc.core.armorstandeditor.ArmorStandEditorModule;
 import net.greenfieldmc.core.powershovel.PowerShovelModule;
 import net.greenfieldmc.core.redblock.RedblockModule;
 import net.greenfieldmc.core.templates.TemplatesModule;
@@ -32,6 +33,7 @@ public final class GreenfieldCore extends JavaPlugin {
                 new CodesModule(this, ModuleConfig::isCodesEnabled),
                 new TestResultModule(this, ModuleConfig::isTestResultsEnabled),
                 new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled),
+                new ArmorStandEditorModule(this, ModuleConfig::isArmorStandEditorEnabled),
                 new UtilitiesModule(this, ModuleConfig::isUtilitiesEnabled),
                 new AuthhubModule(this, ModuleConfig::isAuthHubEnabled),
                 new CommandStoreModule(this, ModuleConfig::isCommandStoreEnabled),

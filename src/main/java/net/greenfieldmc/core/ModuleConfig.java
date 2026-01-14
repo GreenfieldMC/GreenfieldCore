@@ -13,6 +13,7 @@ public class ModuleConfig extends Configuration {
     private final boolean hotspots;
     private final boolean openServer;
     private final boolean paintingSwitch;
+    private final boolean armorStandEditor;
     private final boolean powerShovel;
     private final boolean redblock;
     private final boolean testResults;
@@ -31,6 +32,7 @@ public class ModuleConfig extends Configuration {
         addEntry("modules.hotspots", true);
         addEntry("modules.openServer", true);
         addEntry("modules.paintingSwitch", true);
+        addEntry("modules.armorStandEditor", true);
         addEntry("modules.powerShovel", true);
         addEntry("modules.redblock", true);
         addEntry("modules.testResults", true);
@@ -47,6 +49,7 @@ public class ModuleConfig extends Configuration {
         hotspots = getBoolean("modules.hotspots");
         openServer = getBoolean("modules.openServer");
         paintingSwitch = getBoolean("modules.paintingSwitch");
+        armorStandEditor = getBoolean("modules.armorStandEditor");
         powerShovel = getBoolean("modules.powerShovel");
         redblock = getBoolean("modules.redblock");
         testResults = getBoolean("modules.testResults");
@@ -83,6 +86,8 @@ public class ModuleConfig extends Configuration {
     public boolean isPaintingSwitchEnabled() {
         return paintingSwitch;
     }
+
+    public boolean isArmorStandEditorEnabled() { return armorStandEditor; }
 
     public boolean isPowerShovelEnabled() {
         return powerShovel;

@@ -47,17 +47,33 @@ public interface IGreenfieldCoreApi extends IModuleService<IGreenfieldCoreApi> {
 
     /**
      * Gets the Discord connection for a user.
+     *
      * @param userId The internal user ID
      * @return A CompletableFuture containing a Result with the Discord connection data or error message
      */
-    CompletableFuture<Result<GfDiscordConnection>> getDiscordConnection(long userId);
+    CompletableFuture<Result<GfDiscordConnection[]>> getDiscordConnection(long userId);
 
     /**
      * Gets the Patreon connection for a user.
+     *
      * @param userId The internal user ID
      * @return A CompletableFuture containing a Result with the Patreon connection data or error message
      */
-    CompletableFuture<Result<GfPatreonConnection>> getPatreonConnection(long userId);
+    CompletableFuture<Result<GfPatreonConnection[]>> getPatreonConnection(long userId);
+
+    /**
+     * Gets the Discord connection link for a user to connect their account.
+     * @param userId The internal user ID
+     * @return A CompletableFuture containing a Result with the Discord connection link or error message
+     */
+    CompletableFuture<Result<String>> getDiscordConnectionLink(long userId);
+
+    /**
+     * This refreshes the patreon connection data for the specified connection ID
+     * @param patreonConnectionId The ID of the patreon connection to refresh
+     * @return A CompletableFuture containing a Result with the updated Patreon connection data or error message
+     */
+    CompletableFuture<Result<GfPatreonConnection>> refreshPatreonConnection(long patreonConnectionId);
 }
 
 

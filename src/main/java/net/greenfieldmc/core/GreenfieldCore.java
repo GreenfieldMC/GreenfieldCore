@@ -28,21 +28,37 @@ public final class GreenfieldCore extends JavaPlugin {
     public void onEnable() {
         Util.userNameMap.put(Util.CONSOLE_UUID, "Console");
         Util.getAllPlayers();
+
+        var coreModule = new CoreModule(this, (c) -> true);
+        var codesModule = new CodesModule(this, ModuleConfig::isCodesEnabled);
+        var testResultModule = new TestResultModule(this, ModuleConfig::isTestResultsEnabled);
+        var paintingSwitchModule = new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled);
+        var utilitiesModule = new UtilitiesModule(this, ModuleConfig::isUtilitiesEnabled);
+        var commandStoreModule = new CommandStoreModule(this, ModuleConfig::isCommandStoreEnabled);
+        var hotspotModule = new HotspotModule(this, ModuleConfig::isHotspotsEnabled);
+        var powerShovelModule = new PowerShovelModule(this, ModuleConfig::isPowerShovelEnabled);
+        var advancedBuildModule = new AdvancedBuildModule(this, ModuleConfig::isAdvancedBuildModeEnabled);
+        var redblockModule = new RedblockModule(this, ModuleConfig::isRedblockEnabled);
+        var chatFormatModule = new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled);
+        var templatesModule = new TemplatesModule(this, ModuleConfig::isTemplatesEnabled);
+        var greenfieldApiModule = new GreenfieldApiModule(this, ModuleConfig::isGreenfieldApiEnabled);
+        var authhubModule = new AuthhubModule(this, ModuleConfig::isAuthHubEnabled, greenfieldApiModule);
+
         MODULES.addAll(List.of(
-                new CoreModule(this, (c) -> true),
-                new CodesModule(this, ModuleConfig::isCodesEnabled),
-                new TestResultModule(this, ModuleConfig::isTestResultsEnabled),
-                new PaintingSwitchModule(this, ModuleConfig::isPaintingSwitchEnabled),
-                new UtilitiesModule(this, ModuleConfig::isUtilitiesEnabled),
-                new AuthhubModule(this, ModuleConfig::isAuthHubEnabled),
-                new CommandStoreModule(this, ModuleConfig::isCommandStoreEnabled),
-                new HotspotModule(this, ModuleConfig::isHotspotsEnabled),
-                new PowerShovelModule(this, ModuleConfig::isPowerShovelEnabled),
-                new AdvancedBuildModule(this, ModuleConfig::isAdvancedBuildModeEnabled),
-                new RedblockModule(this, ModuleConfig::isRedblockEnabled),
-                new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled),
-                new TemplatesModule(this, ModuleConfig::isTemplatesEnabled),
-                new GreenfieldApiModule(this, ModuleConfig::isGreenfieldApiEnabled)
+                coreModule,
+                codesModule,
+                testResultModule,
+                paintingSwitchModule,
+                utilitiesModule,
+                commandStoreModule,
+                hotspotModule,
+                powerShovelModule,
+                advancedBuildModule,
+                redblockModule,
+                chatFormatModule,
+                templatesModule,
+                greenfieldApiModule,
+                authhubModule
         ));
 
         MODULES.forEach(Module::enable);

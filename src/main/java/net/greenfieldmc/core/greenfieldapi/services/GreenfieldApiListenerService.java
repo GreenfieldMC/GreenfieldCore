@@ -9,12 +9,10 @@ import org.bukkit.plugin.Plugin;
 
 public class GreenfieldApiListenerService extends ModuleService<GreenfieldApiListenerService> implements Listener {
 
-    private final IGreenfieldApiConfigService configService;
     private final IGreenfieldCoreApi apiService;
 
-    public GreenfieldApiListenerService(Plugin plugin, Module module, IGreenfieldApiConfigService configService, IGreenfieldCoreApi apiService) {
+    public GreenfieldApiListenerService(Plugin plugin, Module module, IGreenfieldCoreApi apiService) {
         super(plugin, module);
-        this.configService = configService;
         this.apiService = apiService;
     }
 
@@ -32,6 +30,10 @@ public class GreenfieldApiListenerService extends ModuleService<GreenfieldApiLis
 
     }
 
+
+    /**
+     * Attempts to find/create/update the user in the Greenfield system when they join the server.
+     */
     @EventHandler
     public void onPlayerJoin(AsyncPlayerPreLoginEvent e) {
         var foundUserTask = apiService.getUserByMinecraftUuid(e.getUniqueId());

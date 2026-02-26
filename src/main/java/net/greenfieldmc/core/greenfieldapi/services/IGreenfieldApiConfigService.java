@@ -24,5 +24,11 @@ public interface IGreenfieldApiConfigService extends IModuleService<IGreenfieldA
      * @return The client secret
      */
     String getClientSecret();
+
+    /**
+     * Gets the redirect url used for connecting services to the user account.
+     * @return The redirect URL
+     */
+    String getRedirectUrl();
 }
 

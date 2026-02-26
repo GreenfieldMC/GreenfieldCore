@@ -13,6 +13,7 @@ import net.greenfieldmc.core.greenfieldapi.models.Result;
 import org.bukkit.plugin.Plugin;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -121,15 +122,27 @@ public class GreenfieldCoreApiImpl extends ModuleService<IGreenfieldCoreApi> imp
     }
 
     @Override
-    public CompletableFuture<Result<GfDiscordConnection>> getDiscordConnection(long userId) {
+    public CompletableFuture<Result<GfDiscordConnection[]>> getDiscordConnection(long userId) {
         String endpoint = "/user/" + userId + "/accounts/discord";
-        return makeGetRequest(endpoint, GfDiscordConnection.class);
+        return makeGetRequest(endpoint, GfDiscordConnection[].class);
     }
 
     @Override
-    public CompletableFuture<Result<GfPatreonConnection>> getPatreonConnection(long userId) {
+    public CompletableFuture<Result<GfPatreonConnection[]>> getPatreonConnection(long userId) {
         String endpoint = "/user/" + userId + "/accounts/patreon";
-        return makeGetRequest(endpoint, GfPatreonConnection.class);
+        return makeGetRequest(endpoint, GfPatreonConnection[].class);
+    }
+
+    @Override
+    public CompletableFuture<Result<String>> getDiscordConnectionLink(long userId) {
+        String endpoint = "/discord/oauth/connection-link?userId=" + userId + "&redirectUrl=" + URLEncoder.encode(configService.getRedirectUrl(), java.nio.charset.StandardCharsets.UTF_8);
+        return makeGetRequest(endpoint, String.class);
+    }
+
+    @Override
+    public CompletableFuture<Result<GfPatreonConnection>> refreshPatreonConnection(long patreonConnectionId) {
+        String endpoint = "/patreon/connections/" + patreonConnectionId + "/refresh";
+        return makePostRequest(endpoint, null, GfPatreonConnection.class);
     }
 
     /**
@@ -151,6 +164,13 @@ public class GreenfieldCoreApiImpl extends ModuleService<IGreenfieldCoreApi> imp
      */
     private <T> CompletableFuture<Result<T>> makePatchRequest(String endpoint, Object body, Class<T> responseClass) {
         return makeAuthenticatedRequest(endpoint, "PATCH", body, responseClass);
+    }
+
+    /**
+     * Makes a POST request to the specified endpoint.
+     */
+    private <T> CompletableFuture<Result<T>> makePostRequest(String endpoint, Object body, Class<T> responseClass) {
+        return makeAuthenticatedRequest(endpoint, "POST", body, responseClass);
     }
 
     /**

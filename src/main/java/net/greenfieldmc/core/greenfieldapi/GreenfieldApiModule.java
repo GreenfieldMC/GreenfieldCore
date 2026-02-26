@@ -46,7 +46,7 @@ public class GreenfieldApiModule extends Module {
                 true
         );
 
-        this.listenerService = enableIntegration(new GreenfieldApiListenerService(plugin, this, configService, apiService), true);
+        this.listenerService = enableIntegration(new GreenfieldApiListenerService(plugin, this, apiService), true);
 
         getLogger().info("Greenfield API Module enabled successfully");
     }

@@ -16,6 +16,7 @@ public class GreenfieldApiConfigService extends ModuleService<IGreenfieldApiConf
     private String apiUrl;
     private String clientId;
     private String clientSecret;
+    private String redirectUrl;
 
     public GreenfieldApiConfigService(Plugin plugin, Module module) {
         super(plugin, module);
@@ -30,11 +31,13 @@ public class GreenfieldApiConfigService extends ModuleService<IGreenfieldApiConf
             config.addEntry("api.url", "https://dev-api.greenfieldmc.net/api/v1.0");
             config.addEntry("api.clientId", "your-client-id-here");
             config.addEntry("api.clientSecret", "your-client-secret-here");
+            config.addEntry("api.redirectUrl", "http://localhost/callback");
 
             // Load values from config
             this.apiUrl = config.getString("api.url");
             this.clientId = config.getString("api.clientId");
             this.clientSecret = config.getString("api.clientSecret");
+            this.redirectUrl = config.getString("api.redirectUrl");
 
             // Validate configuration
             if (clientId.equals("your-client-id-here") || clientSecret.equals("your-client-secret-here")) {
@@ -66,6 +69,11 @@ public class GreenfieldApiConfigService extends ModuleService<IGreenfieldApiConf
     @Override
     public String getClientSecret() {
         return clientSecret;
+    }
+
+    @Override
+    public String getRedirectUrl() {
+        return redirectUrl;
     }
 }
 

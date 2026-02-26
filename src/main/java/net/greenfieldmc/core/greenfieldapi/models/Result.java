@@ -14,7 +14,7 @@ public class Result<T> {
     private final T data;
     private final String errorMessage;
 
-    private Result(boolean success, T data, String errorMessage) {
+    protected Result(boolean success, T data, String errorMessage) {
         this.success = success;
         this.data = data;
         this.errorMessage = errorMessage;

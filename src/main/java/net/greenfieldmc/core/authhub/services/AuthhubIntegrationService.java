@@ -102,15 +102,19 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             }
 
             getModule().getLogger().info("User " + player.getName() + " does not have a linked discord account, sending connection link.");
-            greenfieldCoreApi.getDiscordConnectionLink(greenfieldCoreApi.getUserByMinecraftUuid(player.getUniqueId()).join().getData().getUserId()).join()
+            var foundUser = greenfieldCoreApi.getUserByMinecraftUuid(player.getUniqueId()).join().getData();
+            greenfieldCoreApi.getDiscordConnectionLink(foundUser.getUserId()).join()
                     .ifFailure(errorMsg -> getModule().getLogger().warning("Failed to retrieve user for UUID " + player.getUniqueId() + " while getting discord connection link: " + errorMsg))
-                    .ifSuccess(connectionLink -> Bukkit.getScheduler().runTask(getPlugin(), () -> {
-                        if (!player.isOnline()) return;
+                    .ifSuccess(connectionLink -> Bukkit.getScheduler().runTaskLater(getPlugin(), () -> {
+                        if (!player.isOnline()) {
+                            getModule().getLogger().warning("Player " + player.getName() + " went offline before we could send the discord connection link.");
+                            return;
+                        }
                         player.sendMessage(ComponentUtils.moduleMessage("GreenfieldCore", "Hey " + player.getName() + "! It looks like you don't have a linked Discord account, which is required (and will soon be enforced) to join the server. Please click the link below to link your account.")
                                 .append(Component.newline())
                                 .append(Component.text("[CONNECT]", ChatFormatModule.linkStyle.apply(connectionLink))));
-                    })
-            );
+                    }, 40L)
+                );
         });
     }
 

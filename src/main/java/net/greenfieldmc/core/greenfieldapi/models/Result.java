@@ -86,7 +86,7 @@ public class Result<T> {
      * @return This result for chaining
      */
     public Result<T> ifSuccess(Consumer<T> consumer) {
-        if (success && data != null) {
+        if (success) {
             consumer.accept(data);
         }
         return this;
@@ -98,7 +98,7 @@ public class Result<T> {
      * @return This result for chaining
      */
     public Result<T> ifFailure(Consumer<String> consumer) {
-        if (!success && errorMessage != null) {
+        if (!success) {
             consumer.accept(errorMessage);
         }
         return this;

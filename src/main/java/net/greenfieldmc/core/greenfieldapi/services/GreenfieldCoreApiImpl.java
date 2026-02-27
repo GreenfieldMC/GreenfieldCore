@@ -228,6 +228,19 @@ public class GreenfieldCoreApiImpl extends ModuleService<IGreenfieldCoreApi> imp
                             return Result.<T>failure("Empty response from API");
                         }
 
+                        if (responseClass.equals(String.class)) {
+                            String value = responseJson;
+                            try {
+                                String trimmed = responseJson.trim();
+                                if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+                                    value = gson.fromJson(responseJson, String.class);
+                                }
+                            } catch (Exception ignored) {
+                                // Fall back to raw response for non-JSON string bodies.
+                            }
+                            return Result.success(responseClass.cast(value));
+                        }
+
                         try {
                             T data = gson.fromJson(responseJson, responseClass);
                             return Result.success(data);

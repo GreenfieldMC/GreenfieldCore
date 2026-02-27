@@ -167,11 +167,13 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             } catch (InterruptedException e) {
                 getModule().getLogger().warning("Interrupted while waiting to retry resolving discord connections for user with UUID " + minecraftUuid);
                 Thread.currentThread().interrupt();
+                resolvingDiscordConnections.remove(minecraftUuid);
                 return null;
             }
         }
         if (attempt > maxAttempts) {
             getModule().getLogger().warning("Max attempts reached while trying to resolve discord connections for user with UUID " + minecraftUuid);
+            resolvingDiscordConnections.remove(minecraftUuid);
             return null;
         }
         var userResult = greenfieldCoreApi.getUserByMinecraftUuid(minecraftUuid).join();
@@ -196,11 +198,13 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             } catch (InterruptedException e) {
                 getModule().getLogger().warning("Interrupted while waiting to retry resolving patreon connections for user with UUID " + minecraftUuid);
                 Thread.currentThread().interrupt();
+                resolvingPatreonConnections.remove(minecraftUuid);
                 return null;
             }
         }
         if (attempt > maxAttempts) {
             getModule().getLogger().warning("Max attempts reached while trying to resolve patreon connections for user with UUID " + minecraftUuid);
+            resolvingPatreonConnections.remove(minecraftUuid);
             return null;
         }
         var userResult = greenfieldCoreApi.getUserByMinecraftUuid(minecraftUuid).join();

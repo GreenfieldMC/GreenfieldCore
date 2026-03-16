@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Orientation;
 import org.bukkit.block.data.type.Jigsaw;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -33,8 +32,7 @@ public class JigsawInteraction extends InteractionHandler {
     public void onRightClickBlock(PlayerInteractEvent event) {
 
         var placeMaterial = getHandMat(event);
-        var clickedBlock = event.getClickedBlock();
-        var placementLocation = getPlaceableLocation(clickedBlock.getLocation(), event.getBlockFace());
+        var placementLocation = getPlaceableLocation(event.getClickedBlock().getLocation(), event.getBlockFace());
         var clickedFace = event.getBlockFace();
         var player = event.getPlayer();
         if (!player.isSneaking()) return;
@@ -49,24 +47,24 @@ public class JigsawInteraction extends InteractionHandler {
         placeBlockAt(player, placementLocation, placeMaterial, j);
     }
 
-    public static Orientation getJigsawOrientation(BlockFace clickedFace, Player player) {
+    public static Jigsaw.Orientation getJigsawOrientation(BlockFace clickedFace, Player player) {
         return switch (clickedFace) {
-            case EAST -> Orientation.EAST_UP;
-            case SOUTH -> Orientation.SOUTH_UP;
-            case WEST -> Orientation.WEST_UP;
+            case EAST -> Jigsaw.Orientation.EAST_UP;
+            case SOUTH -> Jigsaw.Orientation.SOUTH_UP;
+            case WEST -> Jigsaw.Orientation.WEST_UP;
             case DOWN -> switch (player.getFacing()) {
-                case EAST -> Orientation.DOWN_EAST;
-                case SOUTH -> Orientation.DOWN_SOUTH;
-                case WEST -> Orientation.DOWN_WEST;
-                default -> Orientation.NORTH_UP;
+                case EAST -> Jigsaw.Orientation.DOWN_EAST;
+                case SOUTH -> Jigsaw.Orientation.DOWN_SOUTH;
+                case WEST -> Jigsaw.Orientation.DOWN_WEST;
+                default -> Jigsaw.Orientation.NORTH_UP;
             };
             case UP -> switch (player.getFacing()) {
-                case EAST -> Orientation.UP_EAST;
-                case SOUTH -> Orientation.UP_SOUTH;
-                case WEST -> Orientation.UP_WEST;
-                default -> Orientation.UP_NORTH;
+                case EAST -> Jigsaw.Orientation.UP_EAST;
+                case SOUTH -> Jigsaw.Orientation.UP_SOUTH;
+                case WEST -> Jigsaw.Orientation.UP_WEST;
+                default -> Jigsaw.Orientation.UP_NORTH;
             };
-            default -> Orientation.NORTH_UP;
+            default -> Jigsaw.Orientation.NORTH_UP;
         };
     }
 

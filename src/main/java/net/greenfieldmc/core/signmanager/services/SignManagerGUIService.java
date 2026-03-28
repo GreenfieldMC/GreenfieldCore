@@ -43,6 +43,7 @@ public class SignManagerGUIService extends ModuleService<ISignManagerGUIService>
 
     private final ISignManagerService signManagerService;
     private final Map<UUID, GUISession> sessions = new HashMap<>();
+    private final java.util.Set<UUID> rendering = new java.util.HashSet<>();
 
     public SignManagerGUIService(Plugin plugin, Module module, ISignManagerService signManagerService) {
         super(plugin, module);
@@ -146,7 +147,9 @@ public class SignManagerGUIService extends ModuleService<ISignManagerGUIService>
                 Component.text("Clear Filters", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false)));
 
         session.inventory = inventory;
+        rendering.add(player.getUniqueId());
         player.openInventory(inventory);
+        rendering.remove(player.getUniqueId());
     }
 
     private void setFlagFilterButton(Inventory inventory, int slot, SignFlag flag, @Nullable SignFlag activeFlag) {
@@ -252,7 +255,9 @@ public class SignManagerGUIService extends ModuleService<ISignManagerGUIService>
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player player) {
-            sessions.remove(player.getUniqueId());
+            if (!rendering.contains(player.getUniqueId())) {
+                sessions.remove(player.getUniqueId());
+            }
         }
     }
 

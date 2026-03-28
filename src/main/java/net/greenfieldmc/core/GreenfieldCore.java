@@ -9,6 +9,7 @@ import net.greenfieldmc.core.hotspots.HotspotModule;
 import net.greenfieldmc.core.paintingswitch.PaintingSwitchModule;
 import net.greenfieldmc.core.powershovel.PowerShovelModule;
 import net.greenfieldmc.core.redblock.RedblockModule;
+import net.greenfieldmc.core.signmanager.SignManagerModule;
 import net.greenfieldmc.core.templates.TemplatesModule;
 import net.greenfieldmc.core.testresult.TestResultModule;
 import net.greenfieldmc.core.utilities.UtilitiesModule;
@@ -40,7 +41,8 @@ public final class GreenfieldCore extends JavaPlugin {
                 new AdvancedBuildModule(this, ModuleConfig::isAdvancedBuildModeEnabled),
                 new RedblockModule(this, ModuleConfig::isRedblockEnabled),
                 new ChatFormatModule(this, ModuleConfig::isChatFormatEnabled),
-                new TemplatesModule(this, ModuleConfig::isTemplatesEnabled)
+                new TemplatesModule(this, ModuleConfig::isTemplatesEnabled),
+                new SignManagerModule(this, ModuleConfig::isSignManagerEnabled)
         ));
 
         MODULES.forEach(Module::enable);

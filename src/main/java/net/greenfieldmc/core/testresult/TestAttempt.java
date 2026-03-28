@@ -96,7 +96,7 @@ public class TestAttempt implements PageItem<ICommandContext> {
 
     @Override
     public String getPlainItemText(ChatPaginator<?, ICommandContext> paginator, ICommandContext generatorInfo) {
-        return "Attempt #" + attemptNumber + " - Successful: " + successful;
+        return attemptNotes;
     }
 
     @Override

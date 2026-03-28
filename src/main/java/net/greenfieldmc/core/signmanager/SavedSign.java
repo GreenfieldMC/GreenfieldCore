@@ -61,6 +61,7 @@ public class SavedSign {
 
     /**
      * Builds the lore lines representing the sign's front and back text content.
+     * Sign text is center-aligned, so we pad with spaces to mimic that in lore.
      * Used both for individual sign display and for group display signs.
      */
     public List<Component> buildLoreLines() {
@@ -70,7 +71,8 @@ public class SavedSign {
             var component = deserializeLine(line);
             var plain = PlainTextComponentSerializer.plainText().serialize(component);
             if (!plain.isBlank()) {
-                lore.add(Component.text("  ", NamedTextColor.WHITE).append(component).decoration(TextDecoration.ITALIC, false));
+                var centered = MinecraftFontWidths.centerForLore(component);
+                lore.add(centered.decoration(TextDecoration.ITALIC, false));
             }
         }
         lore.add(Component.text("── Back ──", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
@@ -78,7 +80,8 @@ public class SavedSign {
             var component = deserializeLine(line);
             var plain = PlainTextComponentSerializer.plainText().serialize(component);
             if (!plain.isBlank()) {
-                lore.add(Component.text("  ", NamedTextColor.WHITE).append(component).decoration(TextDecoration.ITALIC, false));
+                var centered = MinecraftFontWidths.centerForLore(component);
+                lore.add(centered.decoration(TextDecoration.ITALIC, false));
             }
         }
         return lore;

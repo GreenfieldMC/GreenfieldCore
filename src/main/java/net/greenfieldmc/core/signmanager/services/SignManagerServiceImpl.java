@@ -4,13 +4,13 @@ import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.signmanager.SavedSign;
 import net.greenfieldmc.core.signmanager.SavedSignGroup;
-import net.greenfieldmc.core.signmanager.SignFlag;
 import net.greenfieldmc.core.signmanager.SignManagerEntry;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SignManagerServiceImpl extends ModuleService<ISignManagerService> implements ISignManagerService {
@@ -31,11 +31,11 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
     }
 
     @Override
-    public @Nullable SavedSign saveSignFromHand(Player player, String name, @Nullable SignFlag flag) {
+    public @Nullable SavedSign saveSignFromHand(Player player, String name) {
         var item = player.getInventory().getItemInMainHand();
         if (!SavedSign.isSignMaterial(item.getType())) return null;
 
-        var sign = SavedSign.fromItemStack(item, name, flag);
+        var sign = SavedSign.fromItemStack(item, name);
         if (sign == null) return null;
 
         storageService.saveSign(sign);
@@ -44,15 +44,13 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
     }
 
     @Override
-    public @Nullable SavedSignGroup saveGroupFromHotbar(Player player, String groupName, @Nullable SignFlag flag) {
-        // The main hand item becomes the display sign
+    public @Nullable SavedSignGroup saveGroupFromHotbar(Player player, String groupName) {
         var mainHandItem = player.getInventory().getItemInMainHand();
         if (!SavedSign.isSignMaterial(mainHandItem.getType())) return null;
 
-        var displaySign = SavedSign.fromItemStack(mainHandItem, groupName + "_display", flag);
+        var displaySign = SavedSign.fromItemStack(mainHandItem, groupName + "_display");
         if (displaySign == null) return null;
 
-        // Collect all sign items from the hotbar as member signs
         var memberSigns = new ArrayList<SavedSign>();
         int signCount = 0;
         for (int slot = 0; slot < 9; slot++) {
@@ -60,13 +58,13 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
             if (item == null || !SavedSign.isSignMaterial(item.getType())) continue;
 
             signCount++;
-            var memberSign = SavedSign.fromItemStack(item, groupName + "_" + signCount, flag);
+            var memberSign = SavedSign.fromItemStack(item, groupName + "_" + signCount);
             if (memberSign != null) memberSigns.add(memberSign);
         }
 
         if (memberSigns.isEmpty()) return null;
 
-        var group = new SavedSignGroup(groupName, displaySign, memberSigns, flag);
+        var group = new SavedSignGroup(groupName, displaySign, memberSigns);
         storageService.saveGroup(group);
         storageService.saveDatabase();
         return group;
@@ -105,7 +103,7 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
         var entries = new ArrayList<SignManagerEntry>();
         storageService.getSigns().forEach(sign -> entries.add(SignManagerEntry.ofSign(sign)));
         storageService.getGroups().forEach(group -> entries.add(SignManagerEntry.ofGroup(group)));
-        entries.sort(java.util.Comparator.comparing(entry -> entry.getName().toLowerCase()));
+        entries.sort(Comparator.comparing(entry -> entry.getName().toLowerCase()));
         return entries;
     }
 
@@ -119,10 +117,28 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
     }
 
     @Override
-    public List<SignManagerEntry> filterByFlag(SignFlag flag) {
-        return getAllEntries().stream()
-                .filter(entry -> entry.getFlag() == flag)
-                .toList();
+    public @Nullable SignManagerEntry giveEntry(Player player, String entryName) {
+        // Check individual signs first
+        var sign = storageService.getSign(entryName);
+        if (sign != null) {
+            var entry = SignManagerEntry.ofSign(sign);
+            for (var item : entry.toGiveItemStacks()) {
+                player.getInventory().addItem(item);
+            }
+            return entry;
+        }
+
+        // Check groups
+        var group = storageService.getGroup(entryName);
+        if (group != null) {
+            var entry = SignManagerEntry.ofGroup(group);
+            for (var item : entry.toGiveItemStacks()) {
+                player.getInventory().addItem(item);
+            }
+            return entry;
+        }
+
+        return null;
     }
 
     @Override
@@ -138,5 +154,14 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
     @Override
     public List<String> getSignNames() {
         return storageService.getSigns().stream().map(SavedSign::getName).toList();
+    }
+
+    @Override
+    public List<String> getAllEntryNames() {
+        var names = new ArrayList<String>();
+        storageService.getSigns().forEach(sign -> names.add(sign.getName()));
+        storageService.getGroups().forEach(group -> names.add(group.getName()));
+        names.sort(String.CASE_INSENSITIVE_ORDER);
+        return names;
     }
 }

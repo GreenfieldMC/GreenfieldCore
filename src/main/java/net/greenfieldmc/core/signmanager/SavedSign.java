@@ -21,14 +21,12 @@ public class SavedSign {
     private final Material signMaterial;
     private final List<String> frontLines; // GsonComponentSerializer JSON strings
     private final List<String> backLines;  // GsonComponentSerializer JSON strings
-    private @Nullable SignFlag flag;
 
-    public SavedSign(String name, Material signMaterial, List<String> frontLines, List<String> backLines, @Nullable SignFlag flag) {
+    public SavedSign(String name, Material signMaterial, List<String> frontLines, List<String> backLines) {
         this.name = name;
         this.signMaterial = signMaterial;
         this.frontLines = frontLines;
         this.backLines = backLines;
-        this.flag = flag;
     }
 
     public String getName() {
@@ -51,40 +49,28 @@ public class SavedSign {
         return backLines;
     }
 
-    public @Nullable SignFlag getFlag() {
-        return flag;
-    }
-
-    public void setFlag(@Nullable SignFlag flag) {
-        this.flag = flag;
-    }
-
     /**
-     * Builds the lore lines representing the sign's front and back text content.
-     * Sign text is center-aligned, so we pad with spaces to mimic that in lore.
-     * Used both for individual sign display and for group display signs.
+     * Builds hover text showing the sign's front and back text content.
      */
-    public List<Component> buildLoreLines() {
-        var lore = new ArrayList<Component>();
-        lore.add(Component.text("── Front ──", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+    public List<Component> buildHoverLines() {
+        var lines = new ArrayList<Component>();
+        lines.add(Component.text("── Front ──", NamedTextColor.GRAY));
         for (var line : frontLines) {
             var component = deserializeLine(line);
             var plain = PlainTextComponentSerializer.plainText().serialize(component);
             if (!plain.isBlank()) {
-                var centered = MinecraftFontWidths.centerForLore(component);
-                lore.add(centered.decoration(TextDecoration.ITALIC, false));
+                lines.add(Component.text("  ").append(component));
             }
         }
-        lore.add(Component.text("── Back ──", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lines.add(Component.text("── Back ──", NamedTextColor.GRAY));
         for (var line : backLines) {
             var component = deserializeLine(line);
             var plain = PlainTextComponentSerializer.plainText().serialize(component);
             if (!plain.isBlank()) {
-                var centered = MinecraftFontWidths.centerForLore(component);
-                lore.add(centered.decoration(TextDecoration.ITALIC, false));
+                lines.add(Component.text("  ").append(component));
             }
         }
-        return lore;
+        return lines;
     }
 
     /**
@@ -110,16 +96,6 @@ public class SavedSign {
             }
         }
 
-        // Set display name
-        meta.displayName(Component.text(name, NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
-
-        // Build lore: sign text lines + flag info
-        var lore = buildLoreLines();
-        if (flag != null) {
-            lore.add(Component.empty());
-            lore.add(Component.text("Flag: ", NamedTextColor.DARK_GRAY).append(Component.text(flag.getDisplayName(), NamedTextColor.AQUA)).decoration(TextDecoration.ITALIC, false));
-        }
-        meta.lore(lore);
         item.setItemMeta(meta);
         return item;
     }
@@ -127,7 +103,7 @@ public class SavedSign {
     /**
      * Creates a SavedSign from a sign ItemStack held by a player.
      */
-    public static @Nullable SavedSign fromItemStack(ItemStack item, String name, @Nullable SignFlag flag) {
+    public static @Nullable SavedSign fromItemStack(ItemStack item, String name) {
         if (item == null || !isSignMaterial(item.getType())) return null;
 
         var meta = item.getItemMeta();
@@ -152,7 +128,7 @@ public class SavedSign {
         while (frontLines.size() < 4) frontLines.add(serializeLine(Component.empty()));
         while (backLines.size() < 4) backLines.add(serializeLine(Component.empty()));
 
-        return new SavedSign(name, item.getType(), frontLines, backLines, flag);
+        return new SavedSign(name, item.getType(), frontLines, backLines);
     }
 
     /**
@@ -167,8 +143,40 @@ public class SavedSign {
         for (var line : backLines) {
             sb.append(PlainTextComponentSerializer.plainText().serialize(deserializeLine(line))).append(" ");
         }
-        if (flag != null) sb.append(flag.getDisplayName()).append(" ");
         return sb.toString();
+    }
+
+    /**
+     * Returns a human-readable sign type description based on the material name.
+     * e.g. "Oak Sign", "Birch Hanging Sign", "Dark Oak Wall Sign"
+     */
+    public String getSignTypeDescription() {
+        var name = signMaterial.name();
+        // Remove _SIGN suffix and convert underscores to spaces, title case
+        name = name.replace("_SIGN", "").replace("_", " ");
+        var words = name.toLowerCase().split(" ");
+        var sb = new StringBuilder();
+        for (var word : words) {
+            if (!word.isEmpty()) {
+                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
+            }
+        }
+        sb.append("Sign");
+        return sb.toString().trim();
+    }
+
+    /**
+     * Returns true if the sign material is a hanging sign type.
+     */
+    public boolean isHangingSign() {
+        return signMaterial.name().contains("HANGING");
+    }
+
+    /**
+     * Returns true if the sign material is a wall sign type.
+     */
+    public boolean isWallSign() {
+        return signMaterial.name().contains("WALL");
     }
 
     public static boolean isSignMaterial(Material material) {

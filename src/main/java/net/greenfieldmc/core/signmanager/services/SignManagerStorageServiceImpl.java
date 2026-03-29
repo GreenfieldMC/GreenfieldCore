@@ -6,7 +6,6 @@ import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.signmanager.SavedSign;
 import net.greenfieldmc.core.signmanager.SavedSignGroup;
-import net.greenfieldmc.core.signmanager.SignFlag;
 import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -43,10 +42,6 @@ public class SignManagerStorageServiceImpl extends ModuleService<ISignManagerSto
             // Load groups
             if (config.hasSection("groups")) {
                 for (var groupName : config.getSection("groups").getKeys(false)) {
-                    var section = config.getSection("groups." + groupName);
-                    var flagStr = section.getString("flag");
-                    var flag = SignFlag.fromString(flagStr);
-
                     // Load display sign
                     var displaySign = loadSign("groups." + groupName + ".displaySign", groupName + "_display");
                     if (displaySign == null) {
@@ -56,6 +51,7 @@ public class SignManagerStorageServiceImpl extends ModuleService<ISignManagerSto
 
                     // Load member signs
                     var memberSigns = new ArrayList<SavedSign>();
+                    var section = config.getSection("groups." + groupName);
                     if (section.contains("members")) {
                         for (var memberKey : section.getSection("members").getKeys(false)) {
                             var memberSign = loadSign("groups." + groupName + ".members." + memberKey, memberKey);
@@ -63,7 +59,7 @@ public class SignManagerStorageServiceImpl extends ModuleService<ISignManagerSto
                         }
                     }
 
-                    groups.put(groupName.toLowerCase(), new SavedSignGroup(groupName, displaySign, memberSigns, flag));
+                    groups.put(groupName.toLowerCase(), new SavedSignGroup(groupName, displaySign, memberSigns));
                 }
             }
         } catch (Exception e) {
@@ -78,20 +74,17 @@ public class SignManagerStorageServiceImpl extends ModuleService<ISignManagerSto
         if (material == null) return null;
         var frontLines = section.getStringList("frontLines");
         var backLines = section.getStringList("backLines");
-        var flagStr = section.getString("flag");
-        var flag = SignFlag.fromString(flagStr);
 
         while (frontLines.size() < 4) frontLines.add("\"\"");
         while (backLines.size() < 4) backLines.add("\"\"");
 
-        return new SavedSign(name, material, frontLines, backLines, flag);
+        return new SavedSign(name, material, frontLines, backLines);
     }
 
     private void persistSign(String path, SavedSign sign) {
         config.setEntry(path + ".material", sign.getSignMaterial().name());
         config.setEntry(path + ".frontLines", sign.getFrontLines());
         config.setEntry(path + ".backLines", sign.getBackLines());
-        config.setEntry(path + ".flag", sign.getFlag() != null ? sign.getFlag().name() : null);
     }
 
     @Override
@@ -137,7 +130,6 @@ public class SignManagerStorageServiceImpl extends ModuleService<ISignManagerSto
     public void saveGroup(SavedSignGroup group) {
         groups.put(group.getName().toLowerCase(), group);
         var basePath = "groups." + group.getName().toLowerCase();
-        config.setEntry(basePath + ".flag", group.getFlag() != null ? group.getFlag().name() : null);
         persistSign(basePath + ".displaySign", group.getDisplaySign());
         // Clear old members and rewrite
         config.setEntry(basePath + ".members", null);

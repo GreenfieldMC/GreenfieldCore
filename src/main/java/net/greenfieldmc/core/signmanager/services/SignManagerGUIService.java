@@ -94,6 +94,11 @@ public class SignManagerGUIService extends ModuleService<ISignManagerGUIService>
     }
 
     private void renderPage(Player player, GUISession session) {
+        var entries = session.entries;
+        int startIndex = session.page * ITEMS_PER_PAGE;
+        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, entries.size());
+
+        // Build base title
         Component title;
         if (session.searchQuery != null) {
             title = SignManagerMessages.GUI_TITLE_SEARCH.apply(session.searchQuery);
@@ -103,10 +108,15 @@ public class SignManagerGUIService extends ModuleService<ISignManagerGUIService>
             title = SignManagerMessages.GUI_TITLE;
         }
 
+        // Append page range to title if there are entries on this page
+        if (startIndex < entries.size()) {
+            var firstName = entries.get(startIndex).getName().toLowerCase();
+            var lastName = entries.get(endIndex - 1).getName().toLowerCase();
+            var range = computeSignificantRange(firstName, lastName);
+            title = title.append(Component.text(" (" + range + ")", NamedTextColor.GRAY));
+        }
+
         var inventory = Bukkit.createInventory(null, GUI_SIZE, title);
-        var entries = session.entries;
-        int startIndex = session.page * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, entries.size());
 
         // Fill entry display items
         for (int i = startIndex; i < endIndex; i++) {
@@ -166,6 +176,41 @@ public class SignManagerGUIService extends ModuleService<ISignManagerGUIService>
         meta.displayName(name);
         item.setItemMeta(meta);
         return item;
+    }
+
+    /**
+     * Computes the significant character range for two entry names.
+     * Finds the shortest prefix that distinguishes the first name from the last name.
+     * e.g. "railsign" and "roadsign" -> "ra-ro"
+     *      "aaa" and "aaa" -> "aaa"
+     *      "bridge" and "bus" -> "br-bu"
+     */
+    private String computeSignificantRange(String first, String last) {
+        if (first.equals(last)) return first;
+
+        // Find the index where the two names first differ
+        int shared = 0;
+        int minLen = Math.min(first.length(), last.length());
+        while (shared < minLen && first.charAt(shared) == last.charAt(shared)) {
+            shared++;
+        }
+
+        // Include up to one character past the divergence point (minimum 1 char total)
+        int prefixLen = Math.min(shared + 1, minLen);
+
+        // Ensure at least 1 character
+        prefixLen = Math.max(prefixLen, 1);
+
+        var firstPrefix = first.substring(0, Math.min(prefixLen, first.length()));
+        var lastPrefix = last.substring(0, Math.min(prefixLen, last.length()));
+
+        if (firstPrefix.equals(lastPrefix)) {
+            // Edge case: one name is a prefix of the other, extend to distinguish
+            firstPrefix = first.substring(0, Math.min(prefixLen + 1, first.length()));
+            lastPrefix = last.substring(0, Math.min(prefixLen + 1, last.length()));
+        }
+
+        return firstPrefix + "-" + lastPrefix;
     }
 
     @EventHandler

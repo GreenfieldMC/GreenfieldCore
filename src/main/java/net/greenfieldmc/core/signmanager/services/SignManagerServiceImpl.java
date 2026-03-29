@@ -105,6 +105,7 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
         var entries = new ArrayList<SignManagerEntry>();
         storageService.getSigns().forEach(sign -> entries.add(SignManagerEntry.ofSign(sign)));
         storageService.getGroups().forEach(group -> entries.add(SignManagerEntry.ofGroup(group)));
+        entries.sort(java.util.Comparator.comparing(entry -> entry.getName().toLowerCase()));
         return entries;
     }
 

@@ -71,6 +71,29 @@ public class SignManagerServiceImpl extends ModuleService<ISignManagerService> i
     }
 
     @Override
+    public void saveSign(SavedSign sign) {
+        storageService.saveSign(sign);
+        storageService.saveDatabase();
+    }
+
+    @Override
+    public boolean renameSign(String oldName, String newName) {
+        var sign = storageService.getSign(oldName);
+        if (sign == null) return false;
+        storageService.deleteSign(oldName);
+        sign.setName(newName);
+        storageService.saveSign(sign);
+        storageService.saveDatabase();
+        return true;
+    }
+
+    @Override
+    public boolean deleteEntry(String name) {
+        if (deleteSign(name)) return true;
+        return deleteGroup(name);
+    }
+
+    @Override
     public boolean deleteSign(String name) {
         var sign = storageService.getSign(name);
         if (sign == null) return false;

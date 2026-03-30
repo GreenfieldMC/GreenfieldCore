@@ -29,6 +29,27 @@ public interface ISignManagerService extends IModuleService<ISignManagerService>
     @Nullable SavedSignGroup saveGroupFromHotbar(Player player, String groupName);
 
     /**
+     * Save a sign to the database.
+     * @param sign The sign to save.
+     */
+    void saveSign(SavedSign sign);
+
+    /**
+     * Rename a saved sign.
+     * @param oldName The current name of the sign.
+     * @param newName The new name for the sign.
+     * @return true if the sign was found and renamed.
+     */
+    boolean renameSign(String oldName, String newName);
+
+    /**
+     * Delete a saved sign or group by name. Tries sign first, then group.
+     * @param name The name of the entry.
+     * @return true if the entry was found and deleted.
+     */
+    boolean deleteEntry(String name);
+
+    /**
      * Delete a saved sign by name.
      * @param name The name of the sign.
      * @return true if the sign was found and deleted.

@@ -108,6 +108,7 @@ public class SignManagerStorageServiceImpl extends ModuleService<ISignManagerSto
         persistSign("signs." + sign.getName().toLowerCase(), sign);
     }
 
+
     @Override
     public void deleteSign(String name) {
         var removed = signs.remove(name.toLowerCase());

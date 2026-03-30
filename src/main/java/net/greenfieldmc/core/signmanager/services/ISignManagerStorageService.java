@@ -38,6 +38,7 @@ public interface ISignManagerStorageService extends IModuleService<ISignManagerS
      */
     void saveSign(SavedSign sign);
 
+
     /**
      * Delete a sign by name.
      * @param name The name of the sign to delete.

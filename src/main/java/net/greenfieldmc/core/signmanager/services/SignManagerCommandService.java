@@ -12,7 +12,6 @@ import net.greenfieldmc.core.signmanager.SavedSign;
 import net.greenfieldmc.core.signmanager.SignManagerEntry;
 import net.greenfieldmc.core.signmanager.SignManagerMessages;
 import net.greenfieldmc.core.signmanager.arguments.SignEntryNameArgument;
-import net.greenfieldmc.core.signmanager.arguments.SignGroupNameArgument;
 import net.greenfieldmc.core.signmanager.arguments.SignNameArgument;
 import net.greenfieldmc.core.signmanager.paginators.SignManagerPaginator;
 import net.kyori.adventure.text.Component;
@@ -66,31 +65,24 @@ public class SignManagerCommandService extends ModuleService<SignManagerCommandS
     }
 
     // === Staff commands ===
-
-    private void saveSign(ICommandContext ctx) throws PDKCommandException {
+    private void saveEntry(ICommandContext ctx) throws PDKCommandException {
         var player = ctx.asPlayer();
-        var name = ctx.getTyped("name", String.class);
+        var signName = ctx.getTyped("name", String.class);
 
-        if (signManagerService.nameExists(name)) {
+        if (signManagerService.nameExists(signName)) {
             ctx.error(SignManagerMessages.ERROR_SIGN_ALREADY_EXISTS);
             return;
         }
 
-        var sign = signManagerService.saveSignFromHand(player, name);
+        var sign = signManagerService.saveSignFromHand(player, signName);
         if (sign == null) {
             ctx.error(SignManagerMessages.ERROR_NOT_HOLDING_SIGN);
             return;
         }
-        ctx.send(SignManagerMessages.SIGN_SAVED.apply(name));
+        ctx.send(SignManagerMessages.SIGN_SAVED.apply(signName));
     }
 
-    private void deleteSign(ICommandContext ctx) throws PDKCommandException {
-        var savedSign = ctx.getTyped("signName", SavedSign.class);
-        signManagerService.deleteSign(savedSign.getName());
-        ctx.send(SignManagerMessages.SIGN_DELETED.apply(savedSign.getName()));
-    }
-
-    private void saveGroup(ICommandContext ctx) throws PDKCommandException {
+    private void saveGroupEntry(ICommandContext ctx) throws PDKCommandException {
         var player = ctx.asPlayer();
         var groupName = ctx.getTyped("name", String.class);
 
@@ -108,14 +100,31 @@ public class SignManagerCommandService extends ModuleService<SignManagerCommandS
         ctx.send(SignManagerMessages.GROUP_SAVED_COUNT.apply(group.getMemberSigns().size()));
     }
 
-    private void deleteGroup(ICommandContext ctx) throws PDKCommandException {
-        var groupName = ctx.getTyped("groupName", String.class);
-        boolean deleted = signManagerService.deleteGroup(groupName);
-        if (!deleted) {
-            ctx.error(SignManagerMessages.ERROR_GROUP_NOT_FOUND);
+    private void renameSign(ICommandContext ctx) throws PDKCommandException {
+        var savedSign = ctx.getTyped("signName", SavedSign.class);
+        var newName = ctx.getTyped("newName", String.class);
+
+        if (signManagerService.nameExists(newName)) {
+            ctx.error(SignManagerMessages.ERROR_SIGN_ALREADY_EXISTS);
             return;
         }
-        ctx.send(SignManagerMessages.GROUP_DELETED.apply(groupName));
+
+        var oldName = savedSign.getName();
+        signManagerService.renameSign(oldName, newName);
+        ctx.send(SignManagerMessages.SIGN_RENAMED.apply(oldName, newName));
+    }
+
+    /**
+     * Unified delete command. Deletes a sign or group by name.
+     */
+    private void deleteEntry(ICommandContext ctx) throws PDKCommandException {
+        var entryName = ctx.getTyped("entryName", String.class);
+        boolean deleted = signManagerService.deleteEntry(entryName);
+        if (!deleted) {
+            ctx.error(SignManagerMessages.ERROR_ENTRY_NOT_FOUND);
+            return;
+        }
+        ctx.send(SignManagerMessages.SIGN_DELETED.apply(entryName));
     }
 
     @Override
@@ -127,7 +136,8 @@ public class SignManagerCommandService extends ModuleService<SignManagerCommandS
                 .canExecute()
                 // User commands
                 .then("page")
-                    .then("pageNumber", PdkArgumentTypes.integer(ctx -> IntStream.rangeClosed(1, (int) Math.ceil(signManagerService.getAllEntries().size() / 8.0)).boxed().toList(), () -> "Page number")).executes(this::listSigns).end()
+                    .then("pageNumber", PdkArgumentTypes.integer(ctx -> IntStream.rangeClosed(1, (int) Math.ceil(signManagerService.getAllEntries().size() / 8.0)).boxed().toList(), () -> "Page number")).executes(this::listSigns)
+                .end()
                 .then("search")
                     .then("query", PdkArgumentTypes.greedyString()).executes(this::searchSigns)
                 .end()
@@ -136,16 +146,18 @@ public class SignManagerCommandService extends ModuleService<SignManagerCommandS
                 .end()
                 // Staff commands
                 .then("save").permission("greenfieldcore.signmanager.manage")
-                    .then("name", PdkArgumentTypes.string()).executes(this::saveSign)
+                    .then("-group") // Group save flag
+                        .then("name", PdkArgumentTypes.string()).executes(this::saveGroupEntry)
+                    .end()
+                    .then("name", PdkArgumentTypes.string()).executes(this::saveEntry)
+                .end()
+                .then("rename").permission("greenfieldcore.signmanager.manage")
+                    .then("signName", new SignNameArgument(signManagerService))
+                        .then("newName", PdkArgumentTypes.string()).executes(this::renameSign)
+                    .end()
                 .end()
                 .then("delete").permission("greenfieldcore.signmanager.manage")
-                    .then("signName", new SignNameArgument(signManagerService)).executes(this::deleteSign)
-                .end()
-                .then("savegroup").permission("greenfieldcore.signmanager.manage")
-                    .then("name", PdkArgumentTypes.string()).executes(this::saveGroup)
-                .end()
-                .then("deletegroup").permission("greenfieldcore.signmanager.manage")
-                    .then("groupName", new SignGroupNameArgument(signManagerService)).executes(this::deleteGroup)
+                    .then("entryName", new SignEntryNameArgument(signManagerService)).executes(this::deleteEntry)
                 .end()
                 .register(plugin);
     }

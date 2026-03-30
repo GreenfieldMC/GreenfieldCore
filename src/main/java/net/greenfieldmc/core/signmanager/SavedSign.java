@@ -59,7 +59,7 @@ public class SavedSign {
             var component = deserializeLine(line);
             var plain = PlainTextComponentSerializer.plainText().serialize(component);
             if (!plain.isBlank()) {
-                lines.add(Component.text("  ").append(component));
+                lines.add(MinecraftFontWidths.centerText(component));
             }
         }
         lines.add(Component.text("── Back ──", NamedTextColor.GRAY));
@@ -67,7 +67,7 @@ public class SavedSign {
             var component = deserializeLine(line);
             var plain = PlainTextComponentSerializer.plainText().serialize(component);
             if (!plain.isBlank()) {
-                lines.add(Component.text("  ").append(component));
+                lines.add(MinecraftFontWidths.centerText(component));
             }
         }
         return lines;

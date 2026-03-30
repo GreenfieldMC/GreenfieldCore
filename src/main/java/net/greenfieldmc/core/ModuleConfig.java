@@ -19,6 +19,7 @@ public class ModuleConfig extends Configuration {
     private final boolean utilities;
     private final boolean authHub;
     private final boolean templates;
+    private final boolean signManager;
 
     public ModuleConfig(Plugin plugin) {
         super(plugin, ConfigType.YML, "moduleConfig");
@@ -37,6 +38,7 @@ public class ModuleConfig extends Configuration {
         addEntry("modules.utilities", true);
         addEntry("modules.authHub", true);
         addEntry("modules.templates", true);
+        addEntry("modules.signManager", true);
 
         save();
 
@@ -53,6 +55,7 @@ public class ModuleConfig extends Configuration {
         utilities = getBoolean("modules.utilities");
         authHub = getBoolean("modules.authHub");
         templates = getBoolean("modules.templates");
+        signManager = getBoolean("modules.signManager");
 
     }
 
@@ -106,6 +109,10 @@ public class ModuleConfig extends Configuration {
 
     public boolean isTemplatesEnabled() {
         return templates;
+    }
+
+    public boolean isSignManagerEnabled() {
+        return signManager;
     }
 
 }

@@ -39,7 +39,7 @@ public class ChatFormatModule extends Module {
     private static final NumberFormat compactFormat = CompactNumberFormat.getInstance();
 
     private static final Pattern linkFormat = Pattern.compile("\\[[^]]*]\\((https?://\\S+)\\)|\\b((?i)https?://\\S+)");
-    private static final Function<String, Style> linkStyle = (link) -> Style.style()
+    public static final Function<String, Style> linkStyle = (link) -> Style.style()
                     .color(TextColor.color(199, 233, 255))
                     .decorate(TextDecoration.UNDERLINED)
                     .clickEvent(ClickEvent.openUrl(link))

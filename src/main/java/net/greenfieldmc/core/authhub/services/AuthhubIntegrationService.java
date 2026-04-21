@@ -1,13 +1,18 @@
 package net.greenfieldmc.core.authhub.services;
 
-import com.njdaeger.authenticationhub.ConnectionRequirement;
-import com.njdaeger.authenticationhub.discord.DiscordUserLoginEvent;
-import com.njdaeger.authenticationhub.patreon.PatreonUserLoginEvent;
+import com.njdaeger.authenticationhub.AuthhubLoginEvent;
+import net.greenfieldmc.core.ComponentUtils;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import io.papermc.paper.ban.BanListType;
+import net.greenfieldmc.core.chatformat.ChatFormatModule;
+import net.greenfieldmc.core.greenfieldapi.models.GfDiscordConnection;
+import net.greenfieldmc.core.greenfieldapi.models.GfPatreonConnection;
+import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldCoreApi;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,19 +20,29 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationService> implements IModuleService<AuthhubIntegrationService>, Listener {
 
+    private final List<UUID> resolvingDiscordConnections = new ArrayList<>();
+    private final List<UUID> resolvingPatreonConnections = new ArrayList<>();
+
+    private final Map<UUID, List<GfPatreonConnection>> patreonPledgeCache = new HashMap<>();
+    private final Map<UUID, List<GfDiscordConnection>> discordConnectionCache = new HashMap<>();
+
+    private final IGreenfieldCoreApi greenfieldCoreApi;
     private final IAuthhubService authhubService;
     private final List<UUID> prefixedUsers = new ArrayList<>();
 
     private static final int PREFIX_PRIORITY = 3;
 
-    public AuthhubIntegrationService(Plugin plugin, Module module, IAuthhubService authhubService) {
+    public AuthhubIntegrationService(Plugin plugin, Module module, IAuthhubService authhubService, IGreenfieldCoreApi greenfieldCoreApi) {
         super(plugin, module);
         this.authhubService = authhubService;
+        this.greenfieldCoreApi = greenfieldCoreApi;
     }
 
     @Override
@@ -42,74 +57,173 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             throw new Exception("AuthenticationHub not found");
         }
 
-        createConnectionRequirement();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
     public void tryDisable(Plugin plugin, Module module) throws Exception {
-        // Remove prefixes for all users that had them set
-//        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-//            for (UUID uuid : prefixedUsers) {
-//                var currentPrefix = vaultService.getUserPrefix(uuid).join();
-//                if (currentPrefix != null && currentPrefix.contains("&3[$]")) {
-//                    var newPfx = currentPrefix.replace("&3[$]", "").trim();
-//                    if (newPfx.isEmpty()) newPfx = null;
-//                    var result = vaultService.setUserPrefix(uuid, newPfx).join();
-//                    if (!result) getModule().getLogger().warning("Failed to remove prefix for player with UUID " + uuid);
-//                }
-//            }
-//        });
+        prefixedUsers.forEach(uuid -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + uuid + " meta removeprefix " + PREFIX_PRIORITY));
+    }
 
-        prefixedUsers.forEach(uuid -> {
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + uuid + " meta removeprefix " + PREFIX_PRIORITY);
+    @EventHandler
+    public void onDiscordLogin(AuthhubLoginEvent ale) {
+
+        var player = ale.getPlayer();
+        var pbl = Bukkit.getBanList(BanListType.PROFILE);
+        if (player.hasPermission("greenfieldcore.discord.exempt") || !player.isWhitelisted() || pbl.isBanned(player.getPlayerProfile())) {
+            getModule().getLogger().info("User " + player.getName() + " is exempted from having a linked discord profile or does not need one.");
+            return;
+        }
+
+        if (resolvingDiscordConnections.contains(player.getUniqueId())) {
+            getModule().getLogger().info("Already resolving discord connections for user " + player.getName() + ".");
+            return;
+        }
+
+        var cached = discordConnectionCache.get(player.getUniqueId());
+        if (cached != null && !cached.isEmpty()) {
+            getModule().getLogger().info("Found cached discord connections for user " + player.getName() + ", skipping lookup.");
+            return;
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+            getModule().getLogger().info("Resolving discord connections for user " + player.getName() + "...");
+            var foundUsers = resolveDiscordConnections(player.getUniqueId(), 0, 4, 250);
+
+            if (foundUsers == null) {
+                getModule().getLogger().warning("Failed to resolve discord connections for user " + player.getName() + " after multiple attempts.");
+                return;
+            }
+
+            discordConnectionCache.put(player.getUniqueId(), foundUsers);
+            if (!foundUsers.isEmpty()) {
+                getModule().getLogger().info("Found " + foundUsers.size() + " linked discord account(s) for user " + player.getName() + ".");
+                return;
+            }
+
+            getModule().getLogger().info("User " + player.getName() + " does not have a linked discord account, sending connection link.");
+            var foundUser = greenfieldCoreApi.getUserByMinecraftUuid(player.getUniqueId()).join().getData();
+            greenfieldCoreApi.getDiscordConnectionLink(foundUser.getUserId()).join()
+                    .ifFailure(errorMsg -> getModule().getLogger().warning("Failed to retrieve user for UUID " + player.getUniqueId() + " while getting discord connection link: " + errorMsg))
+                    .ifSuccess(connectionLink -> Bukkit.getScheduler().runTaskLater(getPlugin(), () -> {
+                        if (!player.isOnline()) {
+                            getModule().getLogger().warning("Player " + player.getName() + " went offline before we could send the discord connection link.");
+                            return;
+                        }
+                        player.sendMessage(ComponentUtils.moduleMessage("GreenfieldCore", "Hey " + player.getName() + "! It looks like you don't have a linked Discord account, which is required (and will soon be enforced) to join the server. Please click the link below to link your account.")
+                                .append(Component.newline())
+                                .append(Component.text("[CONNECT]", ChatFormatModule.linkStyle.apply(connectionLink))));
+                    }, 40L)
+                );
         });
     }
 
     @EventHandler
-    public void onDiscordLogin(DiscordUserLoginEvent e) {
-        if (!e.getPlayer().isBanned()) e.allow();
-    }
+    public void onPatreonLogin(AuthhubLoginEvent ale) {
+        var player = ale.getPlayer();
 
-    @EventHandler
-    public void onPatreonLogin(PatreonUserLoginEvent e) {
-        if (e.getUser().getPledgingAmount() < authhubService.getRequiredPatreonPledge() && e.getApplication().getConnectionRequirement().isRequired(e.getPlayer())) {
-            e.disallow("Your patron account currently pledges " + e.getUser().getPledgingAmount() + " cents, which is less than the required " + authhubService.getRequiredPatreonPledge() + " cents. Please upgrade your patronage to continue.");
-        } else {
-            e.allow();
-            //going to just use raw LP commands instead of trying to use their api
+        // Whitelisted players bypass Patreon requirements
+        if (player.isWhitelisted()) {
+            getModule().getLogger().info("User " + player.getName() + " is whitelisted, bypassing Patreon check.");
+            return;
+        }
 
-            if (e.getUser().getPledgingAmount() < authhubService.getRequiredPatreonPledge()) {
-                getModule().getLogger().info("User " + e.getPlayer().getName() + " is not a patron, skipping prefix setting.");
+        var cached = patreonPledgeCache.get(player.getUniqueId());
+        if (cached != null && !cached.isEmpty() && cached.stream().anyMatch(conn -> conn.getPledge() >= authhubService.getRequiredPatreonPledge())) {
+            getModule().getLogger().info("User " + player.getName() + " has a valid Patreon pledge in cache, allowing login.");
+            ale.allow();
+            setPatreonPrefix(player);
+            return;
+        }
+
+        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+            if (resolvingDiscordConnections.contains(player.getUniqueId())) {
+                getModule().getLogger().info("Already resolving patreon connections for user " + player.getName() + ".");
+                return;
+            }
+            getModule().getLogger().info("Resolving patreon connections for user " + player.getName() + "...");
+            var foundConnections = resolvePatreonConnections(player.getUniqueId(), 0, 4, 250);
+            if (foundConnections == null) {
+                getModule().getLogger().warning("Failed to resolve patreon connections for user " + player.getName() + " after multiple attempts.");
+                return;
+            }
+            if (foundConnections.isEmpty()) {
+                getModule().getLogger().info("No linked patreon accounts found for user " + player.getName() + ".");
                 return;
             }
 
-            if (prefixedUsers.contains(e.getPlayer().getUniqueId())) return;
+            patreonPledgeCache.put(player.getUniqueId(), foundConnections);
+        });
 
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + e.getPlayer().getUniqueId() + " meta setprefix " + PREFIX_PRIORITY + " \"&3[$] \"");
-            prefixedUsers.add(e.getPlayer().getUniqueId());
+        if (resolvingPatreonConnections.contains(player.getUniqueId())) ale.disallow("Your Patreon pledge status is currently being verified. Please wait a moment and try again.");
+        else ale.disallow("You must be an Architect patron or a build member to join the server. Your Patreon pledge status is currently being verified, please wait a moment and try again.");
+    }
 
-//            if (vaultService.isEnabled()) {
-//                Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-//                    if (e.getUser().getPledgingAmount() < authhubService.getRequiredPatreonPledge()) {
-//                        getModule().getLogger().info("User " + e.getPlayer().getName() + " is not a patron, skipping prefix setting.");
-//                        return;
-//                    }
-//                    var prefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
-//                    var currentPrefix = prefix == null ? "" : prefix;
-//                    if (currentPrefix.contains("&3[$]")) {
-//                        if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) prefixedUsers.add(e.getPlayer().getUniqueId());
-//                        getModule().getLogger().info("Prefix is " + currentPrefix + " for player " + e.getPlayer().getName());
-//                        return;
-//                    }
-//                    var newPfx = currentPrefix.isEmpty() ? "&3[$]" : "&3[$] " + currentPrefix;
-//                    var result = vaultService.setUserPrefix(e.getPlayer().getUniqueId(), newPfx).join();
-//                    if (!result)
-//                        getModule().getLogger().warning("Failed to set prefix for player " + e.getPlayer().getName());
-//                    else if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) prefixedUsers.add(e.getPlayer().getUniqueId());
-//                });
-//            } else getModule().getLogger().warning("Vault service is not enabled, prefixes will not be set for Patrons.");
+    private List<GfDiscordConnection> resolveDiscordConnections(UUID minecraftUuid, int attempt, int maxAttempts, long waitInMillis) {
+        if (!resolvingDiscordConnections.contains(minecraftUuid)) resolvingDiscordConnections.add(minecraftUuid);
+        if (attempt >= 1) {
+            try {
+                Thread.sleep(waitInMillis * attempt);
+            } catch (InterruptedException e) {
+                getModule().getLogger().warning("Interrupted while waiting to retry resolving discord connections for user with UUID " + minecraftUuid);
+                Thread.currentThread().interrupt();
+                resolvingDiscordConnections.remove(minecraftUuid);
+                return null;
+            }
         }
+        if (attempt > maxAttempts) {
+            getModule().getLogger().warning("Max attempts reached while trying to resolve discord connections for user with UUID " + minecraftUuid);
+            resolvingDiscordConnections.remove(minecraftUuid);
+            return null;
+        }
+        var userResult = greenfieldCoreApi.getUserByMinecraftUuid(minecraftUuid).join();
+        if (userResult.isFailure()) {
+            getModule().getLogger().warning("Failed to retrieve user for UUID " + minecraftUuid + " while resolving discord connections. Attempt " + attempt + " of " + maxAttempts);
+            return resolveDiscordConnections(minecraftUuid, attempt + 1, maxAttempts, 250);
+        }
+        var accountResult = greenfieldCoreApi.getDiscordConnection(userResult.getData().getUserId()).join();
+        if (accountResult.isFailure()) {
+            getModule().getLogger().warning("Failed to retrieve discord connections for user with UUID " + minecraftUuid + ". Attempt " + attempt + " of " + maxAttempts);
+            return resolveDiscordConnections(minecraftUuid, attempt + 1, maxAttempts, 250);
+        }
+        resolvingDiscordConnections.remove(minecraftUuid);
+        return List.of(accountResult.getData());
+    }
+
+    private List<GfPatreonConnection> resolvePatreonConnections(UUID minecraftUuid, int attempt, int maxAttempts, long waitMillis) {
+        if (!resolvingPatreonConnections.contains(minecraftUuid)) resolvingPatreonConnections.add(minecraftUuid);
+        if (attempt >= 1) {
+            try {
+                Thread.sleep(waitMillis * attempt);
+            } catch (InterruptedException e) {
+                getModule().getLogger().warning("Interrupted while waiting to retry resolving patreon connections for user with UUID " + minecraftUuid);
+                Thread.currentThread().interrupt();
+                resolvingPatreonConnections.remove(minecraftUuid);
+                return null;
+            }
+        }
+        if (attempt > maxAttempts) {
+            getModule().getLogger().warning("Max attempts reached while trying to resolve patreon connections for user with UUID " + minecraftUuid);
+            resolvingPatreonConnections.remove(minecraftUuid);
+            return null;
+        }
+        var userResult = greenfieldCoreApi.getUserByMinecraftUuid(minecraftUuid).join();
+        if (userResult.isFailure()) {
+            getModule().getLogger().warning("Failed to retrieve user for UUID " + minecraftUuid + " while resolving discord connections. Attempt " + attempt + " of " + maxAttempts);
+            return resolvePatreonConnections(minecraftUuid, attempt + 1, maxAttempts, 250);
+        }
+        var accountResult = greenfieldCoreApi.getPatreonConnection(userResult.getData().getUserId()).join();
+        if (accountResult.isFailure()) {
+            getModule().getLogger().warning("Failed to retrieve discord connections for user with UUID " + minecraftUuid + ". Attempt " + attempt + " of " + maxAttempts);
+            return resolvePatreonConnections(minecraftUuid, attempt + 1, maxAttempts, 250);
+        }
+        resolvingPatreonConnections.remove(minecraftUuid);
+        return List.of(accountResult.getData());
+    }
+
+    private void setPatreonPrefix(Player player) {
+        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + player.getUniqueId() + " meta setprefix " + PREFIX_PRIORITY + " \"&3[$] \"");
+        prefixedUsers.add(player.getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -117,30 +231,7 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
         if (!prefixedUsers.contains(e.getPlayer().getUniqueId())) return;
         Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + e.getPlayer().getUniqueId() + " meta removeprefix " + PREFIX_PRIORITY);
         prefixedUsers.remove(e.getPlayer().getUniqueId());
-//        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-//            var currentPrefix = vaultService.getUserPrefix(e.getPlayer().getUniqueId()).join();
-//            if (currentPrefix != null && currentPrefix.contains("&3[$]")) {
-//                var newPfx = currentPrefix.replace("&3[$]", "").trim();
-//                if (newPfx.isEmpty()) newPfx = null;
-//                var result = vaultService.setUserPrefix(e.getPlayer().getUniqueId(), newPfx).join();
-//                if (!result) getModule().getLogger().warning("Failed to remove prefix for player " + e.getPlayer().getName());
-//            }
-//        });
     }
 
-    private void createConnectionRequirement() {
-        var pbl = Bukkit.getBanList(BanListType.PROFILE);
-        new ConnectionRequirement("DISCORD_REQUIREMENT", (p) -> {
-            if (p.hasPermission("greenfieldcore.discord.exempt")) {
-                getModule().getLogger().info("User " + p.getName() + " is exempted from having a linked discord profile.");
-                return false;
-            } else if (p.isWhitelisted() && !pbl.isBanned(p.getPlayerProfile())) {
-                getModule().getLogger().info("User " + p.getName() + " must have a linked discord profile.");
-                return true;
-            }
-            getModule().getLogger().info("User " + p.getName() + " does not need a linked discord profile - they were not found in the whitelist or they are a banned member.");
-            return false;
-        });
-    }
 
 }

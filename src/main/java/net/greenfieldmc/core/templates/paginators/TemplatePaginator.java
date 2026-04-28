@@ -58,14 +58,14 @@ public class TemplatePaginator implements Listener {
 
     // ---- Player inventory layout ----
     // Main inventory rows 1-3 = player inventory slots 9-35 (27 slots) → flag items
-    private static final int FLAGS_PER_PAGE  = 27;
+    private static final int FLAGS_PER_PAGE  = 18;
     private static final int FLAG_SLOT_START = 9;   // first player-inv slot used for flags
-    private static final int FLAG_SLOT_END   = 35;  // last  player-inv slot used for flags
+    private static final int FLAG_SLOT_END   = 26;  // last  player-inv slot used for flags
     // Hotbar (player inventory slots 0-8) → flag navigation
-    private static final int HOTBAR_PREV     = 0;
-    private static final int HOTBAR_CLEAR    = 1;
-    private static final int HOTBAR_INFO     = 4;
-    private static final int HOTBAR_NEXT     = 8;
+    private static final int HOTBAR_PREV     = 27;
+    private static final int HOTBAR_CLEAR    = 28;
+    private static final int HOTBAR_INFO     = 31;
+    private static final int HOTBAR_NEXT     = 35;
 
     private final Plugin plugin;
     private final ITemplateService templateService;
@@ -181,8 +181,8 @@ public class TemplatePaginator implements Listener {
     private void populatePlayerInventory(Player player, PaginatorSession session) {
         var inv = player.getInventory();
 
-        // Clear hotbar and the 3 main rows we use
-        for (int i = 0; i < 9; i++) inv.setItem(i, null);
+        // Clear 3rd inventory row and use the slots for flags
+        for (int i = 18; i < 27; i++) inv.setItem(i, null);
         for (int i = FLAG_SLOT_START; i <= FLAG_SLOT_END; i++) inv.setItem(i, null);
 
         // Flag items (main inventory rows 1-3, player slots 9-35)
@@ -294,6 +294,12 @@ public class TemplatePaginator implements Listener {
             player.performCommand(isSelected
                     ? "tbrush remove template " + template.getTemplateName()
                     : "tbrush add template " + template.getTemplateName());
+        } else if (session.mode == TemplatePaginatorMode.INVENTORY) {
+            if (leftClick) {
+
+            } else if (rightClick) {
+
+            }
         }
     }
 
@@ -615,7 +621,7 @@ public class TemplatePaginator implements Listener {
     public enum TemplatePaginatorMode {
         SELECT,
         BRUSH,
-        CREATIVE
+        INVENTORY
     }
 
     // =========================================================

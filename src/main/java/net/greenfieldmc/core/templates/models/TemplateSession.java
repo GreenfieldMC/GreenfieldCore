@@ -9,6 +9,7 @@ public class TemplateSession {
     private final UUID uuid;
     private final List<TemplateBrush> brushes;
     private int lastBrushId = 0;
+    private boolean pasteIgnoreAir = true;
 
     public TemplateSession(UUID uuid) {
         this.uuid = uuid;
@@ -46,5 +47,13 @@ public class TemplateSession {
     public TemplateBrush removeBrush(TemplateBrush brush) {
         this.brushes.remove(brush);
         return brush;
+    }
+
+    public boolean isPasteIgnoreAir() {
+        return pasteIgnoreAir;
+    }
+
+    public void setPasteIgnoreAir(boolean pasteIgnoreAir) {
+        this.pasteIgnoreAir = pasteIgnoreAir;
     }
 }

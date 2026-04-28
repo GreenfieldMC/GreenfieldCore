@@ -22,6 +22,7 @@ public class TemplatesModule extends Module {
     private ITemplateStorageService storageService;
     private ITemplateService templateService;
     private IWorldEditService worldEditService;
+    private TemplateCommandService commandService;
 
     public TemplatesModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
         super(plugin, canEnable);
@@ -29,15 +30,18 @@ public class TemplatesModule extends Module {
 
     @Override
     protected void tryEnable() throws Exception {
-        this.viewerService = enableIntegration(new TemplateViewerServiceImpl(plugin, this), true);
         this.storageService = enableIntegration(new TemplateStorageServiceImpl(plugin, this), true);
-        this.templateService = enableIntegration(new TemplateServiceImpl(plugin, this, storageService, viewerService), true);
+        this.templateService = enableIntegration(new TemplateServiceImpl(plugin, this, storageService, null), true);
+        this.viewerService = enableIntegration(new TemplateViewerServiceImpl(plugin, this, templateService), true);
+        // Now update templateService with viewerService reference
+        ((TemplateServiceImpl) templateService).setViewerService(viewerService);
         this.worldEditService = enableIntegration(new TemplateWorldEditServiceImpl(plugin, this, templateService), true);
-        enableIntegration(new TemplateCommandService(plugin, this, templateService, (ITemplateWorldEditService) worldEditService), true);
+        this.commandService = enableIntegration(new TemplateCommandService(plugin, this, templateService, (ITemplateWorldEditService) worldEditService, viewerService), true);
     }
 
     @Override
     protected void tryDisable() throws Exception {
+        disableIntegration(commandService);
         disableIntegration(worldEditService);
         disableIntegration(templateService);
         disableIntegration(storageService);

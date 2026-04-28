@@ -1,19 +1,10 @@
 package net.greenfieldmc.core.templates.models;
 
-import com.njdaeger.pdk.command.brigadier.ICommandContext;
-import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
-import com.njdaeger.pdk.utils.text.pager.PageItem;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
 import com.sk89q.worldedit.math.BlockVector3;
-import net.greenfieldmc.core.Triple;
-import net.greenfieldmc.core.templates.paginators.TemplatePaginator;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,26 +12,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * Represents a template in the template system
  */
-public class Template implements PageItem<Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush>> {
+public class Template {
 
     private String templateName;
     private String schematicFile;
     private final List<String> attributes;
     private BlockArrayClipboard clipboard;
+    private ItemStack displayItem;
 
     public Template(String templateName) {
-        this(templateName, null, List.of());
+        this(templateName, null, List.of(), null);
     }
 
     public Template(String templateName, String schematicFile, List<String> attributes) {
+        this(templateName, schematicFile, attributes, null);
+    }
+
+    public Template(String templateName, String schematicFile, List<String> attributes, @Nullable ItemStack displayItem) {
         this.templateName = templateName;
         this.schematicFile = schematicFile;
-        this.attributes = attributes;
+        this.attributes = new java.util.ArrayList<>(attributes);
+        this.displayItem = displayItem;
     }
 
     /**
@@ -100,6 +96,33 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
     public void setSchematicFile(String schematicFile)  {
         this.schematicFile = schematicFile;
         this.clipboard = null; // Reset the clipboard when the schematic file is changed
+    }
+
+    /**
+     * Get the display item for this template. Used to represent the template in the GUI.
+     * @return the display item, or a default PAPER item if none is set.
+     */
+    public @NotNull ItemStack getDisplayItem() {
+        if (displayItem == null) {
+            return new ItemStack(Material.PAPER);
+        }
+        return displayItem.clone();
+    }
+
+    /**
+     * Set the display item for this template. This item represents the template in the GUI.
+     * @param displayItem the display item to set
+     */
+    public void setDisplayItem(@Nullable ItemStack displayItem) {
+        this.displayItem = displayItem != null ? displayItem.clone() : null;
+    }
+
+    /**
+     * Check if this template has a custom display item set
+     * @return true if a display item has been set, false otherwise
+     */
+    public boolean hasDisplayItem() {
+        return displayItem != null;
     }
 
     /**
@@ -168,101 +191,5 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
     public String getEntityCount() {
         if (!isLoaded()) return "Not yet loaded";
         return Integer.toString(clipboard.getEntities().size());
-    }
-
-    @Override
-    public String getPlainItemText(ChatPaginator<?, Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush>> paginator, Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush> generatorInfo) {
-        return getTemplateName();
-    }
-
-    @Override
-    public TextComponent getItemText(ChatPaginator<?, Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush>> paginator, Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush> generatorInfo) {
-        var mode = generatorInfo.getFirst();
-        var context = generatorInfo.getSecond();
-        var brush = generatorInfo.getThird();
-        
-        boolean isSelected = brush != null && brush.getTemplates().contains(getTemplateName());
-        
-        // Create the question mark with hover info
-        TextComponent questionMark = createQuestionMark(paginator);
-        
-        var line = Component.text();
-        line.append(questionMark).resetStyle().appendSpace();
-        line.append(Component.text("[", NamedTextColor.GRAY, TextDecoration.BOLD));
-
-        if (context.hasPermission("greenfieldcore.template.view")) {
-            line.append(Component.text("V", NamedTextColor.DARK_GREEN, TextDecoration.BOLD)
-                    .clickEvent(ClickEvent.runCommand("/tview " + getTemplateName()))
-                    .hoverEvent(HoverEvent.showText(Component.text("View this template", NamedTextColor.GRAY))));
-
-            line.appendSpace();
-        }
-
-        if (context.hasPermission("greenfieldcore.template.copy")) {
-            line.append(Component.text("C", NamedTextColor.GOLD, TextDecoration.BOLD)
-                    .clickEvent(ClickEvent.runCommand("/tcopy " + getTemplateName()))
-                    .hoverEvent(HoverEvent.showText(Component.text("Copy this template", NamedTextColor.GRAY))));
-        }
-
-        // Add buttons based on mode
-        if (mode == TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY) {
-            line.appendSpace();
-            // Add/Remove template button
-            if (isSelected) {
-                // Template is in brush, show remove option
-                line.append(Component.text("X", NamedTextColor.RED, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush remove template " + getTemplateName() + " flags: -page " + generatorInfo.getSecond().getFlag("page", 1)))
-                        .hoverEvent(HoverEvent.showText(Component.text("Remove this template from brush", NamedTextColor.GRAY))));
-            } else {
-                // Template is not in brush, show add option
-                line.append(Component.text("S", NamedTextColor.BLUE, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush add template " + getTemplateName() + " flags: -page " + generatorInfo.getSecond().getFlag("page", 1)))
-                        .hoverEvent(HoverEvent.showText(Component.text("Add this template to brush", NamedTextColor.GRAY))));
-            }
-        }
-
-        line.append(Component.text("] - ", NamedTextColor.GRAY, TextDecoration.BOLD));
-
-        var nameColor = isSelected ? paginator.getGrayedOutColor() : paginator.getHighlightColor();
-        var nameFormatting = isSelected ? new TextDecoration[] { TextDecoration.UNDERLINED } : new TextDecoration[0];
-        line.append(Component.text(getTemplateName(), nameColor, nameFormatting));
-        
-        return line.build();
-    }
-    
-    private TextComponent createQuestionMark(ChatPaginator<?, ?> paginator) {
-        var hoverText = Component.text();
-        
-        // Add block count
-        hoverText.append(Component.text("Block Count: ", NamedTextColor.GRAY))
-                .append(Component.text(getBlockCount() == -1 ? "Not yet loaded" : Long.toString(getBlockCount()), NamedTextColor.BLUE));
-        
-        hoverText.appendNewline();
-        
-        // Add entity count
-        hoverText.append(Component.text("Entity Count: ", NamedTextColor.GRAY))
-                .append(Component.text(getEntityCount(), NamedTextColor.BLUE));
-        
-        hoverText.appendNewline();
-        
-        // Add dimensions
-        hoverText.append(Component.text("Dimensions: ", NamedTextColor.GRAY))
-                .append(Component.text(getDimensions(), NamedTextColor.BLUE));
-        
-        // Add attributes if there are any
-        if (!attributes.isEmpty()) {
-            hoverText.appendNewline();
-            
-            StringJoiner joiner = new StringJoiner(", ");
-            for (String attribute : attributes) {
-                joiner.add(attribute);
-            }
-            
-            hoverText.append(Component.text("Attributes: ", NamedTextColor.GRAY))
-                    .append(Component.text(joiner.toString(), NamedTextColor.BLUE));
-        }
-        
-        return Component.text("?", paginator.getHighlightColor(), TextDecoration.BOLD)
-                .hoverEvent(HoverEvent.showText(hoverText.build()));
     }
 }

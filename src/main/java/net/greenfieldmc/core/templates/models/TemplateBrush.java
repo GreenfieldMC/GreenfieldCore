@@ -7,15 +7,11 @@ public class TemplateBrush {
 
     private int brushId;
     private final List<String> templates;
-    private final List<RotationOption> rotationOptions;
-    private final List<FlipOption> flipOptions;
     private final List<PasteOption> pasteOptions;
     private TemplateInstance nextTemplate;
 
     public TemplateBrush() {
         this.templates = new ArrayList<>();
-        this.rotationOptions = new ArrayList<>();
-        this.flipOptions = new ArrayList<>();
         this.pasteOptions = new ArrayList<>();
     }
 
@@ -30,7 +26,7 @@ public class TemplateBrush {
 
     public void randomizeNextTemplate() {
         if (templates.isEmpty()) nextTemplate = null;
-        else nextTemplate = new TemplateInstance(templates, rotationOptions, flipOptions, pasteOptions);
+        else nextTemplate = new TemplateInstance(templates, pasteOptions);
     }
 
     public void setBrushId(int brushId) {
@@ -49,24 +45,6 @@ public class TemplateBrush {
         this.templates.remove(template);
     }
 
-    public void addRotationOption(RotationOption rotationOption) {
-        if (rotationOption == RotationOption.SELF) this.rotationOptions.clear();
-        else this.rotationOptions.remove(RotationOption.SELF);
-        this.rotationOptions.add(rotationOption);
-    }
-
-    public void removeRotationOption(RotationOption rotationOption) {
-        this.rotationOptions.remove(rotationOption);
-    }
-
-    public void addFlipOption(FlipOption flipOption) {
-        this.flipOptions.add(flipOption);
-    }
-
-    public void removeFlipOption(FlipOption flipOption) {
-        this.flipOptions.remove(flipOption);
-    }
-
     public void addPasteOption(PasteOption pasteOption) {
         this.pasteOptions.add(pasteOption);
     }
@@ -77,14 +55,6 @@ public class TemplateBrush {
 
     public List<String> getTemplates() {
         return templates;
-    }
-
-    public List<RotationOption> getRotationOptions() {
-        return rotationOptions;
-    }
-
-    public List<FlipOption> getFlipOptions() {
-        return flipOptions;
     }
 
     public List<PasteOption> getPasteOptions() {

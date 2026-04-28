@@ -9,7 +9,6 @@ import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.session.ClipboardHolder;
-import net.greenfieldmc.core.templates.models.RotationOption;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateInstance;
 import net.greenfieldmc.core.templates.services.ITemplateService;
@@ -83,16 +82,8 @@ public class WorldEditTemplateBrush implements Brush {
     private void performOperation(TemplateInstance templateInstance, Template template, EditSession editSession, BlockVector3 position, Player player) throws MaxChangedBlocksException {
         var clipboard = template.getClipboard();
 
-        var transform = new AffineTransform();
-        if (templateInstance.hasRotationOption()) {
-            if (templateInstance.getCurrentRotationOption() == RotationOption.SELF) transform = transform.rotateY(getRotationFromPlayer(player));
-            else transform = transform.rotateY(templateInstance.getCurrentRotationOption().getAdjustmentValue());
-        }
-
-        if (templateInstance.hasFlipOption()) {
-            var blockVector = BukkitAdapter.adapt(templateInstance.getCurrentFlipOption().getAdjustmentValue()).toBlockVector();
-            transform = transform.scale(blockVector.abs().multiply(-2).add(1,1,1).toVector3());
-        }
+        // Always orient the brush paste to the player's facing direction
+        var transform = new AffineTransform().rotateY(getRotationFromPlayer(player));
 
         var holder = new ClipboardHolder(clipboard);
         holder.setTransform(transform);

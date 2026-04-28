@@ -1,14 +1,22 @@
 package net.greenfieldmc.core.templates.services;
 
+import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.command.tool.InvalidToolBindException;
+import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.HandSide;
+import com.sk89q.worldedit.util.SideEffect;
+import com.sk89q.worldedit.util.SideEffectSet;
+import org.jetbrains.annotations.Nullable;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.shared.services.WorldEditServiceImpl;
 import net.greenfieldmc.core.templates.WorldEditTemplateBrush;
 import net.greenfieldmc.core.templates.models.Template;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -130,6 +138,69 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
         } catch (InvalidToolBindException e) {
             throw new Exception("Failed to bind brush to item in hand.", e);
         }
+    }
+
+    @Override
+    public void pasteTemplate(Template template, Location anchor, Player player, boolean ignoreAir, int rotationDegrees) throws Exception {
+        if (!isEnabled()) throw new Exception("WorldEdit is not enabled.");
+        if (!template.isLoaded()) throw new Exception("Template '" + template.getTemplateName() + "' is not loaded. Load the template before pasting.");
+
+        var weWorld = BukkitAdapter.adapt(anchor.getWorld());
+        var wePosition = BlockVector3.at(anchor.getBlockX(), anchor.getBlockY(), anchor.getBlockZ());
+        var actor = BukkitAdapter.adapt(player);
+        var localSession = impl.getWorldEdit().getSessionManager().get(actor);
+
+        try (var editSession = impl.getWorldEdit().newEditSessionBuilder()
+                .world(weWorld)
+                .actor(actor)
+                .build()) {
+            // Suppress neighbour/physics block-updates so schematics with redstone,
+            // observers, pistons, etc. are placed exactly as saved.
+            editSession.setSideEffectApplier(
+                    SideEffectSet.defaults().with(SideEffect.NEIGHBORS, SideEffect.State.OFF)
+            );
+            var holder = new ClipboardHolder(template.getClipboard());
+            // Apply the same Y-rotation that the player confirmed during placement mode.
+            // This mirrors exactly what DisplayLifecycleManager uses for the hologram.
+            if (rotationDegrees != 0) {
+                holder.setTransform(new AffineTransform().rotateY(rotationDegrees));
+            }
+            var operation = holder.createPaste(editSession)
+                    .to(wePosition)
+                    .ignoreAirBlocks(ignoreAir)
+                    .build();
+            Operations.completeLegacy(operation);
+            localSession.remember(editSession);
+        }
+    }
+
+    @Override
+    public Path copySelectionToSchematic(Player player, String schematicName, @Nullable String mask) throws Exception {
+        if (!isEnabled()) throw new Exception("WorldEdit is not enabled.");
+
+        var actor = BukkitAdapter.adapt(player);
+        var localSession = impl.getWorldEdit().getSessionManager().getIfPresent(actor);
+        if (localSession == null) throw new Exception("You have no active WorldEdit session. Make a WorldEdit selection first.");
+
+        // Verify the player has an active, complete selection
+        try {
+            localSession.getSelection(BukkitAdapter.adapt(player.getWorld()));
+        } catch (IncompleteRegionException e) {
+            throw new Exception("Your WorldEdit selection is incomplete. Select a region first.");
+        }
+
+        // Dispatch //copy, optionally with a mask
+        String copyCmd = (mask != null && !mask.isBlank())
+                ? "worldedit:/copy -m " + "!" + mask
+                : "worldedit:/copy";
+        Bukkit.dispatchCommand(player, copyCmd);
+
+        // Dispatch //schematic save (use -f to overwrite existing files)
+        Bukkit.dispatchCommand(player, "worldedit:/schematic save -f " + schematicName);
+
+        // Return the expected schematic path (WE writes asynchronously, but path is deterministic)
+        var schemsDir = impl.getWorldEdit().getWorkingDirectoryPath(impl.getWorldEdit().getConfiguration().saveDir);
+        return schemsDir.resolve(schematicName + ".schem");
     }
 
     private static List<Path> getAllFiles(Path fromPath) throws IOException {

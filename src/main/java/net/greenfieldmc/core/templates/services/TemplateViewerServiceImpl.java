@@ -201,9 +201,9 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerInteract(PlayerInteractEvent event) {
         var player = event.getPlayer();
-        
+
         // First, check if player is right-clicking a template item to enter placement mode
-        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) 
+        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
                 && !isInPlacementMode(player)) {
             var item = event.getItem();
             if (item != null && item.hasItemMeta()) {
@@ -218,21 +218,21 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
                                 .append(Component.text("Template '" + templateName + "' not found.", NamedTextColor.RED)));
                         return;
                     }
-                    
+
                     // Remove the template item from player's hand
                     if (item.getAmount() > 1) {
                         item.setAmount(item.getAmount() - 1);
                     } else {
                         player.getInventory().setItemInMainHand(null);
                     }
-                    
+
                     // Start placement mode
                     player.performCommand("tview " + templateName);
                     return;
                 }
             }
         }
-        
+
         // Handle placement mode interactions (confirm/cancel)
         if (!isInPlacementMode(player)) return;
 
@@ -265,21 +265,21 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
     /**
      * Create a template item that can be right-clicked to enter placement mode.
      * The item uses PersistentDataContainer to store the template name.
-     * 
+     *
      * @param template the template to create an item for
      * @return an ItemStack representing the template
      */
     public ItemStack createTemplateItem(Template template) {
         var item = template.getDisplayItem();
         var meta = item.getItemMeta();
-        
+
         // Store template name in PDC
         meta.getPersistentDataContainer().set(templateItemKey, PersistentDataType.STRING, template.getTemplateName());
-        
+
         // Set display name and lore
         meta.displayName(Component.text(template.getTemplateName(), NamedTextColor.GREEN, TextDecoration.BOLD)
                 .decoration(TextDecoration.ITALIC, false));
-        
+
         var lore = new java.util.ArrayList<Component>();
         lore.add(Component.text("Right-click to enter placement mode", NamedTextColor.YELLOW)
                 .decoration(TextDecoration.ITALIC, false));
@@ -293,7 +293,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
                     .decoration(TextDecoration.ITALIC, false));
         }
         meta.lore(lore);
-        
+
         item.setItemMeta(meta);
         return item;
     }

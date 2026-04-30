@@ -39,13 +39,13 @@ import java.util.stream.Collectors;
  * <p>Layout:
  * <ul>
  *   <li><b>Top inventory (chest, 54 slots)</b> — template items (rows 1-5) + navigation row (row 6)</li>
- *   <li><b>Player main inventory (slots 9-35)</b> — 27 attribute-flag filter items (3 rows)</li>
- *   <li><b>Player hotbar (slots 0-8)</b> — flag navigation: prev(0), clear(1), info(4), next(8)</li>
+ *   <li><b>Player main inventory (slots 9-35)</b> — 27 attribute-tag filter items (3 rows)</li>
+ *   <li><b>Player hotbar (slots 0-8)</b> — tag navigation: prev(0), clear(1), info(4), next(8)</li>
  * </ul>
  *
  * <p>The player's inventory is cached on open and fully restored on close.
  */
-public class TemplatePaginator implements Listener {
+public class TemplateGUIPaginatorService implements Listener {
 
     // ---- Chest (top) layout ----
     private static final int CHEST_SIZE           = 54;
@@ -57,11 +57,11 @@ public class TemplatePaginator implements Listener {
     private static final int SLOT_NEXT            = 53;
 
     // ---- Player inventory layout ----
-    // Main inventory rows 1-3 = player inventory slots 9-35 (27 slots) → flag items
-    private static final int FLAGS_PER_PAGE  = 18;
-    private static final int FLAG_SLOT_START = 9;   // first player-inv slot used for flags
-    private static final int FLAG_SLOT_END   = 26;  // last  player-inv slot used for flags
-    // Hotbar (player inventory slots 0-8) → flag navigation
+    // Main inventory rows 1-3 = player inventory slots 9-35 (27 slots) → tag items
+    private static final int TAGS_PER_PAGE  = 18;
+    private static final int TAG_SLOT_START = 9;   // first player-inv slot used for tags
+    private static final int TAG_SLOT_END   = 26;  // last  player-inv slot used for tags
+    // Hotbar (player inventory slots 0-8) → tag navigation
     private static final int HOTBAR_PREV     = 27;
     private static final int HOTBAR_CLEAR    = 28;
     private static final int HOTBAR_INFO     = 31;
@@ -72,7 +72,7 @@ public class TemplatePaginator implements Listener {
     private final ITemplateViewerService viewerService;
     private final Map<UUID, PaginatorSession> sessions = new HashMap<>();
 
-    public TemplatePaginator(Plugin plugin, ITemplateService templateService, ITemplateViewerService viewerService) {
+    public TemplateGUIPaginatorService(Plugin plugin, ITemplateService templateService, ITemplateViewerService viewerService) {
         this.plugin = plugin;
         this.templateService = templateService;
         this.viewerService = viewerService;
@@ -101,13 +101,13 @@ public class TemplatePaginator implements Listener {
         var base = new ArrayList<>(templates);
         base.sort(Comparator.comparing(t -> t.getTemplateName().toLowerCase()));
 
-        // Collect all unique attributes that exist in the base list → become flag items
-        var allFlags = base.stream()
+        // Collect all unique attributes that exist in the base list → become tag items
+        var allTags = base.stream()
                 .flatMap(t -> t.getAttributes().stream())
                 .distinct().sorted()
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        int totalFlagPages = Math.max(1, (int) Math.ceil(allFlags.size() / (double) FLAGS_PER_PAGE));
+        int totalTagPages = Math.max(1, (int) Math.ceil(allTags.size() / (double) TAGS_PER_PAGE));
         var filtered       = new ArrayList<>(base);
         int totalPages     = Math.max(1, (int) Math.ceil(filtered.size() / (double) ITEMS_PER_PAGE));
         page               = Math.max(1, Math.min(page, totalPages));
@@ -119,12 +119,12 @@ public class TemplatePaginator implements Listener {
                 ? existingSession.cachedInventory
                 : player.getInventory().getContents().clone();
 
-        // Preserve active flags across brush reopens
-        Set<String> activeFlags = (existingSession != null)
-                ? existingSession.activeFlags
+        // Preserve active tags across brush reopens
+        Set<String> activeTags = (existingSession != null)
+                ? existingSession.activeTags
                 : new LinkedHashSet<>();
-        int flagPage = (existingSession != null) ? existingSession.flagPage : 0;
-        flagPage = Math.min(flagPage, totalFlagPages - 1);
+        int tagPage = (existingSession != null) ? existingSession.tagPage : 0;
+        tagPage = Math.min(tagPage, totalTagPages - 1);
 
         // Read paste-ignore-air preference from the persistent player session (default true)
         boolean pasteIgnoreAir = templateService.isPasteIgnoreAir(player.getUniqueId());
@@ -133,15 +133,15 @@ public class TemplatePaginator implements Listener {
         boolean randomRotation = (existingSession != null) && existingSession.randomRotation;
 
         var session = new PaginatorSession(base, filtered, mode, brush, initialFilter,
-                page, totalPages, allFlags, activeFlags, flagPage, totalFlagPages,
+                page, totalPages, allTags, activeTags, tagPage, totalTagPages,
                 cachedInv, onSelect, pasteIgnoreAir, randomRotation);
 
-        // Re-apply any active flags to the new base list
-        if (!activeFlags.isEmpty()) rebuildFilter(session);
+        // Re-apply any active tags to the new base list
+        if (!activeTags.isEmpty()) rebuildFilter(session);
 
         sessions.put(player.getUniqueId(), session);
 
-        // Populate flag area in player inventory BEFORE opening the chest
+        // Populate tag area in player inventory BEFORE opening the chest
         populatePlayerInventory(player, session);
         player.openInventory(buildChestInventory(session));
     }
@@ -175,31 +175,31 @@ public class TemplatePaginator implements Listener {
     }
 
     // =========================================================
-    //  Player inventory (flags panel)
+    //  Player inventory (tags panel)
     // =========================================================
 
     private void populatePlayerInventory(Player player, PaginatorSession session) {
         var inv = player.getInventory();
 
-        // Clear 3rd inventory row and use the slots for flags
+        // Clear 3rd inventory row and use the slots for tags
         for (int i = 18; i < 27; i++) inv.setItem(i, null);
-        for (int i = FLAG_SLOT_START; i <= FLAG_SLOT_END; i++) inv.setItem(i, null);
+        for (int i = TAG_SLOT_START; i <= TAG_SLOT_END; i++) inv.setItem(i, null);
 
-        // Flag items (main inventory rows 1-3, player slots 9-35)
-        var allFlags = session.allFlags;
-        int flagStart = session.flagPage * FLAGS_PER_PAGE;
-        int flagEnd   = Math.min(flagStart + FLAGS_PER_PAGE, allFlags.size());
-        for (int i = flagStart; i < flagEnd; i++) {
-            String flag = allFlags.get(i);
-            inv.setItem(FLAG_SLOT_START + (i - flagStart),
-                    makeFlagItem(flag, session.activeFlags.contains(flag)));
+        // Tag items (main inventory rows 1-3, player slots 9-35)
+        var allTags = session.allTags;
+        int tagStart = session.tagPage * TAGS_PER_PAGE;
+        int tagEnd   = Math.min(tagStart + TAGS_PER_PAGE, allTags.size());
+        for (int i = tagStart; i < tagEnd; i++) {
+            String tag = allTags.get(i);
+            inv.setItem(TAG_SLOT_START + (i - tagStart),
+                    makeTagItem(tag, session.activeTags.contains(tag)));
         }
 
         // Hotbar navigation
-        inv.setItem(HOTBAR_PREV,  session.flagPage > 0                              ? makeFlagNavButton(false) : null);
-        inv.setItem(HOTBAR_CLEAR, !session.activeFlags.isEmpty()                    ? makeClearFlagsButton()   : null);
-        inv.setItem(HOTBAR_INFO,  makeFlagInfoItem(session));
-        inv.setItem(HOTBAR_NEXT,  session.flagPage < session.totalFlagPages - 1     ? makeFlagNavButton(true)  : null);
+        inv.setItem(HOTBAR_PREV,  session.tagPage > 0                              ? makeTagNavButton(false) : null);
+        inv.setItem(HOTBAR_CLEAR, !session.activeTags.isEmpty()                    ? makeClearTagsButton()   : null);
+        inv.setItem(HOTBAR_INFO,  makeTagInfoItem(session));
+        inv.setItem(HOTBAR_NEXT,  session.tagPage < session.totalTagPages - 1     ? makeTagNavButton(true)  : null);
     }
 
     // =========================================================
@@ -207,11 +207,11 @@ public class TemplatePaginator implements Listener {
     // =========================================================
 
     private void rebuildFilter(PaginatorSession session) {
-        if (session.activeFlags.isEmpty()) {
+        if (session.activeTags.isEmpty()) {
             session.filteredTemplates = new ArrayList<>(session.baseTemplates);
         } else {
             session.filteredTemplates = session.baseTemplates.stream()
-                    .filter(t -> session.activeFlags.stream().allMatch(f -> t.getAttributes().contains(f)))
+                    .filter(t -> session.activeTags.stream().allMatch(f -> t.getAttributes().contains(f)))
                     .collect(Collectors.toCollection(ArrayList::new));
         }
         session.totalPages = Math.max(1, (int) Math.ceil(session.filteredTemplates.size() / (double) ITEMS_PER_PAGE));
@@ -304,26 +304,26 @@ public class TemplatePaginator implements Listener {
     }
 
     private void handlePlayerInvClick(Player player, int slot, Inventory topInv, PaginatorSession session) {
-        if (slot >= FLAG_SLOT_START && slot <= FLAG_SLOT_END) {
-            // Toggle flag
-            int flagIndex = session.flagPage * FLAGS_PER_PAGE + (slot - FLAG_SLOT_START);
-            if (flagIndex >= session.allFlags.size()) return;
-            String flag = session.allFlags.get(flagIndex);
-            if (!session.activeFlags.remove(flag)) session.activeFlags.add(flag);
+        if (slot >= TAG_SLOT_START && slot <= TAG_SLOT_END) {
+            // Toggle tag
+            int tagIndex = session.tagPage * TAGS_PER_PAGE + (slot - TAG_SLOT_START);
+            if (tagIndex >= session.allTags.size()) return;
+            String tag = session.allTags.get(tagIndex);
+            if (!session.activeTags.remove(tag)) session.activeTags.add(tag);
             rebuildFilter(session);
             populatePlayerInventory(player, session);
             fillChestContents(topInv, session);
 
-        } else if (slot == HOTBAR_PREV && session.flagPage > 0) {
-            session.flagPage--;
+        } else if (slot == HOTBAR_PREV && session.tagPage > 0) {
+            session.tagPage--;
             populatePlayerInventory(player, session);
 
-        } else if (slot == HOTBAR_NEXT && session.flagPage < session.totalFlagPages - 1) {
-            session.flagPage++;
+        } else if (slot == HOTBAR_NEXT && session.tagPage < session.totalTagPages - 1) {
+            session.tagPage++;
             populatePlayerInventory(player, session);
 
-        } else if (slot == HOTBAR_CLEAR && !session.activeFlags.isEmpty()) {
-            session.activeFlags.clear();
+        } else if (slot == HOTBAR_CLEAR && !session.activeTags.isEmpty()) {
+            session.activeTags.clear();
             rebuildFilter(session);
             populatePlayerInventory(player, session);
             fillChestContents(topInv, session);
@@ -445,8 +445,8 @@ public class TemplatePaginator implements Listener {
             lore.add(Component.text("Filter: " + session.filter, NamedTextColor.GRAY)
                     .decoration(TextDecoration.ITALIC, false));
         }
-        if (!session.activeFlags.isEmpty()) {
-            lore.add(Component.text("Active flags: " + String.join(", ", session.activeFlags), NamedTextColor.AQUA)
+        if (!session.activeTags.isEmpty()) {
+            lore.add(Component.text("Active tags: " + String.join(", ", session.activeTags), NamedTextColor.AQUA)
                     .decoration(TextDecoration.ITALIC, false));
         }
         meta.lore(lore);
@@ -455,20 +455,20 @@ public class TemplatePaginator implements Listener {
     }
 
     // =========================================================
-    //  Item builders — player inventory flags panel
+    //  Item builders — player inventory tags panel
     // =========================================================
 
-    private ItemStack makeFlagItem(String flag, boolean active) {
+    private ItemStack makeTagItem(String tag, boolean active) {
         // Use the tag's custom display item if one is registered for this attribute
-        var tag = templateService.getTag(flag);
+        var flag = templateService.getTag(tag);
         ItemStack item;
-        if (tag != null && tag.hasDisplayItem()) {
-            item = tag.getDisplayItem(); // already a clone
+        if (flag != null && flag.hasDisplayItem()) {
+            item = flag.getDisplayItem(); // already a clone
         } else {
             item = new ItemStack(active ? Material.LIME_STAINED_GLASS_PANE : Material.LIGHT_GRAY_STAINED_GLASS_PANE);
         }
         var meta = item.getItemMeta();
-        meta.displayName(Component.text(flag, active ? NamedTextColor.GREEN : NamedTextColor.GRAY)
+        meta.displayName(Component.text(tag, active ? NamedTextColor.GREEN : NamedTextColor.GRAY)
                 .decoration(TextDecoration.ITALIC, false));
         var lore = new ArrayList<Component>();
         if (active) {
@@ -479,7 +479,7 @@ public class TemplatePaginator implements Listener {
         }
         // Show if this tag has no custom icon configured
         if (tag == null) {
-            lore.add(Component.text("⚠ No tag icon set — use /ttag create " + flag, NamedTextColor.DARK_GRAY)
+            lore.add(Component.text("⚠ No tag icon set — use /ttag create " + tag, NamedTextColor.DARK_GRAY)
                     .decoration(TextDecoration.ITALIC, true));
         }
         meta.lore(lore);
@@ -487,7 +487,7 @@ public class TemplatePaginator implements Listener {
         return item;
     }
 
-    private ItemStack makeFlagNavButton(boolean next) {
+    private ItemStack makeTagNavButton(boolean next) {
         var item = new ItemStack(Material.SPECTRAL_ARROW);
         var meta = item.getItemMeta();
         meta.displayName(Component.text(next ? "More Filters \u25B6" : "\u25C0 Prev Filters", NamedTextColor.AQUA)
@@ -496,7 +496,7 @@ public class TemplatePaginator implements Listener {
         return item;
     }
 
-    private ItemStack makeClearFlagsButton() {
+    private ItemStack makeClearTagsButton() {
         var item = new ItemStack(Material.BARRIER);
         var meta = item.getItemMeta();
         meta.displayName(Component.text("Clear All Filters", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false));
@@ -504,21 +504,21 @@ public class TemplatePaginator implements Listener {
         return item;
     }
 
-    private ItemStack makeFlagInfoItem(PaginatorSession session) {
+    private ItemStack makeTagInfoItem(PaginatorSession session) {
         var item = new ItemStack(Material.COMPASS);
         var meta = item.getItemMeta();
         meta.displayName(Component.text("Attribute Filters", NamedTextColor.LIGHT_PURPLE)
                 .decoration(TextDecoration.ITALIC, false));
         var lore = new ArrayList<Component>();
-        lore.add(Component.text("Page " + (session.flagPage + 1) + " / " + Math.max(1, session.totalFlagPages),
+        lore.add(Component.text("Page " + (session.tagPage + 1) + " / " + Math.max(1, session.totalTagPages),
                 NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
-        int active = session.activeFlags.size();
+        int active = session.activeTags.size();
         lore.add(Component.text(active == 0 ? "No active filters" : active + " active",
                 active == 0 ? NamedTextColor.DARK_GRAY : NamedTextColor.GREEN)
                 .decoration(TextDecoration.ITALIC, false));
-        if (!session.activeFlags.isEmpty()) {
+        if (!session.activeTags.isEmpty()) {
             lore.add(Component.empty());
-            session.activeFlags.forEach(f ->
+            session.activeTags.forEach(f ->
                     lore.add(Component.text("  \u2022 " + f, NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false)));
         }
         meta.lore(lore);
@@ -638,11 +638,11 @@ public class TemplatePaginator implements Listener {
         final String filter;
         int page;
         int totalPages;
-        // Flag (filter) state
-        final List<String> allFlags;
-        final Set<String> activeFlags;
-        int flagPage;
-        final int totalFlagPages;
+        // Tag (filter) state
+        final List<String> allTags;
+        final Set<String> activeTags;
+        int tagPage;
+        final int totalTagPages;
         // Inventory preservation
         final ItemStack[] cachedInventory;
         // Callback (reserved)
@@ -655,7 +655,7 @@ public class TemplatePaginator implements Listener {
         PaginatorSession(List<Template> baseTemplates, List<Template> filteredTemplates,
                          TemplatePaginatorMode mode, TemplateBrush brush, String filter,
                          int page, int totalPages,
-                         List<String> allFlags, Set<String> activeFlags, int flagPage, int totalFlagPages,
+                         List<String> allTags, Set<String> activeTags, int tagPage, int totalTagPages,
                          ItemStack[] cachedInventory, BiConsumer<Player, Template> onSelect,
                          boolean pasteIgnoreAir, boolean randomRotation) {
             this.baseTemplates     = baseTemplates;
@@ -665,10 +665,10 @@ public class TemplatePaginator implements Listener {
             this.filter            = filter;
             this.page              = page;
             this.totalPages        = totalPages;
-            this.allFlags          = allFlags;
-            this.activeFlags       = activeFlags;
-            this.flagPage          = flagPage;
-            this.totalFlagPages    = totalFlagPages;
+            this.allTags           = allTags;
+            this.activeTags        = activeTags;
+            this.tagPage           = tagPage;
+            this.totalTagPages     = totalTagPages;
             this.cachedInventory   = cachedInventory;
             this.onSelect          = onSelect;
             this.pasteIgnoreAir    = pasteIgnoreAir;

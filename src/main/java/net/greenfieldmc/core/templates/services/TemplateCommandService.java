@@ -15,7 +15,7 @@ import net.greenfieldmc.core.templates.models.AdjustableOption;
 import net.greenfieldmc.core.templates.models.PasteOption;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
-import net.greenfieldmc.core.templates.paginators.TemplatePaginator;
+import net.greenfieldmc.core.templates.paginators.TemplateGUIPaginatorService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -34,7 +34,7 @@ import java.util.List;
 
 public class TemplateCommandService extends ModuleService<TemplateCommandService> implements IModuleService<TemplateCommandService> {
 
-    private TemplatePaginator paginator;
+    private TemplateGUIPaginatorService paginator;
 
     private final ITemplateService templateService;
     private final ITemplateWorldEditService worldEditService;
@@ -84,7 +84,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         var newSchematicFile = ctx.getTyped("newSchematicFile", Path.class, null);
         var addedAttribute = ctx.getTyped("addedAttribute", String.class, null);
         var removedAttribute = ctx.getTyped("removedAttribute", String.class, null);
-        var updateItem = ctx.getTyped("updateItem", Boolean.class, null);
+        var updateItem = ctx.hasTyped("item") ? Boolean.TRUE : null;
 
         var editedField = "";
         var newValue = "";
@@ -333,11 +333,11 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
             return;
         }
 
-        paginator.open(ctx.asPlayer(), templates, TemplatePaginator.TemplatePaginatorMode.SELECT, null, filter, page, null);
+        paginator.open(ctx.asPlayer(), templates, TemplateGUIPaginatorService.TemplatePaginatorMode.SELECT, null, filter, page, null);
     }
 
     private void showBrushModifyGui(ICommandContext ctx, TemplateBrush templateBrush, List<Template> templates, int page) throws PDKCommandException {
-        paginator.open(ctx.asPlayer(), templates, TemplatePaginator.TemplatePaginatorMode.BRUSH, templateBrush, null, page, null);
+        paginator.open(ctx.asPlayer(), templates, TemplateGUIPaginatorService.TemplatePaginatorMode.BRUSH, templateBrush, null, page, null);
 
         // Also send the adjustable options as chat text below the GUI
         var grayColor = NamedTextColor.DARK_GRAY;
@@ -413,7 +413,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
 
     @Override
     public void tryEnable(Plugin plugin, Module module) throws Exception {
-        this.paginator = new TemplatePaginator(plugin, templateService, viewerService);
+        this.paginator = new TemplateGUIPaginatorService(plugin, templateService, viewerService);
 
         CommandBuilder.of("tcreate", "createtemplate", "ct")
                 .permission("greenfieldcore.template.create")

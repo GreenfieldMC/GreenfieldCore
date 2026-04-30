@@ -13,19 +13,25 @@ import org.bukkit.util.io.BukkitObjectOutputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageService> implements ITemplateStorageService {
 
     private IConfig templatesConfig;
     private IConfig tagsConfig;
+    private IConfig mainConfig;
     private final Map<String, Template> templates = new HashMap<>();
     private final Map<String, Tag> tags = new HashMap<>();
+    
+    // Player configs: UUID -> config file (lazy-loaded from templates/user/<UUID>.yml)
+    private final Map<UUID, IConfig> playerConfigs = new HashMap<>();
 
     public TemplateStorageServiceImpl(Plugin plugin, Module module) {
         super(plugin, module);
@@ -34,8 +40,30 @@ public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageSe
     @Override
     public void tryEnable(Plugin plugin, Module module) throws Exception {
         try {
+            // ---- Create folder structure ----
+            File storageFolder = new File(plugin.getDataFolder(), "templates/storage");
+            File userFolder = new File(plugin.getDataFolder(), "templates/user");
+            
+            if (!storageFolder.exists() && !storageFolder.mkdirs()) {
+                throw new Exception("Failed to create storage folder: " + storageFolder.getAbsolutePath());
+            }
+            if (!userFolder.exists() && !userFolder.mkdirs()) {
+                throw new Exception("Failed to create user data folder: " + userFolder.getAbsolutePath());
+            }
+
+            // ---- Main config (entity rendering limits by rank) ----
+            this.mainConfig = ConfigType.YML.createNew(plugin, "templates/config");
+            // Initialize default entity rendering limits if not present
+            if (!mainConfig.hasSection("entityRenderingLimits")) {
+                mainConfig.setEntry("entityRenderingLimits.default", 100);
+                mainConfig.setEntry("entityRenderingLimits.vip", 200);
+                mainConfig.setEntry("entityRenderingLimits.premium", 500);
+                mainConfig.setEntry("entityRenderingLimits.admin", 1000);
+                mainConfig.save();
+            }
+
             // ---- Templates config ----
-            this.templatesConfig = ConfigType.YML.createNew(plugin, "templates");
+            this.templatesConfig = ConfigType.YML.createNew(plugin, "templates/storage/templates");
             if (templatesConfig.hasSection("templates")) {
                 for (var templateName : templatesConfig.getSection("templates").getKeys(false)) {
                     var section = templatesConfig.getSection("templates." + templateName);
@@ -48,7 +76,7 @@ public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageSe
             }
 
             // ---- Tags config ----
-            this.tagsConfig = ConfigType.YML.createNew(plugin, "tags");
+            this.tagsConfig = ConfigType.YML.createNew(plugin, "templates/storage/tags");
             if (tagsConfig.hasSection("tags")) {
                 for (var tagName : tagsConfig.getSection("tags").getKeys(false)) {
                     var section = tagsConfig.getSection("tags." + tagName);
@@ -65,6 +93,11 @@ public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageSe
     @Override
     public void tryDisable(Plugin plugin, Module module) throws Exception {
         saveDatabase();
+        // Save all loaded player configs before shutdown
+        for (var entry : playerConfigs.entrySet()) {
+            entry.getValue().save();
+        }
+        playerConfigs.clear();
     }
 
     // ---- Template methods ----
@@ -129,6 +162,118 @@ public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageSe
         templatesConfig.save();
         tags.values().forEach(this::saveTag);
         tagsConfig.save();
+        mainConfig.save();
+    }
+
+    // ---- Main config methods ----
+
+    /**
+     * Get the entity rendering limit for a given rank/permission group.
+     * @param rank The rank name (e.g., "default", "vip", "premium", "admin")
+     * @return The rendering limit, or 100 if not configured
+     */
+    public int getEntityRenderingLimit(String rank) {
+        if (mainConfig == null) return 100;
+        try {
+            Integer limit = mainConfig.getInt("entityRenderingLimits." + rank.toLowerCase());
+            return limit != null ? limit : 100;
+        } catch (NullPointerException e) {
+            // Key doesn't exist in config, return default
+            return 100;
+        }
+    }
+
+    /**
+     * Set the entity rendering limit for a given rank/permission group.
+     * @param rank The rank name
+     * @param limit The max number of entities to render
+     */
+    public void setEntityRenderingLimit(String rank, int limit) {
+        if (mainConfig == null) return;
+        mainConfig.setEntry("entityRenderingLimits." + rank.toLowerCase(), limit);
+        mainConfig.save();
+    }
+
+    // ---- Player data methods ----
+
+    /**
+     * Lazy-load a player's config file from templates/user/<UUID>.yml
+     * Creates the file if it doesn't exist.
+     */
+    private IConfig getPlayerConfig(UUID playerUuid) {
+        return playerConfigs.computeIfAbsent(playerUuid, uuid -> {
+            try {
+                // Create config using relative path from plugin data folder
+                String relativePath = "templates/user/" + uuid.toString();
+                return ConfigType.YML.createNew(getPlugin(), relativePath);
+            } catch (Exception e) {
+                getModule().getLogger().severe("Failed to load player config for " + uuid + ": " + e.getMessage());
+                return null;
+            }
+        });
+    }
+
+    @Override
+    public boolean getPlayerBoolean(UUID playerUuid, String key, boolean defaultValue) {
+        var config = getPlayerConfig(playerUuid);
+        if (config == null) return defaultValue;
+        try {
+            Boolean value = config.getBoolean(key);
+            return value != null ? value : defaultValue;
+        } catch (NullPointerException e) {
+            // Key doesn't exist in config, return default
+            return defaultValue;
+        }
+    }
+
+    @Override
+    public void setPlayerBoolean(UUID playerUuid, String key, boolean value) {
+        var config = getPlayerConfig(playerUuid);
+        if (config == null) return;
+        config.setEntry(key, value);
+    }
+
+    @Override
+    public String getPlayerString(UUID playerUuid, String key, String defaultValue) {
+        var config = getPlayerConfig(playerUuid);
+        if (config == null) return defaultValue;
+        String value = config.getString(key);
+        return value != null ? value : defaultValue;
+    }
+
+    @Override
+    public void setPlayerString(UUID playerUuid, String key, String value) {
+        var config = getPlayerConfig(playerUuid);
+        if (config == null) return;
+        config.setEntry(key, value);
+    }
+
+    @Override
+    public int getPlayerInt(UUID playerUuid, String key, int defaultValue) {
+        var config = getPlayerConfig(playerUuid);
+        if (config == null) return defaultValue;
+        try {
+            Integer value = config.getInt(key);
+            return value != null ? value : defaultValue;
+        } catch (NullPointerException e) {
+            // Key doesn't exist in config, return default
+            return defaultValue;
+        }
+    }
+
+    @Override
+    public void setPlayerInt(UUID playerUuid, String key, int value) {
+        var config = getPlayerConfig(playerUuid);
+        if (config == null) return;
+        config.setEntry(key, value);
+    }
+
+    @Override
+    public void savePlayerConfig(UUID playerUuid) {
+        var config = playerConfigs.get(playerUuid);
+        if (config != null) {
+            config.save();
+        }
     }
 
     // ---- Serialization helpers ----

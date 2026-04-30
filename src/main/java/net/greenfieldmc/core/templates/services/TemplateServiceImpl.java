@@ -226,12 +226,25 @@ public class TemplateServiceImpl extends ModuleService<ITemplateService> impleme
 
     @Override
     public boolean isPasteIgnoreAir(UUID playerUuid) {
+        // Load from persistent storage (default true)
+        boolean stored = storageService.getPlayerBoolean(playerUuid, "pasteIgnoreAir", true);
+        
+        // Update in-memory session if it exists
         var session = sessions.get(playerUuid);
-        return session == null || session.isPasteIgnoreAir();
+        if (session != null) {
+            session.setPasteIgnoreAir(stored);
+        }
+        
+        return stored;
     }
 
     @Override
     public void setPasteIgnoreAir(UUID playerUuid, boolean ignoreAir) {
+        // Save to persistent storage
+        storageService.setPlayerBoolean(playerUuid, "pasteIgnoreAir", ignoreAir);
+        storageService.savePlayerConfig(playerUuid);
+        
+        // Update in-memory session
         var session = sessions.get(playerUuid);
         if (session == null) {
             session = new TemplateSession(playerUuid);

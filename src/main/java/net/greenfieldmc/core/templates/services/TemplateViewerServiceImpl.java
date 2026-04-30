@@ -26,6 +26,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Team;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -35,14 +36,20 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
 
     private Team originTeam;
     private final Map<UUID, PlacementSession> placementSessions = new HashMap<>();
-    private final ITemplateService templateService;
-    private NamespacedKey templateItemKey;
 
     private static final int RAY_TRACE_DISTANCE = 64;
     private static final int TICK_INTERVAL = 2; // update every 2 ticks
 
+    private ITemplateService templateService;
+    private NamespacedKey templateItemKey;
+    private final NamespacedKey ignoreAirKey;
+    private final NamespacedKey randomRotationKey;
+
     public TemplateViewerServiceImpl(Plugin plugin, Module module, ITemplateService templateService) {
         super(plugin, module);
+        this.templateItemKey = new NamespacedKey(plugin, "template_name");
+        this.ignoreAirKey = new NamespacedKey(plugin, "ignore_air");
+        this.randomRotationKey = new NamespacedKey(plugin, "include_entities");
         this.templateService = templateService;
     }
 
@@ -262,38 +269,31 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
     //  Template Item Creation
     // =========================================================
 
-    /**
-     * Create a template item that can be right-clicked to enter placement mode.
-     * The item uses PersistentDataContainer to store the template name.
-     *
-     * @param template the template to create an item for
-     * @return an ItemStack representing the template
-     */
-    public ItemStack createTemplateItem(Template template) {
+    public ItemStack createTemplateItem(Template template, boolean ignoreAir, boolean randomRotation) {
         var item = template.getDisplayItem();
         var meta = item.getItemMeta();
 
-        // Store template name in PDC
+        // Store all placement data in PDC
         meta.getPersistentDataContainer().set(templateItemKey, PersistentDataType.STRING, template.getTemplateName());
+        meta.getPersistentDataContainer().set(ignoreAirKey, PersistentDataType.BOOLEAN, ignoreAir);
+        meta.getPersistentDataContainer().set(randomRotationKey, PersistentDataType.BOOLEAN, randomRotation);
 
-        // Set display name and lore
-        meta.displayName(Component.text(template.getTemplateName(), NamedTextColor.GREEN, TextDecoration.BOLD)
-                .decoration(TextDecoration.ITALIC, false));
-
-        var lore = new java.util.ArrayList<Component>();
+        // Update lore to show placement options
+        var lore = new ArrayList<Component>();
         lore.add(Component.text("Right-click to enter placement mode", NamedTextColor.YELLOW)
                 .decoration(TextDecoration.ITALIC, false));
         lore.add(Component.empty());
         lore.add(Component.text("Dimensions: " + template.getDimensions(), NamedTextColor.GRAY)
                 .decoration(TextDecoration.ITALIC, false));
-        if (!template.getAttributes().isEmpty()) {
-            var attrJoiner = new java.util.StringJoiner(", ");
-            template.getAttributes().forEach(attrJoiner::add);
-            lore.add(Component.text("Attributes: " + attrJoiner, NamedTextColor.GOLD)
-                    .decoration(TextDecoration.ITALIC, false));
-        }
-        meta.lore(lore);
+        lore.add(Component.text("Paste Mode: " + (ignoreAir ? "Ignore Air" : "Include Air"),
+                        ignoreAir ? NamedTextColor.GREEN : NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, false));
+        lore.add(Component.text("Rotation: " + (randomRotation ? "Random" : "Fixed"),
+                        randomRotation ? NamedTextColor.GREEN : NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, false));
+        // ... rest ofore
 
+        meta.lore(lore);
         item.setItemMeta(meta);
         return item;
     }

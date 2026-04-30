@@ -278,7 +278,7 @@ public class TemplateGUIPaginatorService implements Listener {
                 player.performCommand("tcopy " + template.getTemplateName());
             } else if (rightClick) {
                 // Give the player a template item instead of entering placement mode directly
-                var templateItem = viewerService.createTemplateItem(template);
+                var templateItem = viewerService.createTemplateItem(template, session.pasteIgnoreAir, session.pasteIncludeEntities);
                 player.getInventory().addItem(templateItem);
                 player.sendMessage(Component.text("[Template] ", NamedTextColor.LIGHT_PURPLE)
                         .append(Component.text("Template item received! ", NamedTextColor.GRAY))
@@ -649,6 +649,7 @@ public class TemplateGUIPaginatorService implements Listener {
         final BiConsumer<Player, Template> onSelect;
         // Paste preference
         boolean pasteIgnoreAir;
+        boolean pasteIncludeEntities;
         // Random rotation preference
         boolean randomRotation;
 

@@ -46,12 +46,11 @@ public interface ITemplateViewerService extends IModuleService<ITemplateViewerSe
     boolean isInPlacementMode(Player player);
 
     /**
-     * Create a template item that can be right-clicked to enter placement mode.
-     * The item uses PersistentDataContainer to store the template name.
-     *
-     * @param template The template to create an item for.
-     * @return An ItemStack representing the template.
+     * Create a template item with encoded placement options
+     * @param template the template
+     * @param ignoreAir whether to ignore air blocks
+     * @param includeEntities whever to include entities
+     * @return an ItemStack with encoded metadata
      */
-    ItemStack createTemplateItem(Template template);
-
+    ItemStack createTemplateItem(Template template, boolean ignoreAir, boolean includeEntities);
 }

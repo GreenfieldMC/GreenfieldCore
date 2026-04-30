@@ -15,7 +15,7 @@ import net.greenfieldmc.core.templates.models.AdjustableOption;
 import net.greenfieldmc.core.templates.models.PasteOption;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
-import net.greenfieldmc.core.templates.paginators.TemplateGUIPaginatorService;
+import net.greenfieldmc.core.templates.paginators.gui.TemplateGUIPaginatorService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;

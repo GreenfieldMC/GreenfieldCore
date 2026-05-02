@@ -7,9 +7,9 @@ import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import io.papermc.paper.ban.BanListType;
 import net.greenfieldmc.core.chatformat.ChatFormatModule;
-import net.greenfieldmc.core.greenfieldapi.models.GfDiscordConnection;
-import net.greenfieldmc.core.greenfieldapi.models.GfPatreonConnection;
-import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldCoreApi;
+import net.greenfieldmc.core.greenfieldapi.models.users.GfDiscordConnection;
+import net.greenfieldmc.core.greenfieldapi.models.users.GfPatreonConnection;
+import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldUserApiService;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -33,16 +33,16 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
     private final Map<UUID, List<GfPatreonConnection>> patreonPledgeCache = new HashMap<>();
     private final Map<UUID, List<GfDiscordConnection>> discordConnectionCache = new HashMap<>();
 
-    private final IGreenfieldCoreApi greenfieldCoreApi;
+    private final IGreenfieldUserApiService userApi;
     private final IAuthhubService authhubService;
     private final List<UUID> prefixedUsers = new ArrayList<>();
 
     private static final int PREFIX_PRIORITY = 3;
 
-    public AuthhubIntegrationService(Plugin plugin, Module module, IAuthhubService authhubService, IGreenfieldCoreApi greenfieldCoreApi) {
+    public AuthhubIntegrationService(Plugin plugin, Module module, IAuthhubService authhubService, IGreenfieldUserApiService userApi) {
         super(plugin, module);
         this.authhubService = authhubService;
-        this.greenfieldCoreApi = greenfieldCoreApi;
+        this.userApi = userApi;
     }
 
     @Override
@@ -102,8 +102,8 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             }
 
             getModule().getLogger().info("User " + player.getName() + " does not have a linked discord account, sending connection link.");
-            var foundUser = greenfieldCoreApi.getUserByMinecraftUuid(player.getUniqueId()).join().getData();
-            greenfieldCoreApi.getDiscordConnectionLink(foundUser.getUserId()).join()
+            var foundUser = userApi.getUserByMinecraftUuid(player.getUniqueId()).join().getData();
+            userApi.getDiscordConnectionLink(foundUser.getUserId()).join()
                     .ifFailure(errorMsg -> getModule().getLogger().warning("Failed to retrieve user for UUID " + player.getUniqueId() + " while getting discord connection link: " + errorMsg))
                     .ifSuccess(connectionLink -> Bukkit.getScheduler().runTaskLater(getPlugin(), () -> {
                         if (!player.isOnline()) {
@@ -176,12 +176,12 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             resolvingDiscordConnections.remove(minecraftUuid);
             return null;
         }
-        var userResult = greenfieldCoreApi.getUserByMinecraftUuid(minecraftUuid).join();
+        var userResult = userApi.getUserByMinecraftUuid(minecraftUuid).join();
         if (userResult.isFailure()) {
             getModule().getLogger().warning("Failed to retrieve user for UUID " + minecraftUuid + " while resolving discord connections. Attempt " + attempt + " of " + maxAttempts);
             return resolveDiscordConnections(minecraftUuid, attempt + 1, maxAttempts, 250);
         }
-        var accountResult = greenfieldCoreApi.getDiscordConnection(userResult.getData().getUserId()).join();
+        var accountResult = userApi.getDiscordConnection(userResult.getData().getUserId()).join();
         if (accountResult.isFailure()) {
             getModule().getLogger().warning("Failed to retrieve discord connections for user with UUID " + minecraftUuid + ". Attempt " + attempt + " of " + maxAttempts);
             return resolveDiscordConnections(minecraftUuid, attempt + 1, maxAttempts, 250);
@@ -207,12 +207,12 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
             resolvingPatreonConnections.remove(minecraftUuid);
             return null;
         }
-        var userResult = greenfieldCoreApi.getUserByMinecraftUuid(minecraftUuid).join();
+        var userResult = userApi.getUserByMinecraftUuid(minecraftUuid).join();
         if (userResult.isFailure()) {
             getModule().getLogger().warning("Failed to retrieve user for UUID " + minecraftUuid + " while resolving discord connections. Attempt " + attempt + " of " + maxAttempts);
             return resolvePatreonConnections(minecraftUuid, attempt + 1, maxAttempts, 250);
         }
-        var accountResult = greenfieldCoreApi.getPatreonConnection(userResult.getData().getUserId()).join();
+        var accountResult = userApi.getPatreonConnection(userResult.getData().getUserId()).join();
         if (accountResult.isFailure()) {
             getModule().getLogger().warning("Failed to retrieve discord connections for user with UUID " + minecraftUuid + ". Attempt " + attempt + " of " + maxAttempts);
             return resolvePatreonConnections(minecraftUuid, attempt + 1, maxAttempts, 250);

@@ -22,7 +22,7 @@ public class AuthhubModule extends Module {
     @Override
     protected void tryEnable() throws Exception {
         var authHubService = enableIntegration(new AuthhubServiceImpl(plugin, this), true);
-        authhubIntegrationService = enableIntegration(new AuthhubIntegrationService(plugin, this, authHubService, greenfieldCoreApi.getApiService()), true);
+        authhubIntegrationService = enableIntegration(new AuthhubIntegrationService(plugin, this, authHubService, greenfieldCoreApi.getUserApiService()), true);
     }
 
     @Override

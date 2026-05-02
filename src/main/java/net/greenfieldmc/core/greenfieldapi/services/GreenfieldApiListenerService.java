@@ -9,9 +9,9 @@ import org.bukkit.plugin.Plugin;
 
 public class GreenfieldApiListenerService extends ModuleService<GreenfieldApiListenerService> implements Listener {
 
-    private final IGreenfieldCoreApi apiService;
+    private final IGreenfieldUserApiService apiService;
 
-    public GreenfieldApiListenerService(Plugin plugin, Module module, IGreenfieldCoreApi apiService) {
+    public GreenfieldApiListenerService(Plugin plugin, Module module, IGreenfieldUserApiService apiService) {
         super(plugin, module);
         this.apiService = apiService;
     }

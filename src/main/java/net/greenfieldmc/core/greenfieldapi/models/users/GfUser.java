@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.greenfieldapi.models;
+package net.greenfieldmc.core.greenfieldapi.models.users;
 
 import java.util.Date;
 import java.util.UUID;
@@ -43,32 +43,16 @@ public class GfUser {
         return userId;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
-
     public UUID getMinecraftUuid() {
         return minecraftUuid;
-    }
-
-    public void setMinecraftUuid(UUID minecraftUuid) {
-        this.minecraftUuid = minecraftUuid;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public Date getCreatedOn() {
         return createdOn;
-    }
-
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.greenfieldapi.models;
+package net.greenfieldmc.core.greenfieldapi.models.users;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -34,64 +34,32 @@ public class GfDiscordConnection {
         return userDiscordConnectionId;
     }
 
-    public void setUserDiscordConnectionId(long userDiscordConnectionId) {
-        this.userDiscordConnectionId = userDiscordConnectionId;
-    }
-
     public GfUser getUser() {
         return user;
-    }
-
-    public void setUser(GfUser user) {
-        this.user = user;
     }
 
     public long getDiscordConnectionId() {
         return discordConnectionId;
     }
 
-    public void setDiscordConnectionId(long discordConnectionId) {
-        this.discordConnectionId = discordConnectionId;
-    }
-
     public BigInteger getDiscordSnowflake() {
         return discordSnowflake;
-    }
-
-    public void setDiscordSnowflake(BigInteger discordSnowflake) {
-        this.discordSnowflake = discordSnowflake;
     }
 
     public String getDiscordUsername() {
         return discordUsername;
     }
 
-    public void setDiscordUsername(String discordUsername) {
-        this.discordUsername = discordUsername;
-    }
-
     public Date getConnectedOn() {
         return connectedOn;
-    }
-
-    public void setConnectedOn(Date connectedOn) {
-        this.connectedOn = connectedOn;
     }
 
     public Date getUpdatedOn() {
         return updatedOn;
     }
 
-    public void setUpdatedOn(Date updatedOn) {
-        this.updatedOn = updatedOn;
-    }
-
     public Date getCreatedOn() {
         return createdOn;
-    }
-
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
     }
 
     @Override

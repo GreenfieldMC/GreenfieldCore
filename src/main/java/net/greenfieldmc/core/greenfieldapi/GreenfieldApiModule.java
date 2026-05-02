@@ -3,11 +3,15 @@ package net.greenfieldmc.core.greenfieldapi;
 import net.greenfieldmc.core.GreenfieldCore;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
+import net.greenfieldmc.core.greenfieldapi.services.GreenfieldApiClientImpl;
 import net.greenfieldmc.core.greenfieldapi.services.GreenfieldApiConfigService;
 import net.greenfieldmc.core.greenfieldapi.services.GreenfieldApiListenerService;
-import net.greenfieldmc.core.greenfieldapi.services.GreenfieldCoreApiImpl;
+import net.greenfieldmc.core.greenfieldapi.services.GreenfieldRedblockApiServiceImpl;
+import net.greenfieldmc.core.greenfieldapi.services.GreenfieldUserApiServiceImpl;
+import net.greenfieldmc.core.greenfieldapi.services.IAuthedClientService;
 import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldApiConfigService;
-import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldCoreApi;
+import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldRedblockApiService;
+import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldUserApiService;
 import net.greenfieldmc.core.greenfieldapi.services.OAuthClientCredentialsHandler;
 
 import java.util.function.Predicate;
@@ -20,8 +24,10 @@ public class GreenfieldApiModule extends Module {
 
     private IGreenfieldApiConfigService configService;
     private OAuthClientCredentialsHandler authHandler;
-    private IGreenfieldCoreApi apiService;
     private GreenfieldApiListenerService listenerService;
+    private IGreenfieldUserApiService userApiService;
+    private IGreenfieldRedblockApiService redblockApiService;
+    private IAuthedClientService clientService;
 
     public GreenfieldApiModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
         super(plugin, canEnable);
@@ -40,13 +46,11 @@ public class GreenfieldApiModule extends Module {
                 getLogger()
         );
 
-        // Step 3: Initialize API service with config and auth handler
-        this.apiService = enableIntegration(
-                new GreenfieldCoreApiImpl(plugin, this, configService, authHandler),
-                true
-        );
+        this.clientService = enableIntegration(new GreenfieldApiClientImpl(plugin, this, configService, authHandler), true);
+        this.userApiService = enableIntegration(new GreenfieldUserApiServiceImpl(plugin, this, clientService, configService), true);
+        this.redblockApiService = enableIntegration(new GreenfieldRedblockApiServiceImpl(plugin, this, clientService), true);
 
-        this.listenerService = enableIntegration(new GreenfieldApiListenerService(plugin, this, apiService), true);
+        this.listenerService = enableIntegration(new GreenfieldApiListenerService(plugin, this, userApiService), true);
 
         getLogger().info("Greenfield API Module enabled successfully");
     }
@@ -54,8 +58,8 @@ public class GreenfieldApiModule extends Module {
     @Override
     protected void tryDisable() throws Exception {
         // Disable services in reverse order
-        if (apiService != null) {
-            disableIntegration(apiService);
+        if (clientService != null) {
+            disableIntegration(configService);
         }
         if (authHandler != null) {
             authHandler.shutdown();
@@ -68,6 +72,13 @@ public class GreenfieldApiModule extends Module {
             disableIntegration(listenerService);
         }
 
+        if (redblockApiService != null) {
+            disableIntegration(redblockApiService);
+        }
+        if (userApiService != null) {
+            disableIntegration(userApiService);
+        }
+
         getLogger().info("Greenfield API Module disabled");
     }
 
@@ -75,8 +86,8 @@ public class GreenfieldApiModule extends Module {
      * Gets the API service for making requests to the Greenfield Core API.
      * @return The API service instance
      */
-    public IGreenfieldCoreApi getApiService() {
-        return apiService;
+    public IGreenfieldUserApiService getUserApiService() {
+        return userApiService;
     }
 }
 

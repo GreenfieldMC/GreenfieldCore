@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.greenfieldapi.models;
+package net.greenfieldmc.core.greenfieldapi.models.users;
 
 import java.util.Date;
 
@@ -33,64 +33,32 @@ public class GfPatreonConnection {
         return userPatreonConnectionId;
     }
 
-    public void setUserPatreonConnectionId(long userPatreonConnectionId) {
-        this.userPatreonConnectionId = userPatreonConnectionId;
-    }
-
     public GfUser getUser() {
         return user;
-    }
-
-    public void setUser(GfUser user) {
-        this.user = user;
     }
 
     public Date getConnectedOn() {
         return connectedOn;
     }
 
-    public void setConnectedOn(Date connectedOn) {
-        this.connectedOn = connectedOn;
-    }
-
     public long getPatreonConnectionId() {
         return patreonConnectionId;
-    }
-
-    public void setPatreonConnectionId(long patreonConnectionId) {
-        this.patreonConnectionId = patreonConnectionId;
     }
 
     public String getFullName() {
         return fullName;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
     public double getPledge() {
         return pledge;
-    }
-
-    public void setPledge(double pledge) {
-        this.pledge = pledge;
     }
 
     public Date getUpdatedOn() {
         return updatedOn;
     }
 
-    public void setUpdatedOn(Date updatedOn) {
-        this.updatedOn = updatedOn;
-    }
-
     public Date getCreatedOn() {
         return createdOn;
-    }
-
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
     }
 
     @Override

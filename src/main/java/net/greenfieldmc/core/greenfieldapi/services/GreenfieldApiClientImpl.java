@@ -6,14 +6,10 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParseException;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
-import net.greenfieldmc.core.greenfieldapi.models.GfDiscordConnection;
-import net.greenfieldmc.core.greenfieldapi.models.GfPatreonConnection;
-import net.greenfieldmc.core.greenfieldapi.models.GfUser;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 import org.bukkit.plugin.Plugin;
 
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -26,14 +22,9 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.Date;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Implementation of the Greenfield Core API client.
- * Provides async methods for all API endpoints with Result wrapper for error handling.
- */
-public class GreenfieldCoreApiImpl extends ModuleService<IGreenfieldCoreApi> implements IGreenfieldCoreApi {
+public class GreenfieldApiClientImpl extends ModuleService<IAuthedClientService> implements IAuthedClientService {
 
     private static final DateTimeFormatter API_LOCAL_DATE_TIME = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
@@ -49,135 +40,44 @@ public class GreenfieldCoreApiImpl extends ModuleService<IGreenfieldCoreApi> imp
     private Gson gson;
     private String apiUrl;
 
-    public GreenfieldCoreApiImpl(Plugin plugin, Module module,
-                                 IGreenfieldApiConfigService configService,
-                                 OAuthClientCredentialsHandler authHandler) {
+    public GreenfieldApiClientImpl(Plugin plugin, Module module, IGreenfieldApiConfigService configService, OAuthClientCredentialsHandler authHandler) {
         super(plugin, module);
         this.configService = configService;
         this.authHandler = authHandler;
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(30))
-                .build();
-
-        this.gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                .registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
-                    if (json == null || json.isJsonNull()) {
-                        return null;
-                    }
-                    String value = json.getAsString();
-                    try {
-                        return Date.from(OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant());
-                    } catch (DateTimeParseException ignored) {
-                        // Fall back to local date-time assumed to be UTC.
-                    }
-                    try {
-                        LocalDateTime localDateTime = LocalDateTime.parse(value, API_LOCAL_DATE_TIME);
-                        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
-                    } catch (DateTimeParseException e) {
-                        throw new JsonParseException("Unsupported date format: " + value, e);
-                    }
-                })
-                .create();
-
-        this.apiUrl = configService.getApiUrl();
-
-        getModule().getLogger().info("Greenfield Core API client initialized");
+    public <T> CompletableFuture<Result<T>> makeGetRequest(String endpoint, Class<T> responseType) {
+        return makeAuthenticatedRequest(endpoint, "GET", null, responseType);
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
-        if (authHandler != null) {
-            authHandler.shutdown();
-        }
-        // Java's HttpClient manages its own resources
+    public <T> CompletableFuture<Result<T>> makePostRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        return makeAuthenticatedRequest(endpoint, "POST", requestBody, responseType);
     }
 
     @Override
-    public CompletableFuture<Result<GfUser>> getUserByMinecraftUuid(UUID minecraftUuid) {
-        String endpoint = "/user/" + minecraftUuid.toString();
-        return makeGetRequest(endpoint, GfUser.class);
+    public <T> CompletableFuture<Result<T>> makePutRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        return makeAuthenticatedRequest(endpoint, "PUT", requestBody, responseType);
     }
 
     @Override
-    public CompletableFuture<Result<GfUser>> getUserById(long userId) {
-        String endpoint = "/user/" + userId;
-        return makeGetRequest(endpoint, GfUser.class);
+    public <T> CompletableFuture<Result<T>> makePatchRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        return makeAuthenticatedRequest(endpoint, "PATCH", requestBody, responseType);
     }
 
     @Override
-    public CompletableFuture<Result<GfUser>> createUser(UUID minecraftUuid, String username) {
-        String endpoint = "/user/" + minecraftUuid.toString();
-        return makePutRequest(endpoint, new UsernameModel(username), GfUser.class);
+    public <T> CompletableFuture<Result<T>> makeDeleteRequest(String endpoint, Class<T> responseType) {
+        return makeAuthenticatedRequest(endpoint, "DELETE", null, responseType);
     }
 
     @Override
-    public CompletableFuture<Result<GfUser>> updateUser(UUID minecraftUuid, String username) {
-        String endpoint = "/user/" + minecraftUuid.toString();
-        return makePatchRequest(endpoint, new UsernameModel(username), GfUser.class);
+    public <T> CompletableFuture<Result<T>> makeDeleteRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        return makeAuthenticatedRequest(endpoint, "DELETE", requestBody, responseType);
     }
 
-    @Override
-    public CompletableFuture<Result<GfDiscordConnection[]>> getDiscordConnection(long userId) {
-        String endpoint = "/user/" + userId + "/accounts/discord";
-        return makeGetRequest(endpoint, GfDiscordConnection[].class);
-    }
-
-    @Override
-    public CompletableFuture<Result<GfPatreonConnection[]>> getPatreonConnection(long userId) {
-        String endpoint = "/user/" + userId + "/accounts/patreon";
-        return makeGetRequest(endpoint, GfPatreonConnection[].class);
-    }
-
-    @Override
-    public CompletableFuture<Result<String>> getDiscordConnectionLink(long userId) {
-        String endpoint = "/discord/oauth/connection-link?userId=" + userId + "&redirectUrl=" + URLEncoder.encode(configService.getRedirectUrl(), java.nio.charset.StandardCharsets.UTF_8);
-        return makeGetRequest(endpoint, String.class);
-    }
-
-    @Override
-    public CompletableFuture<Result<GfPatreonConnection>> refreshPatreonConnection(long patreonConnectionId) {
-        String endpoint = "/patreon/connections/" + patreonConnectionId + "/refresh";
-        return makePostRequest(endpoint, null, GfPatreonConnection.class);
-    }
-
-    /**
-     * Makes a GET request to the specified endpoint.
-     */
-    private <T> CompletableFuture<Result<T>> makeGetRequest(String endpoint, Class<T> responseClass) {
-        return makeAuthenticatedRequest(endpoint, "GET", null, responseClass);
-    }
-
-    /**
-     * Makes a PUT request to the specified endpoint.
-     */
-    private <T> CompletableFuture<Result<T>> makePutRequest(String endpoint, Object body, Class<T> responseClass) {
-        return makeAuthenticatedRequest(endpoint, "PUT", body, responseClass);
-    }
-
-    /**
-     * Makes a PATCH request to the specified endpoint.
-     */
-    private <T> CompletableFuture<Result<T>> makePatchRequest(String endpoint, Object body, Class<T> responseClass) {
-        return makeAuthenticatedRequest(endpoint, "PATCH", body, responseClass);
-    }
-
-    /**
-     * Makes a POST request to the specified endpoint.
-     */
-    private <T> CompletableFuture<Result<T>> makePostRequest(String endpoint, Object body, Class<T> responseClass) {
-        return makeAuthenticatedRequest(endpoint, "POST", body, responseClass);
-    }
-
-    /**
-     * Makes an authenticated HTTP request to the API.
-     */
     private <T> CompletableFuture<Result<T>> makeAuthenticatedRequest(String endpoint, String method,
-                                                                       Object requestBody, Class<T> responseClass) {
+                                                                      Object requestBody, Class<T> responseClass) {
         // First, get a valid access token
         return authHandler.getAccessToken().thenCompose(token -> {
             if (token == null) {
@@ -198,6 +98,16 @@ public class GreenfieldCoreApiImpl extends ModuleService<IGreenfieldCoreApi> imp
                 requestBuilder.PUT(HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody)));
             } else if (method.equals("PATCH") && requestBody != null) {
                 requestBuilder.method("PATCH", HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody)));
+            } else if (method.equals("DELETE")) {
+                if (requestBody != null) {
+                    requestBuilder.method("DELETE", HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody)));
+                } else {
+                    requestBuilder.DELETE();
+                }
+            } else if (method.equals("POST") && requestBody != null) {
+                requestBuilder.POST(HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody)));
+            } else {
+                return CompletableFuture.completedFuture(Result.failure("Unsupported HTTP method or missing request body"));
             }
 
             HttpRequest request = requestBuilder.build();
@@ -256,13 +166,42 @@ public class GreenfieldCoreApiImpl extends ModuleService<IGreenfieldCoreApi> imp
         }).exceptionally(throwable -> Result.failure("Authentication error: " + throwable.getMessage()));
     }
 
-    private class UsernameModel {
-        private String username;
+    @Override
+    public void tryEnable(Plugin plugin, Module module) throws Exception {
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(30))
+                .build();
 
-        public UsernameModel(String username) {
-            this.username = username;
-        }
+        this.gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
+                    if (json == null || json.isJsonNull()) {
+                        return null;
+                    }
+                    String value = json.getAsString();
+                    try {
+                        return Date.from(OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant());
+                    } catch (DateTimeParseException ignored) {
+                        // Fall back to local date-time assumed to be UTC.
+                    }
+                    try {
+                        LocalDateTime localDateTime = LocalDateTime.parse(value, API_LOCAL_DATE_TIME);
+                        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+                    } catch (DateTimeParseException e) {
+                        throw new JsonParseException("Unsupported date format: " + value, e);
+                    }
+                })
+                .create();
+
+        this.apiUrl = configService.getApiUrl();
+
+        getModule().getLogger().info("Greenfield Core API client initialized");
     }
 
+    @Override
+    public void tryDisable(Plugin plugin, Module module) throws Exception {
+        if (authHandler != null) {
+            authHandler.shutdown();
+        }
+    }
 }
-

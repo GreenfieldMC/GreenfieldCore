@@ -1,18 +1,15 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
 import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.greenfieldapi.models.GfDiscordConnection;
-import net.greenfieldmc.core.greenfieldapi.models.GfPatreonConnection;
-import net.greenfieldmc.core.greenfieldapi.models.GfUser;
+import net.greenfieldmc.core.greenfieldapi.models.users.GfDiscordConnection;
+import net.greenfieldmc.core.greenfieldapi.models.users.GfPatreonConnection;
+import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Service interface for communicating with the Greenfield Core API.
- */
-public interface IGreenfieldCoreApi extends IModuleService<IGreenfieldCoreApi> {
+public interface IGreenfieldUserApiService extends IModuleService<IGreenfieldUserApiService> {
 
     /**
      * Gets a user by their Minecraft UUID.
@@ -75,5 +72,3 @@ public interface IGreenfieldCoreApi extends IModuleService<IGreenfieldCoreApi> {
      */
     CompletableFuture<Result<GfPatreonConnection>> refreshPatreonConnection(long patreonConnectionId);
 }
-
-

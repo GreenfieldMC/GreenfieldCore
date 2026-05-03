@@ -1,9 +1,12 @@
-package net.greenfieldmc.core.templates.services;
+package net.greenfieldmc.core.templates.services.impl;
 
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.templates.models.PlacementSession;
 import net.greenfieldmc.core.templates.models.Template;
+import net.greenfieldmc.core.templates.services.DisplayLifecycleManager;
+import net.greenfieldmc.core.templates.services.ITemplateService;
+import net.greenfieldmc.core.templates.services.ITemplateViewerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -32,11 +35,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
-public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerService> implements ITemplateViewerService, Listener {
+public class TemplateViewerService extends ModuleService<ITemplateViewerService> implements ITemplateViewerService, Listener {
 
     private Team originTeam;
     private final Map<UUID, PlacementSession> placementSessions = new HashMap<>();
 
+    //todo: something about this
     private static final int RAY_TRACE_DISTANCE = 64;
     private static final int TICK_INTERVAL = 2; // update every 2 ticks
 
@@ -45,7 +49,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
     private final NamespacedKey ignoreAirKey;
     private final NamespacedKey randomRotationKey;
 
-    public TemplateViewerServiceImpl(Plugin plugin, Module module, ITemplateService templateService) {
+    public TemplateViewerService(Plugin plugin, Module module, ITemplateService templateService) {
         super(plugin, module);
         this.templateItemKey = new NamespacedKey(plugin, "template_name");
         this.ignoreAirKey = new NamespacedKey(plugin, "ignore_air");

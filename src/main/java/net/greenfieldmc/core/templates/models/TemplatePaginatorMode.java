@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.templates.paginators.gui.session;
+package net.greenfieldmc.core.templates.models;
 
 /**
  * Mode enum for the template paginator GUI.
@@ -10,9 +10,6 @@ public enum TemplatePaginatorMode {
     SELECT,
     
     /** Modify brush templates - add/remove templates from the active brush */
-    BRUSH,
-    
-    /** Manage owned template items in player's inventory */
-    INVENTORY
+    BRUSH
 }
 

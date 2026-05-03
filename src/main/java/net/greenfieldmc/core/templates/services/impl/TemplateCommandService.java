@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.templates.services;
+package net.greenfieldmc.core.templates.services.impl;
 
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
@@ -11,11 +11,11 @@ import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.templates.TemplateMessages;
 import net.greenfieldmc.core.templates.WorldEditTemplateBrush;
 import net.greenfieldmc.core.templates.arguments.*;
-import net.greenfieldmc.core.templates.models.AdjustableOption;
-import net.greenfieldmc.core.templates.models.PasteOption;
-import net.greenfieldmc.core.templates.models.Template;
-import net.greenfieldmc.core.templates.models.TemplateBrush;
+import net.greenfieldmc.core.templates.models.*;
 import net.greenfieldmc.core.templates.paginators.gui.TemplateGUIPaginatorService;
+import net.greenfieldmc.core.templates.services.ITemplateService;
+import net.greenfieldmc.core.templates.services.ITemplateViewerService;
+import net.greenfieldmc.core.templates.services.ITemplateWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -333,11 +333,11 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
             return;
         }
 
-        paginator.open(ctx.asPlayer(), templates, TemplateGUIPaginatorService.TemplatePaginatorMode.SELECT, null, filter, page, null);
+        paginator.open(ctx.asPlayer(), templates, TemplatePaginatorMode.SELECT, null, filter, page, null);
     }
 
     private void showBrushModifyGui(ICommandContext ctx, TemplateBrush templateBrush, List<Template> templates, int page) throws PDKCommandException {
-        paginator.open(ctx.asPlayer(), templates, TemplateGUIPaginatorService.TemplatePaginatorMode.BRUSH, templateBrush, null, page, null);
+        paginator.open(ctx.asPlayer(), templates, TemplatePaginatorMode.BRUSH, templateBrush, null, page, null);
 
         // Also send the adjustable options as chat text below the GUI
         var grayColor = NamedTextColor.DARK_GRAY;

@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.templates.services;
+package net.greenfieldmc.core.templates.services.impl;
 
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
@@ -10,6 +10,8 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.HandSide;
 import com.sk89q.worldedit.util.SideEffect;
 import com.sk89q.worldedit.util.SideEffectSet;
+import net.greenfieldmc.core.templates.services.ITemplateService;
+import net.greenfieldmc.core.templates.services.ITemplateWorldEditService;
 import org.jetbrains.annotations.Nullable;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.shared.services.WorldEditServiceImpl;
@@ -29,13 +31,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implements ITemplateWorldEditService {
+public class TemplateWorldEditService extends WorldEditServiceImpl implements ITemplateWorldEditService {
 
     private final ITemplateService templateService;
     private final List<Path> schematicFiles = new ArrayList<>();
     private Thread watcherThread;
 
-    public TemplateWorldEditServiceImpl(Plugin plugin, Module module, ITemplateService templateService) {
+    public TemplateWorldEditService(Plugin plugin, Module module, ITemplateService templateService) {
         super(plugin, module);
         this.templateService = templateService;
     }

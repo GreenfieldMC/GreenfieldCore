@@ -1,7 +1,7 @@
 package net.greenfieldmc.core.templates.paginators.gui.builder;
 
 import net.greenfieldmc.core.templates.models.Template;
-import net.greenfieldmc.core.templates.paginators.gui.session.TemplatePaginatorMode;
+import net.greenfieldmc.core.templates.models.TemplatePaginatorMode;
 import net.greenfieldmc.core.templates.paginators.gui.session.TemplatePaginatorSession;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

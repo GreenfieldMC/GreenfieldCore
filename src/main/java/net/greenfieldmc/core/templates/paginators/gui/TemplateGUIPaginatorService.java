@@ -5,7 +5,7 @@ import net.greenfieldmc.core.templates.models.TemplateBrush;
 import net.greenfieldmc.core.templates.paginators.gui.builder.TemplateInventoryBuilder;
 import net.greenfieldmc.core.templates.paginators.gui.builder.TemplateItemFactory;
 import net.greenfieldmc.core.templates.paginators.gui.handler.TemplateGUIClickHandler;
-import net.greenfieldmc.core.templates.paginators.gui.session.TemplatePaginatorMode;
+import net.greenfieldmc.core.templates.models.TemplatePaginatorMode;
 import net.greenfieldmc.core.templates.paginators.gui.session.TemplatePaginatorSession;
 import net.greenfieldmc.core.templates.services.ITemplateService;
 import net.greenfieldmc.core.templates.services.ITemplateViewerService;

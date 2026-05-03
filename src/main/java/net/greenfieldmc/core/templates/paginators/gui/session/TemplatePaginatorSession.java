@@ -2,6 +2,7 @@ package net.greenfieldmc.core.templates.paginators.gui.session;
 
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
+import net.greenfieldmc.core.templates.models.TemplatePaginatorMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;

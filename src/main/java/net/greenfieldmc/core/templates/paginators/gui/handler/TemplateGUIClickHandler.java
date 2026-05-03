@@ -2,7 +2,7 @@ package net.greenfieldmc.core.templates.paginators.gui.handler;
 
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.paginators.gui.builder.TemplateInventoryBuilder;
-import net.greenfieldmc.core.templates.paginators.gui.session.TemplatePaginatorMode;
+import net.greenfieldmc.core.templates.models.TemplatePaginatorMode;
 import net.greenfieldmc.core.templates.paginators.gui.session.TemplatePaginatorSession;
 import net.greenfieldmc.core.templates.services.ITemplateService;
 import net.greenfieldmc.core.templates.services.ITemplateViewerService;
@@ -118,20 +118,12 @@ public class TemplateGUIClickHandler {
         } else if (session.getMode() == TemplatePaginatorMode.BRUSH) {
             boolean isSelected = session.getBrush() != null
                     && session.getBrush().getTemplates().contains(template.getTemplateName());
-            
+
             // The brush command handler calls showBrushModifyGui → paginator.open() which handles
             // the full reopen. We only need to emit the command here.
             player.performCommand(isSelected
                     ? "tbrush remove template " + template.getTemplateName()
                     : "tbrush add template " + template.getTemplateName());
-            
-        } else if (session.getMode() == TemplatePaginatorMode.INVENTORY) {
-            // Future implementation for inventory mode
-            if (leftClick) {
-                // TODO: Implement inventory management
-            } else if (rightClick) {
-                // TODO: Implement inventory management
-            }
         }
     }
 

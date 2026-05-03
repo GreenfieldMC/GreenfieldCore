@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.templates.services;
+package net.greenfieldmc.core.templates.services.impl;
 
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -7,6 +7,9 @@ import net.greenfieldmc.core.templates.models.Tag;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
 import net.greenfieldmc.core.templates.models.TemplateSession;
+import net.greenfieldmc.core.templates.services.ITemplateService;
+import net.greenfieldmc.core.templates.services.ITemplateStorageService;
+import net.greenfieldmc.core.templates.services.ITemplateViewerService;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -23,13 +26,13 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class TemplateServiceImpl extends ModuleService<ITemplateService> implements ITemplateService {
+public class TemplateService extends ModuleService<ITemplateService> implements ITemplateService {
 
     private final Map<UUID, TemplateSession> sessions = new HashMap<>();
     private final ITemplateStorageService storageService;
     private ITemplateViewerService viewerService;
 
-    public TemplateServiceImpl(Plugin plugin, Module module, ITemplateStorageService storageService, @Nullable ITemplateViewerService viewerService) {
+    public TemplateService(Plugin plugin, Module module, ITemplateStorageService storageService, @Nullable ITemplateViewerService viewerService) {
         super(plugin, module);
         this.storageService = storageService;
         this.viewerService = viewerService;

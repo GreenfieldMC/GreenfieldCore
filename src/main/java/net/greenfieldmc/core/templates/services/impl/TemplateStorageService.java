@@ -1,4 +1,4 @@
-package net.greenfieldmc.core.templates.services;
+package net.greenfieldmc.core.templates.services.impl;
 
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -6,6 +6,7 @@ import net.greenfieldmc.core.templates.models.Tag;
 import net.greenfieldmc.core.templates.models.Template;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
+import net.greenfieldmc.core.templates.services.ITemplateStorageService;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageService> implements ITemplateStorageService {
+public class TemplateStorageService extends ModuleService<ITemplateStorageService> implements ITemplateStorageService {
 
     private IConfig templatesConfig;
     private IConfig tagsConfig;
@@ -33,7 +34,7 @@ public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageSe
     // Player configs: UUID -> config file (lazy-loaded from templates/user/<UUID>.yml)
     private final Map<UUID, IConfig> playerConfigs = new HashMap<>();
 
-    public TemplateStorageServiceImpl(Plugin plugin, Module module) {
+    public TemplateStorageService(Plugin plugin, Module module) {
         super(plugin, module);
     }
 

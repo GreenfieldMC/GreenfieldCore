@@ -104,6 +104,7 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new SeaPickleInteraction(worldEditService, coreProtectService),
                 new TurtleEggInteraction(worldEditService, coreProtectService),
                 new FlowerPotInteraction(worldEditService, coreProtectService),
+                new DecoratedPotInteraction(worldEditService, coreProtectService, getPlugin(), this),
                 new PressurePlateInteraction(worldEditService, coreProtectService),
                 new IronDoorsInteraction(worldEditService, coreProtectService)
         );

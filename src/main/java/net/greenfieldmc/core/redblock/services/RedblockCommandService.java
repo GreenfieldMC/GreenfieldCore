@@ -7,6 +7,7 @@ import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
 import net.greenfieldmc.core.redblock.RedblockMessages;
 import net.greenfieldmc.core.redblock.arguments.RankArgument;
+import net.greenfieldmc.core.redblock.arguments.RoleListArgument;
 import net.greenfieldmc.core.shared.arguments.OfflinePlayerArgument;
 import net.greenfieldmc.core.redblock.arguments.RedblockArgument;
 import net.greenfieldmc.core.redblock.paginators.RedblockInfoPaginator;
@@ -217,7 +218,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
                 .then("description", PdkArgumentTypes.quotedString(false, () -> "Enter a description for the RedBlock"))
                 .executes(this::create)
                 .flag("assign", "Assign this RedBlock to a specific player", new OfflinePlayerArgument())
-                .flag("rank", "Assign this RedBlock to a specific rank",  vaultService != null ? new RankArgument(vaultService) : StringArgumentType.word())
+                .flag("rank", "Assign this RedBlock to a specific rank", new RoleListArgument(vaultService))
                 .register(plugin);
 
         CommandBuilder.of("rbapprove", "rba")

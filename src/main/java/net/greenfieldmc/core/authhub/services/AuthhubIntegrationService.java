@@ -2,6 +2,7 @@ package net.greenfieldmc.core.authhub.services;
 
 import com.njdaeger.authenticationhub.AuthhubLoginEvent;
 import net.greenfieldmc.core.ComponentUtils;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -18,6 +19,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +53,7 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(@UnknownNullability IGreenfieldCorePlugin plugin, Module module) throws Exception {
         var authhubPlugin = plugin.getServer().getPluginManager().getPlugin("AuthenticationHub");
         if (authhubPlugin == null) {
             throw new Exception("AuthenticationHub not found");
@@ -61,7 +63,7 @@ public class AuthhubIntegrationService extends ModuleService<AuthhubIntegrationS
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         prefixedUsers.forEach(uuid -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "lp user " + uuid + " meta removeprefix " + PREFIX_PRIORITY));
     }
 

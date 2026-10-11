@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParseException;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
@@ -167,7 +168,7 @@ public class GreenfieldApiClientImpl extends ModuleService<IAuthedClientService>
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
                 .build();
@@ -199,7 +200,7 @@ public class GreenfieldApiClientImpl extends ModuleService<IAuthedClientService>
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         if (authHandler != null) {
             authHandler.shutdown();
         }

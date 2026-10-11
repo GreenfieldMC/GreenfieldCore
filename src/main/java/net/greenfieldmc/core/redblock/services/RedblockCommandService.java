@@ -1,6 +1,7 @@
 package net.greenfieldmc.core.redblock.services;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -211,7 +212,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
     // region Service Methods
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         CommandBuilder.of("rbcreate", "rbc")
                 .description("Create a new RedBlock")
                 .permission("greenfieldcore.redblock.create")
@@ -297,7 +298,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 

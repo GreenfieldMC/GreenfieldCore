@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.shared.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.coreprotect.CoreProtect;
@@ -23,7 +24,7 @@ public class CoreProtectServiceImpl extends ModuleService<ICoreProtectService> i
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         try {
             var coreProtectPlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect");
             if (coreProtectPlugin == null) {
@@ -38,7 +39,7 @@ public class CoreProtectServiceImpl extends ModuleService<ICoreProtectService> i
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
     }
 
     @Override

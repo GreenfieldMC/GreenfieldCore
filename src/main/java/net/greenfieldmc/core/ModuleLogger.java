@@ -27,4 +27,7 @@ public class ModuleLogger extends Logger {
         super.severe(prefix + msg);
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
 }

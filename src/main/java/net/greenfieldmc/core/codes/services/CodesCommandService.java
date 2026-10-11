@@ -1,8 +1,6 @@
 package net.greenfieldmc.core.codes.services;
 
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.codes.Code;
 import net.greenfieldmc.core.codes.paginators.CodesPaginator;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
@@ -14,21 +12,33 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.plugin.Plugin;
 
 import java.util.stream.IntStream;
 
 import static net.greenfieldmc.core.ComponentUtils.moduleMessage;
 
-public class CodesCommandService extends ModuleService<CodesCommandService> implements IModuleService<CodesCommandService> {
+public class CodesCommandService {
 
     private final ICodesService codesService;
 
     private final ChatPaginator<Code, ICommandContext> codePaginator = new CodesPaginator().build();
 
-    public CodesCommandService(Plugin plugin, Module module, ICodesService codesService) {
-        super(plugin, module);
+    public CodesCommandService(IGreenfieldCorePlugin plugin, ICodesService codesService) {
         this.codesService = codesService;
+
+        CommandBuilder.of("codes", "buildcodes", "bcodes")
+                .description("List or change the server build codes")
+                .permission("greenfieldcore.codes")
+                .defaultExecutor(this::codes)
+                .canExecute()
+                .then("add").permission("greenfieldcore.codes.modify")
+                    .then("newCode", PdkArgumentTypes.greedyString()).executes(this::addCode).end()
+                .then("remove").permission("greenfieldcore.codes.modify")
+                    .then("codeNumber", PdkArgumentTypes.integer()).executes(this::removeCode).end()
+                .then("reload").permission("greenfieldcore.codes.modify").executes(this::reload)
+                .then("page")
+                    .then("pageNumber", PdkArgumentTypes.integer(ctx -> IntStream.rangeClosed(1, (int)Math.ceil(codesService.getCodes().size() / 8.0)).boxed().toList(), () -> "What page would you like to view?")).executes().end()
+                .register(plugin);
     }
 
     private void reload(ICommandContext context) {
@@ -62,27 +72,5 @@ public class CodesCommandService extends ModuleService<CodesCommandService> impl
                 .append(Component.text(". \"" + code + "\".", NamedTextColor.GRAY).style(Style.style(TextDecoration.ITALIC)));
         codesService.removeCode(codeNumber - 1);
         context.send(moduleMessage("Codes").append(message));
-    }
-
-    @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
-        CommandBuilder.of("codes", "buildcodes", "bcodes")
-                .description("List or change the server build codes")
-                .permission("greenfieldcore.codes")
-                .defaultExecutor(this::codes)
-                .canExecute()
-                .then("add").permission("greenfieldcore.codes.modify")
-                    .then("newCode", PdkArgumentTypes.greedyString()).executes(this::addCode).end()
-                .then("remove").permission("greenfieldcore.codes.modify")
-                    .then("codeNumber", PdkArgumentTypes.integer()).executes(this::removeCode).end()
-                .then("reload").permission("greenfieldcore.codes.modify").executes(this::reload)
-                .then("page")
-                    .then("pageNumber", PdkArgumentTypes.integer(ctx -> IntStream.rangeClosed(1, (int)Math.ceil(codesService.getCodes().size() / 8.0)).boxed().toList(), () -> "What page would you like to view?")).executes().end()
-                .register(plugin);
-    }
-
-    @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
-
     }
 }

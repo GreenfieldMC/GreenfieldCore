@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.hotspots.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -219,7 +220,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
 
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         CommandBuilder.of("hsgoto", "hstp", "hotspot", "hs")
                 .description("Teleport to a Hotspot")
                 .permission("greenfieldcore.hotspot.goto")
@@ -320,7 +321,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 }

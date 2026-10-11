@@ -6,6 +6,7 @@ import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import com.njdaeger.pdk.command.exception.CommandSenderTypeException;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -312,7 +313,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         CommandBuilder.of("tcreate", "createtemplate", "ct")
                 .permission("greenfieldcore.template.create")
                 .description("Create a new template.")
@@ -410,7 +411,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 }

@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.testresult.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.shared.services.IVaultService;
@@ -13,7 +14,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
     private final IVaultService vaultService;
     private final IConfig config;
 
-    public TestResultServiceImpl(Plugin plugin, Module module, ITestResultStorageService storageService, IVaultService vaultService) {
+    public TestResultServiceImpl(IGreenfieldCorePlugin plugin, Module module, ITestResultStorageService storageService, IVaultService vaultService) {
         super(plugin, module);
         this.config = ConfigType.YML.createNew(plugin, "testbuild-config");
         this.storageService = storageService;
@@ -34,7 +34,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         config.addEntry("testing-group", "Testing");
         config.addEntry("passing-group", "Apprentice");
         config.addEntry("failing-group", "Spectator");
@@ -54,7 +54,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {}
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {}
 
     @Override
     public String getTestingGroup() {

@@ -1,11 +1,13 @@
 package net.greenfieldmc.core.shared.services;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class WorldEditServiceImpl extends ModuleService<IWorldEditService> implements IWorldEditService {
 
@@ -21,7 +23,7 @@ public class WorldEditServiceImpl extends ModuleService<IWorldEditService> imple
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(@UnknownNullability IGreenfieldCorePlugin plugin, Module module) throws Exception {
         try {
             var wePlugin = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
             if (wePlugin != null) {
@@ -34,7 +36,7 @@ public class WorldEditServiceImpl extends ModuleService<IWorldEditService> imple
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 

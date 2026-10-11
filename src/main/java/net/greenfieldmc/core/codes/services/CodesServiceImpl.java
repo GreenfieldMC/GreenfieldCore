@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.codes.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.codes.Code;
@@ -17,12 +18,12 @@ public class CodesServiceImpl extends ModuleService<ICodesService> implements IC
     private IConfig config;
     private final Map<Integer, Code> codeMap = new HashMap<>();
 
-    public CodesServiceImpl(Plugin plugin, Module module) {
+    public CodesServiceImpl(IGreenfieldCorePlugin plugin, Module module) {
         super(plugin, module);
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         try {
             this.config = ConfigType.YML.createNew(plugin, "codes");
 
@@ -45,7 +46,7 @@ public class CodesServiceImpl extends ModuleService<ICodesService> implements IC
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         save();
     }
 

@@ -8,6 +8,4 @@ public interface IEssentialsService extends IModuleService<IEssentialsService> {
 
     void setUserLastLocation(Player player, Location location);
 
-    void loadUsernameMap();
-
 }

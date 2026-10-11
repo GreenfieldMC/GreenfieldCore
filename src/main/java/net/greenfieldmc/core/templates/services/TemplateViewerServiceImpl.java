@@ -5,6 +5,7 @@ import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.templates.models.Template;
@@ -25,6 +26,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -45,7 +47,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(@UnknownNullability IGreenfieldCorePlugin plugin, Module module) throws Exception {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
         this.originTeam = plugin.getServer().getScoreboardManager().getMainScoreboard().registerNewTeam("template_origin");
@@ -53,7 +55,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         for (var viewer : templateViewers.values()) {
             for (var entity : viewer.getSpawnedDisplays()) {
                 if (originTeam.hasEntry(entity.getUniqueId().toString())) originTeam.removeEntry(entity.getUniqueId().toString());

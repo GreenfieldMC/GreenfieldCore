@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.chatformat.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -25,7 +26,7 @@ public class ChatFormatCommandService extends ModuleService<ChatFormatCommandSer
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         CommandBuilder.of("togglepings", "togglementions")
                 .description("Enables the ping sounds when you are mentioned in chat.")
                 .permission("greenfieldcore.chat.toggle-mentions")
@@ -61,7 +62,7 @@ public class ChatFormatCommandService extends ModuleService<ChatFormatCommandSer
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 }

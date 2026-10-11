@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
@@ -9,6 +10,7 @@ import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import org.bukkit.plugin.Plugin;
 
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -24,13 +26,20 @@ public class GreenfieldUserApiServiceImpl extends ModuleService<IGreenfieldUserA
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
+    }
+
+    @Override
+    public CompletableFuture<Result<List<GfUser>>> getAllUsers() {
+        String endpoint = "/user/all";
+        return clientService.makeGetRequest(endpoint, GfUser[].class)
+                .thenApply(result -> result.map(List::of));
     }
 
     @Override
@@ -42,6 +51,12 @@ public class GreenfieldUserApiServiceImpl extends ModuleService<IGreenfieldUserA
     @Override
     public CompletableFuture<Result<GfUser>> getUserById(long userId) {
         String endpoint = "/user/" + userId;
+        return clientService.makeGetRequest(endpoint, GfUser.class);
+    }
+
+    @Override
+    public CompletableFuture<Result<GfUser>> getUserByUsername(String username) {
+        String endpoint = "/user/username/" + URLEncoder.encode(username, java.nio.charset.StandardCharsets.UTF_8);
         return clientService.makeGetRequest(endpoint, GfUser.class);
     }
 

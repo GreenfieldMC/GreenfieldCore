@@ -4,6 +4,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -63,7 +64,7 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         module.getLogger().info("Loading custom head...");
         PROFILE = Bukkit.createProfile(UUID.fromString("e4ac149f-2815-4e06-8ce1-770a628a2cfc"));
         var texture = PROFILE.getTextures();
@@ -107,7 +108,7 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 

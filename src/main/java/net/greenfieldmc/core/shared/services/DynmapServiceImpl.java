@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.shared.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import org.bukkit.Location;
@@ -7,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class DynmapServiceImpl extends ModuleService<IDynmapService> implements IDynmapService {
 
@@ -17,7 +19,7 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(@UnknownNullability IGreenfieldCorePlugin plugin, Module module) throws Exception {
         var dynmapPlugin = plugin.getServer().getPluginManager().getPlugin("dynmap");
         if (dynmapPlugin != null) {
             markerApi = ((org.dynmap.DynmapCommonAPI) dynmapPlugin).getMarkerAPI();
@@ -27,7 +29,7 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
     }
 
     @Override

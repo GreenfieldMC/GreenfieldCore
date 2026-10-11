@@ -1,6 +1,8 @@
 package net.greenfieldmc.core.advancedbuild;
 
-import net.greenfieldmc.core.GreenfieldCore;
+import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.advancedbuild.services.AdvBuildCommandService;
@@ -9,18 +11,16 @@ import net.greenfieldmc.core.advancedbuild.services.IAdvBuildService;
 import net.greenfieldmc.core.shared.services.CoreProtectServiceImpl;
 import net.greenfieldmc.core.shared.services.WorldEditServiceImpl;
 
-import java.util.function.Predicate;
-
 public class AdvancedBuildModule extends Module {
 
     private IAdvBuildService advBuildService;
 
-    public AdvancedBuildModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
-        super(plugin, canEnable);
+    public AdvancedBuildModule(IGreenfieldCorePlugin plugin) {
+        super(plugin, ModuleConfig::isAdvancedBuildModeEnabled);
     }
 
     @Override
-    public void tryEnable() throws Exception {
+    public ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) throws Exception {
         try {
 
             var worldEditService = enableIntegration(new WorldEditServiceImpl(plugin, this), false);

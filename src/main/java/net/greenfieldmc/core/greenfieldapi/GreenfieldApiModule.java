@@ -1,5 +1,7 @@
 package net.greenfieldmc.core.greenfieldapi;
 
+import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
 import net.greenfieldmc.core.GreenfieldCore;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
@@ -34,7 +36,7 @@ public class GreenfieldApiModule extends Module {
     }
 
     @Override
-    protected void tryEnable() throws Exception {
+    protected ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) throws Exception {
         // Step 1: Initialize configuration service
         this.configService = enableIntegration(new GreenfieldApiConfigService(plugin, this), true);
 

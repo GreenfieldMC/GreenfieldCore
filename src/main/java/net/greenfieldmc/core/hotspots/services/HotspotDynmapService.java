@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.hotspots.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.shared.services.DynmapServiceImpl;
 import org.bukkit.plugin.Plugin;
@@ -17,19 +18,19 @@ public class HotspotDynmapService extends DynmapServiceImpl {
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         super.tryEnable(plugin, module);
     }
 
     @Override
-    public void postTryEnable(Plugin plugin, Module module) throws Exception {
+    public void postTryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         getModule().getLogger().info("Loading hotspots to Dynmap...");
         loadCategoriesToDynmap();
         loadHotspotsToDynmap();
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         super.tryDisable(plugin, module);
     }
 

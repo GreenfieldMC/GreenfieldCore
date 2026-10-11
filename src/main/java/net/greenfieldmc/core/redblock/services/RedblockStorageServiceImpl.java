@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.redblock.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
@@ -25,9 +26,9 @@ public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageSe
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         try {
-            this.config = ConfigType.YML.createNew(plugin, "redblocks");
+            this.config = ConfigType.YML_CONFIGURATE.createNew(plugin, "redblocks");
 
             if (config.hasSection("redblocks")) {
                 for (String stringId : config.getSection("redblocks").getKeys(false)) {
@@ -70,7 +71,7 @@ public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageSe
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         saveDatabase();
     }
 

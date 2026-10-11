@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.utilities.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -21,12 +22,12 @@ public class WorldEditPrefsService extends ModuleService<WorldEditPrefsService> 
     private final Set<UUID> overriddenPerfs = new HashSet<>();
     private WorldEditPlugin worldEditPlugin;
 
-    public WorldEditPrefsService(Plugin plugin, Module module) {
+    public WorldEditPrefsService(IGreenfieldCorePlugin plugin, Module module) {
         super(plugin, module);
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         if (Bukkit.getPluginManager().getPlugin("WorldEdit") != null) {
             worldEditPlugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
             Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -36,7 +37,7 @@ public class WorldEditPrefsService extends ModuleService<WorldEditPrefsService> 
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 

@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.testresult.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class TestResultCommandService extends ModuleService<TestResultCommandService> implements IModuleService<TestResultCommandService> {
+public class TestResultCommandService {
 
     private final ITestResultService testResultService;
 
@@ -37,9 +38,48 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
     private final ChatPaginator<TestSet, ICommandContext> conductedPaginator = new TestSetPaginator().build();
     private final ChatPaginator<PageItem<ICommandContext>, ICommandContext> testInfoPaginator = new TestInfoPaginator().build();
 
-    public TestResultCommandService(Plugin plugin, Module module, ITestResultService testResultService) {
-        super(plugin, module);
+    public TestResultCommandService(IGreenfieldCorePlugin plugin, ITestResultService testResultService) {
         this.testResultService = testResultService;
+
+        CommandBuilder.of("pass")
+                .description("Pass a test build attempt.")
+                .permission("greenfieldcore.testresult.pass")
+                .then("userToPass", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.INCOMPLETE_ATTEMPTS))
+                    .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
+                    .executes(this::pass)
+                .end()
+                .register(plugin);
+
+        CommandBuilder.of("fail")
+                .description("Fail a test build attempt.")
+                .permission("greenfieldcore.testresult.fail")
+                .flag("final", "Mark this test build attempt as the final attempt. This will remove the user from the server.")
+                .then("userToFail", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.INCOMPLETE_ATTEMPTS))
+                    .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
+                    .executes(this::fail)
+                .end()
+                .register(plugin);
+
+        CommandBuilder.of("start")
+                .description("Start a test build attempt.")
+                .permission("greenfieldcore.testresult.start")
+                .then("userToStart", PdkArgumentTypes.player((Predicate<Player>)(p -> p.hasPermission("group." + testResultService.getFailingGroup().toLowerCase()))))
+                    .executes(this::start)
+                .register(plugin);
+
+        CommandBuilder.of("attempts")
+                .description("View test build attempts.")
+                .permission("greenfieldcore.testresult.list")
+                .flag("page", "The page to view", PdkArgumentTypes.integer(1, Integer.MAX_VALUE))
+                .then("user", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.ANY_ATTEMPTS)).executes(this::listUserAttempts)
+                .canExecute(this::listAllAttempts)
+                .register(plugin);
+
+        CommandBuilder.of("testinfo")
+                .description("View test build information.")
+                .permission("greenfieldcore.testinfo")
+                .canExecute(this::testInfo)
+                .register(plugin);
     }
 
     // /start <user>
@@ -117,53 +157,5 @@ public class TestResultCommandService extends ModuleService<TestResultCommandSer
                     return info;
                 }
             }).collect(Collectors.toUnmodifiableList()), 1).sendTo(ctx.getSender());
-    }
-
-    @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
-        CommandBuilder.of("pass")
-                .description("Pass a test build attempt.")
-                .permission("greenfieldcore.testresult.pass")
-                .then("userToPass", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.INCOMPLETE_ATTEMPTS))
-                    .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
-                    .executes(this::pass)
-                .end()
-                .register(plugin);
-
-        CommandBuilder.of("fail")
-                .description("Fail a test build attempt.")
-                .permission("greenfieldcore.testresult.fail")
-                .flag("final", "Mark this test build attempt as the final attempt. This will remove the user from the server.")
-                .then("userToFail", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.INCOMPLETE_ATTEMPTS))
-                    .then("comments", PdkArgumentTypes.quotedString(false, () -> "Test attempt notes and comments."))
-                    .executes(this::fail)
-                .end()
-                .register(plugin);
-
-        CommandBuilder.of("start")
-                .description("Start a test build attempt.")
-                .permission("greenfieldcore.testresult.start")
-                .then("userToStart", PdkArgumentTypes.player((Predicate<Player>)(p -> p.hasPermission("group." + testResultService.getFailingGroup().toLowerCase()))))
-                    .executes(this::start)
-                .register(plugin);
-
-        CommandBuilder.of("attempts")
-                .description("View test build attempts.")
-                .permission("greenfieldcore.testresult.list")
-                .flag("page", "The page to view", PdkArgumentTypes.integer(1, Integer.MAX_VALUE))
-                .then("user", new AttemptingUserArgument(testResultService, AttemptingUserArgument.ArgumentMode.ANY_ATTEMPTS)).executes(this::listUserAttempts)
-                .canExecute(this::listAllAttempts)
-                .register(plugin);
-
-        CommandBuilder.of("testinfo")
-                .description("View test build information.")
-                .permission("greenfieldcore.testinfo")
-                .canExecute(this::testInfo)
-                .register(plugin);
-    }
-
-    @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
-
     }
 }

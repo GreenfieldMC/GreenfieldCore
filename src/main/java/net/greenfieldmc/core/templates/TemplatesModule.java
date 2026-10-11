@@ -1,6 +1,8 @@
 package net.greenfieldmc.core.templates;
 
-import net.greenfieldmc.core.GreenfieldCore;
+import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.shared.services.IWorldEditService;
@@ -14,8 +16,6 @@ import net.greenfieldmc.core.templates.services.TemplateStorageServiceImpl;
 import net.greenfieldmc.core.templates.services.TemplateViewerServiceImpl;
 import net.greenfieldmc.core.templates.services.TemplateWorldEditServiceImpl;
 
-import java.util.function.Predicate;
-
 public class TemplatesModule extends Module {
 
     private ITemplateViewerService viewerService;
@@ -23,12 +23,12 @@ public class TemplatesModule extends Module {
     private ITemplateService templateService;
     private IWorldEditService worldEditService;
 
-    public TemplatesModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
-        super(plugin, canEnable);
+    public TemplatesModule(IGreenfieldCorePlugin plugin) {
+        super(plugin, ModuleConfig::isTemplatesEnabled);
     }
 
     @Override
-    protected void tryEnable() throws Exception {
+    protected ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) throws Exception {
         this.viewerService = enableIntegration(new TemplateViewerServiceImpl(plugin, this), true);
         this.storageService = enableIntegration(new TemplateStorageServiceImpl(plugin, this), true);
         this.templateService = enableIntegration(new TemplateServiceImpl(plugin, this, storageService, viewerService), true);

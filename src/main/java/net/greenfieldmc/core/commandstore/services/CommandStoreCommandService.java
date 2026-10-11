@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.commandstore.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -130,7 +131,7 @@ public class CommandStoreCommandService extends ModuleService<CommandStoreComman
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
         CommandBuilder.of("scmd", "savecmd", "addcmd", "acmd", "sc")
                 .description("Saves a command to the command storage")
@@ -211,7 +212,7 @@ public class CommandStoreCommandService extends ModuleService<CommandStoreComman
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 }

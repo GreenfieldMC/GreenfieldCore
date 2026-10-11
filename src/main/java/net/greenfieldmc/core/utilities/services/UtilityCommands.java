@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.utilities.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -22,7 +23,7 @@ public class UtilityCommands extends ModuleService<UtilityCommands> implements I
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         CommandBuilder.of("nv")
                 .permission("greenfieldcore.nightvision")
                 .description("Enable or disable night vision.")
@@ -73,7 +74,7 @@ public class UtilityCommands extends ModuleService<UtilityCommands> implements I
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 }

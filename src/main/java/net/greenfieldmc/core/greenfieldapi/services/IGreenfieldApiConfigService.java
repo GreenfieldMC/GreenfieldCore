@@ -1,11 +1,9 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
-import net.greenfieldmc.core.IModuleService;
-
 /**
  * Service interface for managing Greenfield API configuration.
  */
-public interface IGreenfieldApiConfigService extends IModuleService<IGreenfieldApiConfigService> {
+public interface IGreenfieldApiConfigService {
 
     /**
      * Gets the base URL for the Greenfield API.

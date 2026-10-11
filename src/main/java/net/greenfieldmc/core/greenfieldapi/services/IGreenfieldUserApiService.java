@@ -6,10 +6,17 @@ import net.greenfieldmc.core.greenfieldapi.models.users.GfPatreonConnection;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface IGreenfieldUserApiService extends IModuleService<IGreenfieldUserApiService> {
+
+    /**
+     * Gets all users from the Greenfield API.
+     * @return A CompletableFuture containing a Result with the list of users or error message
+     */
+    CompletableFuture<Result<List<GfUser>>> getAllUsers();
 
     /**
      * Gets a user by their Minecraft UUID.
@@ -24,6 +31,13 @@ public interface IGreenfieldUserApiService extends IModuleService<IGreenfieldUse
      * @return A CompletableFuture containing a Result with the user data or error message
      */
     CompletableFuture<Result<GfUser>> getUserById(long userId);
+
+    /**
+     * Gets a user by their currently saved username.
+     * @param username The username of the user
+     * @return A CompletableFuture containing a Result with the user data or error message
+     */
+    CompletableFuture<Result<GfUser>> getUserByUsername(String username);
 
     /**
      * Creates or updates a user by their Minecraft UUID (PUT operation).

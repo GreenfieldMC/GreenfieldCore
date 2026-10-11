@@ -1,6 +1,8 @@
 package net.greenfieldmc.core.chatformat;
 
-import net.greenfieldmc.core.GreenfieldCore;
+import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.chatformat.services.ChatConfigServiceImpl;
@@ -29,7 +31,6 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class ChatFormatModule extends Module {
@@ -65,12 +66,12 @@ public class ChatFormatModule extends Module {
 
     private IChatConfigService config;
 
-    public ChatFormatModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
-        super(plugin, canEnable);
+    public ChatFormatModule(IGreenfieldCorePlugin plugin) {
+        super(plugin, ModuleConfig::isChatFormatEnabled);
     }
 
     @Override
-    public void tryEnable() {
+    public ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
         this.config = enableIntegration(new ChatConfigServiceImpl(plugin, this), true);
         if (enableIntegration(new EssentialsChatService(plugin, this, config), false).isEnabled()) getLogger().info("Using EssentialsChat integration for chat formatting.");
         else if (enableIntegration(new DefaultChatService(plugin, this, config), true).isEnabled()) getLogger().info("Using DefaultChat integration for chat formatting.");

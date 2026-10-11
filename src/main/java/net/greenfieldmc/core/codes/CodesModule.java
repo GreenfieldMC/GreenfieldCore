@@ -1,31 +1,34 @@
 package net.greenfieldmc.core.codes;
 
-import net.greenfieldmc.core.GreenfieldCore;
+import com.njdaeger.pdk.serviceprovider.IServiceProvider;
+import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.codes.services.CodesCommandService;
 import net.greenfieldmc.core.codes.services.CodesServiceImpl;
 import net.greenfieldmc.core.codes.services.ICodesService;
 
-import java.util.function.Predicate;
-
 public class CodesModule extends Module {
 
-    private ICodesService codesService;
-
-    public CodesModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
-        super(plugin, canEnable);
+    public CodesModule(IGreenfieldCorePlugin plugin) {
+        super(plugin, ModuleConfig::isCodesEnabled);
     }
 
     @Override
-    public void tryEnable() {
-        codesService = enableIntegration(new CodesServiceImpl(plugin, this), true);
-        enableIntegration(new CodesCommandService(plugin, this, codesService), true);
+    public IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
+        return serviceProviderBuilder
+                .addSingleton(ICodesService.class, CodesServiceImpl.class)
+                .build(plugin);
+    }
+
+    @Override
+    protected void tryEnable() throws Exception {
+        moduleServiceProvider.initialize(CodesCommandService.class);
     }
 
     @Override
     public void tryDisable() {
-        disableIntegration(codesService);
     }
 
 }

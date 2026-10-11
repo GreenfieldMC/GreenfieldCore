@@ -2,6 +2,7 @@ package net.greenfieldmc.core.chatformat.services;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.chat.EssentialsChat;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
@@ -19,7 +20,7 @@ public class EssentialsChatService extends ModuleService<EssentialsChatService> 
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         if (Bukkit.getPluginManager().getPlugin("EssentialsChat") != null && Bukkit.getPluginManager().getPlugin("Essentials") != null) {
             try {
                 module.getLogger().info("Attempting to override EssentialsChat chat handler.");
@@ -38,7 +39,7 @@ public class EssentialsChatService extends ModuleService<EssentialsChatService> 
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 

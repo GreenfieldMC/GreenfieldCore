@@ -1,6 +1,8 @@
 package net.greenfieldmc.core.paintingswitch;
 
-import net.greenfieldmc.core.GreenfieldCore;
+import com.njdaeger.pdk.serviceprovider.IServiceProvider;
+import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.paintingswitch.services.IPaintingSwitchService;
@@ -8,27 +10,22 @@ import net.greenfieldmc.core.paintingswitch.services.PaintingSwitchCommandServic
 import net.greenfieldmc.core.paintingswitch.services.PaintingSwitchServiceImpl;
 import org.bukkit.event.Listener;
 
-import java.util.function.Predicate;
-
-import static net.greenfieldmc.core.ComponentUtils.moduleMessage;
-
 public class PaintingSwitchModule extends Module implements Listener {
 
-    private IPaintingSwitchService paintingSwitchService;
-
-    public PaintingSwitchModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
-        super(plugin, canEnable);
+    public PaintingSwitchModule(IGreenfieldCorePlugin plugin) {
+        super(plugin, ModuleConfig::isPaintingSwitchEnabled);
     }
 
     @Override
-    public void tryEnable() {
-        paintingSwitchService = enableIntegration(new PaintingSwitchServiceImpl(plugin, this), true);
-        enableIntegration(new PaintingSwitchCommandService(plugin, this, paintingSwitchService), true);
+    public IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
+        return serviceProviderBuilder
+                .addSingleton(IPaintingSwitchService.class, PaintingSwitchServiceImpl.class)
+                .addSingleton(PaintingSwitchCommandService.class, PaintingSwitchCommandService.class)
+                .build(plugin);
     }
 
     @Override
     public void tryDisable() {
-        disableIntegration(paintingSwitchService);
     }
 
 }

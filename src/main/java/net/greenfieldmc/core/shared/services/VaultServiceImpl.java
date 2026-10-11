@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.shared.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.milkbowl.vault.chat.Chat;
@@ -17,12 +18,12 @@ public class VaultServiceImpl extends ModuleService<IVaultService> implements IV
     private Permission permission;
     private Chat chat;
 
-    public VaultServiceImpl(Plugin plugin, Module module) {
+    public VaultServiceImpl(IGreenfieldCorePlugin plugin, Module module) {
         super(plugin, module);
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         if (Bukkit.getPluginManager().getPlugin("Vault") == null)
             throw new Exception("Vault not found for VaultServiceImpl");
 
@@ -39,7 +40,7 @@ public class VaultServiceImpl extends ModuleService<IVaultService> implements IV
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 

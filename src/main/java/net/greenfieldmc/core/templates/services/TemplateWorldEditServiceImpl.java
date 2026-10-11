@@ -4,6 +4,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.command.tool.InvalidToolBindException;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.HandSide;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.shared.services.WorldEditServiceImpl;
 import net.greenfieldmc.core.templates.WorldEditTemplateBrush;
@@ -33,7 +34,7 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         super.tryEnable(plugin, module);
         var schemPath = impl.getWorldEdit().getWorkingDirectoryPath(impl.getWorldEdit().getConfiguration().saveDir);
         schematicFiles.addAll(getAllFiles(schemPath));
@@ -80,7 +81,7 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         super.tryDisable(plugin, module);
     }
 

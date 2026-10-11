@@ -1,6 +1,8 @@
 package net.greenfieldmc.core.hotspots;
 
-import net.greenfieldmc.core.GreenfieldCore;
+import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.hotspots.services.HotspotCommandService;
@@ -13,8 +15,6 @@ import net.greenfieldmc.core.shared.services.EssentialsServiceImpl;
 import net.greenfieldmc.core.shared.services.IDynmapService;
 import net.greenfieldmc.core.shared.services.IEssentialsService;
 
-import java.util.function.Predicate;
-
 public class HotspotModule extends Module {
 
     private IEssentialsService essentialsService;
@@ -22,12 +22,12 @@ public class HotspotModule extends Module {
     private IDynmapService dynmapService;
     private IHotspotStorageService storage;
 
-    public HotspotModule(GreenfieldCore plugin, Predicate<ModuleConfig> canEnable) {
-        super(plugin, canEnable);
+    public HotspotModule(IGreenfieldCorePlugin plugin) {
+        super(plugin, ModuleConfig::isHotspotsEnabled);
     }
 
     @Override
-    public void tryEnable() {
+    public ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
         storage = enableIntegration(new HotspotStorageServiceImpl(plugin, this), true);
         dynmapService = enableIntegration(new HotspotDynmapService(plugin, this, storage), false);
         hotspotService = enableIntegration(new HotspotServiceImpl(plugin, this, dynmapService, storage), true);

@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.redblock.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
@@ -30,10 +31,10 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {}
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {}
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {}
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {}
 
     @Override
     public Redblock getRedblock(int id) {

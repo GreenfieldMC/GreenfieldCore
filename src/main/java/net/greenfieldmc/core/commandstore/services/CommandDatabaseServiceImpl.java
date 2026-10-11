@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.commandstore.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.commandstore.SavedCommand;
@@ -19,12 +20,12 @@ public class CommandDatabaseServiceImpl extends ModuleService<ICommandDatabaseSe
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         commandDatabase.saveDatabase();
     }
 

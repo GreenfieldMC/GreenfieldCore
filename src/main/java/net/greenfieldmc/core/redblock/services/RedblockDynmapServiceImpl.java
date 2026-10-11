@@ -1,5 +1,6 @@
 package net.greenfieldmc.core.redblock.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.redblock.Redblock;
 import net.greenfieldmc.core.shared.services.DynmapServiceImpl;
@@ -25,17 +26,17 @@ public class RedblockDynmapServiceImpl extends DynmapServiceImpl {
     }
 
     @Override
-    public void tryEnable(Plugin plugin, Module module) throws Exception {
+    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         super.tryEnable(plugin, module);
     }
 
     @Override
-    public void postTryEnable(Plugin plugin, Module module) throws Exception {
+    public void postTryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         loadRedblocksToDynmap();
     }
 
     @Override
-    public void tryDisable(Plugin plugin, Module module) throws Exception {
+    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         super.tryDisable(plugin, module);
         if (isEnabled()) {
             var incompleteSet = markerApi.getMarkerSet(INCOMPLETE_MARKER_SET);

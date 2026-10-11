@@ -18,19 +18,24 @@ public class RedblockMessages {
     // Error messages
     public static final BiFunction<String, Integer, String> ERROR_REDBLOCK_NOT_FOUND_RADIUS = (type, radius) -> "No " + type + " RedBlock found within a radius of " + radius + " blocks.";
     public static final BiFunction<String, String, String> ERROR_REDBLOCK_NOT_FOUND_ID = (type, id) -> "No " + type + " RedBlock found with id #" + id + ".";
+    public static final BiFunction<String, String, String> ERROR_REDBLOCK_NOT_FOUND_KEY = (type, id) -> "No " + type + " RedBlock found with key " + id + ".";
     public static final String ERROR_EDIT_ASSIGN_UNASSIGN = "You cannot assign and unassign a RedBlock simultaneously.";
     public static final String ERROR_EDIT_RANK_UNRANK = "You cannot rank and unrank a RedBlock simultaneously.";
     public static final String ERROR_GOTO_ID_MINE = "You cannot use -id and -mine flags simultaneously.";
     public static final Function<Integer, String> ERROR_GOTO_NO_REDBLOCK_FOUND = (radius) -> "No incomplete RedBlock found" + (radius > 0 ? " in a " + radius + " block radius of you" : "") + " matching the given criteria.";
     public static final TextComponent ERROR_NO_RESULTS_TO_DISPLAY = Component.text("There are no results to display.", NamedTextColor.RED);
 
+    public static final Function<String, String> ERROR_REDBLOCK_NOT_GENERATED = (errorMessage) -> "Could not generate RedBlock: " + errorMessage;
+
 
     // All other messages
     public static final Function<Integer, TextComponent> REDBLOCK_CREATED = id -> MODULE.append(Component.text("Created RedBlock #" + id, NamedTextColor.GRAY));
+    public static final Function<String, TextComponent> REDBLOCK_CREATED_NEW = id -> MODULE.append(Component.text("Created RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_DENIED = id -> MODULE.append(Component.text("Denied RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_APPROVED = id -> MODULE.append(Component.text("Approved RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_COMPLETED = id -> MODULE.append(Component.text("Completed RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_DELETED = id -> MODULE.append(Component.text("Deleted RedBlock #" + id, NamedTextColor.GRAY));
+    public static final Function<String, TextComponent> REDBLOCK_DELETED_NEW = id -> MODULE.append(Component.text("Deleted RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_EDITED = id -> MODULE.append(Component.text("Edited RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_GOTO = id -> MODULE.append(Component.text("Teleported to RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_JOIN_NOTIFICATION = count -> MODULE.append(Component.text("You have ", NamedTextColor.GRAY))

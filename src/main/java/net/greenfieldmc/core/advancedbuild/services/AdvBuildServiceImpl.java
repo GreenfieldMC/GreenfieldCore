@@ -76,6 +76,7 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
                 new CandleInteraction(worldEditService, coreProtectService),
                 new AmethystInteraction(worldEditService, coreProtectService),
                 new ChiseledBookshelfInteraction(worldEditService, coreProtectService, getPlugin(), this),
+                new LeafLitterInteraction(worldEditService, coreProtectService, getPlugin(), this),
                 new DoorInteraction(worldEditService, coreProtectService),
                 new JigsawInteraction(worldEditService, coreProtectService),
                 new PinkPetalsInteraction(worldEditService, coreProtectService),

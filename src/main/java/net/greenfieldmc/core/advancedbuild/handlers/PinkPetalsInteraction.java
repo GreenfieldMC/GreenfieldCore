@@ -8,7 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
-import org.bukkit.block.data.type.PinkPetals;
+import org.bukkit.block.data.type.FlowerBed;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -26,9 +26,10 @@ public class PinkPetalsInteraction extends InteractionHandler {
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand == Material.AIR &&
                             event.getClickedBlock() != null &&
-                            event.getClickedBlock().getBlockData() instanceof PinkPetals;
+                            event.getClickedBlock().getBlockData() instanceof FlowerBed;
                 },
-                Material.PINK_PETALS
+                Material.PINK_PETALS,
+                Material.WILDFLOWERS
         );
         this.sessions = new HashMap<>();
     }
@@ -47,10 +48,10 @@ public class PinkPetalsInteraction extends InteractionHandler {
 
     @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
-        if (getHandMat(event) == Material.AIR || (getHandMat(event) == Material.PINK_PETALS && !event.getPlayer().isSneaking())) {
+        if (getHandMat(event) == Material.AIR || (materials.contains(getHandMat(event)) && !event.getPlayer().isSneaking())) {
             var session = getSession(event.getPlayer().getUniqueId());
 
-            if (!(event.getClickedBlock().getBlockData() instanceof PinkPetals petals)) return;
+            if (!(event.getClickedBlock().getBlockData() instanceof FlowerBed petals)) return;
             session.setFlowerAmount(petals.getMaximumFlowerAmount() == petals.getFlowerAmount() ? 1 : petals.getFlowerAmount() + 1);
             petals.setFlowerAmount(session.getFlowerAmount());
             event.setCancelled(true);
@@ -64,7 +65,7 @@ public class PinkPetalsInteraction extends InteractionHandler {
                 event.setCancelled(true);
                 event.setUseInteractedBlock(Event.Result.DENY);
                 event.setUseItemInHand(Event.Result.DENY);
-                var petals = (PinkPetals) getHandMat(event).createBlockData();
+                var petals = (FlowerBed) getHandMat(event).createBlockData();
                 petals.setFlowerAmount(getSession(event.getPlayer().getUniqueId()).getFlowerAmount());
                 petals.setFacing(event.getPlayer().getFacing().getOppositeFace());
                 placeBlockAt(event.getPlayer(), placeableLocation, getHandMat(event), petals);

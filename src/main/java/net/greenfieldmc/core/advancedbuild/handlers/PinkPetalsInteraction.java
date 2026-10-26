@@ -52,8 +52,8 @@ public class PinkPetalsInteraction extends InteractionHandler {
             var session = getSession(event.getPlayer().getUniqueId());
 
             if (!(event.getClickedBlock().getBlockData() instanceof FlowerBed petals)) return;
-            session.setFlowerAmount(petals.getMaximumFlowerAmount() == petals.getFlowerAmount() ? 1 : petals.getFlowerAmount() + 1);
-            petals.setFlowerAmount(session.getFlowerAmount());
+            session.setFlowerAmount(petals.getMaterial(), petals.getMaximumFlowerAmount() == petals.getFlowerAmount() ? 1 : petals.getFlowerAmount() + 1);
+            petals.setFlowerAmount(session.getFlowerAmount(petals.getMaterial()));
             event.setCancelled(true);
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
@@ -66,7 +66,7 @@ public class PinkPetalsInteraction extends InteractionHandler {
                 event.setUseInteractedBlock(Event.Result.DENY);
                 event.setUseItemInHand(Event.Result.DENY);
                 var petals = (FlowerBed) getHandMat(event).createBlockData();
-                petals.setFlowerAmount(getSession(event.getPlayer().getUniqueId()).getFlowerAmount());
+                petals.setFlowerAmount(getSession(event.getPlayer().getUniqueId()).getFlowerAmount(getHandMat(event)));
                 petals.setFacing(event.getPlayer().getFacing().getOppositeFace());
                 placeBlockAt(event.getPlayer(), placeableLocation, getHandMat(event), petals);
             }
@@ -74,24 +74,19 @@ public class PinkPetalsInteraction extends InteractionHandler {
     }
 
     private PetalSession getSession(UUID uuid) {
-        if (!sessions.containsKey(uuid)) sessions.put(uuid, new PetalSession(1));
-        return sessions.get(uuid);
+        return sessions.computeIfAbsent(uuid, k -> new PetalSession());
     }
 
     public class PetalSession {
 
-        private int flowerAmount;
+        private final Map<Material, Integer> flowerAmounts = new HashMap<>();
 
-        public PetalSession(int flowerAmount) {
-            this.flowerAmount = flowerAmount;
+        public int getFlowerAmount(Material material) {
+            return flowerAmounts.getOrDefault(material, 1);
         }
 
-        public int getFlowerAmount() {
-            return flowerAmount;
-        }
-
-        public void setFlowerAmount(int flowerAmount) {
-            this.flowerAmount = flowerAmount;
+        public void setFlowerAmount(Material material, int flowerAmount) {
+            flowerAmounts.put(material, flowerAmount);
         }
 
     }

@@ -8,7 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
-import org.bukkit.block.data.type.PinkPetals;
+import org.bukkit.block.data.type.FlowerBed;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -26,9 +26,10 @@ public class PinkPetalsInteraction extends InteractionHandler {
                     var mainHand = player.getInventory().getItemInMainHand().getType();
                     return mainHand == Material.AIR &&
                             event.getClickedBlock() != null &&
-                            event.getClickedBlock().getBlockData() instanceof PinkPetals;
+                            event.getClickedBlock().getBlockData() instanceof FlowerBed;
                 },
-                Material.PINK_PETALS
+                Material.PINK_PETALS,
+                Material.WILDFLOWERS
         );
         this.sessions = new HashMap<>();
     }
@@ -47,12 +48,12 @@ public class PinkPetalsInteraction extends InteractionHandler {
 
     @Override
     public void onRightClickBlock(PlayerInteractEvent event) {
-        if (getHandMat(event) == Material.AIR || (getHandMat(event) == Material.PINK_PETALS && !event.getPlayer().isSneaking())) {
+        if (getHandMat(event) == Material.AIR || (materials.contains(getHandMat(event)) && !event.getPlayer().isSneaking())) {
             var session = getSession(event.getPlayer().getUniqueId());
 
-            if (!(event.getClickedBlock().getBlockData() instanceof PinkPetals petals)) return;
-            session.setFlowerAmount(petals.getMaximumFlowerAmount() == petals.getFlowerAmount() ? 1 : petals.getFlowerAmount() + 1);
-            petals.setFlowerAmount(session.getFlowerAmount());
+            if (!(event.getClickedBlock().getBlockData() instanceof FlowerBed petals)) return;
+            session.setFlowerAmount(petals.getMaterial(), petals.getMaximumFlowerAmount() == petals.getFlowerAmount() ? 1 : petals.getFlowerAmount() + 1);
+            petals.setFlowerAmount(session.getFlowerAmount(petals.getMaterial()));
             event.setCancelled(true);
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
@@ -64,8 +65,8 @@ public class PinkPetalsInteraction extends InteractionHandler {
                 event.setCancelled(true);
                 event.setUseInteractedBlock(Event.Result.DENY);
                 event.setUseItemInHand(Event.Result.DENY);
-                var petals = (PinkPetals) getHandMat(event).createBlockData();
-                petals.setFlowerAmount(getSession(event.getPlayer().getUniqueId()).getFlowerAmount());
+                var petals = (FlowerBed) getHandMat(event).createBlockData();
+                petals.setFlowerAmount(getSession(event.getPlayer().getUniqueId()).getFlowerAmount(getHandMat(event)));
                 petals.setFacing(event.getPlayer().getFacing().getOppositeFace());
                 placeBlockAt(event.getPlayer(), placeableLocation, getHandMat(event), petals);
             }
@@ -73,24 +74,19 @@ public class PinkPetalsInteraction extends InteractionHandler {
     }
 
     private PetalSession getSession(UUID uuid) {
-        if (!sessions.containsKey(uuid)) sessions.put(uuid, new PetalSession(1));
-        return sessions.get(uuid);
+        return sessions.computeIfAbsent(uuid, k -> new PetalSession());
     }
 
     public class PetalSession {
 
-        private int flowerAmount;
+        private final Map<Material, Integer> flowerAmounts = new HashMap<>();
 
-        public PetalSession(int flowerAmount) {
-            this.flowerAmount = flowerAmount;
+        public int getFlowerAmount(Material material) {
+            return flowerAmounts.getOrDefault(material, 1);
         }
 
-        public int getFlowerAmount() {
-            return flowerAmount;
-        }
-
-        public void setFlowerAmount(int flowerAmount) {
-            this.flowerAmount = flowerAmount;
+        public void setFlowerAmount(Material material, int flowerAmount) {
+            flowerAmounts.put(material, flowerAmount);
         }
 
     }

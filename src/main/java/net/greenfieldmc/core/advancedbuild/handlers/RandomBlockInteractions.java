@@ -1,13 +1,19 @@
 package net.greenfieldmc.core.advancedbuild.handlers;
 
+import io.papermc.paper.datacomponent.DataComponentType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.BlockItemDataProperties;
+import io.papermc.paper.registry.keys.DataComponentTypeKeys;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import net.greenfieldmc.core.shared.services.IWorldEditService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class RandomBlockInteractions extends InteractionHandler {
 
@@ -30,7 +36,7 @@ public class RandomBlockInteractions extends InteractionHandler {
                 Material.WHITE_CARPET,
                 Material.YELLOW_CARPET,
                 Material.MOSS_CARPET,
-                Material.PALE_MOSS_CARPET
+                Material.LIGHT
         );
     }
 
@@ -52,6 +58,12 @@ public class RandomBlockInteractions extends InteractionHandler {
             event.setCancelled(true);
             event.setUseInteractedBlock(Event.Result.DENY);
             event.setUseItemInHand(Event.Result.DENY);
+            var assignedBlockdata = event.getItem().getData(DataComponentTypes.BLOCK_DATA);
+            if (assignedBlockdata != null) {
+                var handMaterial = getHandMat(event);
+                placeBlockAt(event.getPlayer(), placementLocation, handMaterial, assignedBlockdata.applyTo(handMaterial.createBlockData()));
+                return;
+            }
             placeBlockAt(event.getPlayer(), placementLocation, getHandMat(event));
         }
     }

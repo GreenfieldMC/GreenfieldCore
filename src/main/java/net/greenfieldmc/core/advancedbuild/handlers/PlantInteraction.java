@@ -57,7 +57,12 @@ public class PlantInteraction extends InteractionHandler {
                 Material.TORCHFLOWER,
                 Material.CLOSED_EYEBLOSSOM,
                 Material.OPEN_EYEBLOSSOM,
-                Material.PALE_OAK_SAPLING
+                Material.PALE_OAK_SAPLING,
+                Material.FIREFLY_BUSH,
+                Material.TALL_DRY_GRASS,
+                Material.SHORT_DRY_GRASS,
+                Material.CACTUS_FLOWER,
+                Material.BUSH
         );
     }
 

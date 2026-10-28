@@ -1,7 +1,6 @@
 package net.greenfieldmc.core.utilities;
 
 import com.njdaeger.pdk.serviceprovider.IServiceProvider;
-import com.njdaeger.pdk.serviceprovider.ServiceProvider;
 import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
@@ -17,11 +16,17 @@ public class UtilitiesModule extends Module {
 
     @Override
     public IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
-        return serviceProviderBuilder
-                .addSingleton()
+        return serviceProviderBuilder.build(plugin);
+    }
 
-        enableIntegration(new UtilityCommands(plugin, this), true);
-        enableIntegration(new WorldEditPrefsService(plugin, this), false);
+    @Override
+    protected void tryEnable() throws Exception {
+        moduleServiceProvider.initialize(UtilityCommands.class);
+        try {
+            moduleServiceProvider.initialize(WorldEditPrefsService.class);
+        } catch (Exception e) {
+            getLogger().warning("WorldEditPrefsService not enabled... " + e.getMessage());
+        }
     }
 
     @Override

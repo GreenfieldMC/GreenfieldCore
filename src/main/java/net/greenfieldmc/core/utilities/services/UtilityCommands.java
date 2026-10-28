@@ -1,29 +1,19 @@
 package net.greenfieldmc.core.utilities.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.utilities.UtilityMessages;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 
-public class UtilityCommands extends ModuleService<UtilityCommands> implements IModuleService<UtilityCommands> {
+public class UtilityCommands {
 
-
-    public UtilityCommands(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public UtilityCommands(IGreenfieldCorePlugin plugin) {
         CommandBuilder.of("nv")
                 .permission("greenfieldcore.nightvision")
                 .description("Enable or disable night vision.")
@@ -71,10 +61,5 @@ public class UtilityCommands extends ModuleService<UtilityCommands> implements I
                     }
                 })
                 .register(plugin);
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 }

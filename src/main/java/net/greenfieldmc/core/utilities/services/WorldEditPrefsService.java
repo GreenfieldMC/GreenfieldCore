@@ -1,9 +1,6 @@
 package net.greenfieldmc.core.utilities.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.util.SideEffect;
 import org.bukkit.Bukkit;
@@ -11,34 +8,21 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.Plugin;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class WorldEditPrefsService extends ModuleService<WorldEditPrefsService> implements IModuleService<WorldEditPrefsService>, Listener {
+public class WorldEditPrefsService implements Listener {
 
     private final Set<UUID> overriddenPerfs = new HashSet<>();
-    private WorldEditPlugin worldEditPlugin;
+    private final WorldEditPlugin worldEditPlugin;
 
-    public WorldEditPrefsService(IGreenfieldCorePlugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        if (Bukkit.getPluginManager().getPlugin("WorldEdit") != null) {
-            worldEditPlugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
-            Bukkit.getPluginManager().registerEvents(this, plugin);
-        } else {
+    public WorldEditPrefsService(IGreenfieldCorePlugin plugin) throws Exception {
+        if (Bukkit.getPluginManager().getPlugin("WorldEdit") == null)
             throw new Exception("WorldEdit is not installed.");
-        }
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
+        this.worldEditPlugin = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler

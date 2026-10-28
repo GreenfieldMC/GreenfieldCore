@@ -1,8 +1,6 @@
 package net.greenfieldmc.core.paintingswitch.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.paintingswitch.PaintingSwitchMessages;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
@@ -22,7 +20,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,33 +29,28 @@ import java.util.UUID;
 
 import static java.lang.Math.*;
 
-public class PaintingSwitchServiceImpl extends ModuleService<IPaintingSwitchService> implements IPaintingSwitchService, Listener {
+public class PaintingSwitchServiceImpl implements IPaintingSwitchService, Listener, AutoCloseable {
 
     private static final String PERM = "greenfieldcore.paintingswitch.use";
 
-    private IConfig config;
-    private List<UUID> disabledUsers;
+    private final IConfig config;
+    private final List<UUID> disabledUsers;
     private final Map<UUID, PaintingSession> users = new HashMap<>();
     private static final List<Art> ALL_ART = RegistryAccess.registryAccess().getRegistry(RegistryKey.PAINTING_VARIANT).stream().toList();
 
-    public PaintingSwitchServiceImpl(IGreenfieldCorePlugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public PaintingSwitchServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML.createNew(plugin, "paintingswitch");
             config.addEntry("disabled", new ArrayList<>());
             this.disabledUsers = new ArrayList<>(config.getStringList("disabled").stream().map(UUID::fromString).toList());
             Bukkit.getPluginManager().registerEvents(this, plugin);
         } catch (Exception e) {
-            throw new Exception("Failed to load PaintingSwitchService.", e);
+            throw new RuntimeException("Failed to load PaintingSwitchService.", e);
         }
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         config.setEntry("disabled", disabledUsers.stream().map(UUID::toString).toList());
         config.save();
     }

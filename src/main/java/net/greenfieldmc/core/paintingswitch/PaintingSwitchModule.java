@@ -8,9 +8,8 @@ import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.paintingswitch.services.IPaintingSwitchService;
 import net.greenfieldmc.core.paintingswitch.services.PaintingSwitchCommandService;
 import net.greenfieldmc.core.paintingswitch.services.PaintingSwitchServiceImpl;
-import org.bukkit.event.Listener;
 
-public class PaintingSwitchModule extends Module implements Listener {
+public class PaintingSwitchModule extends Module {
 
     public PaintingSwitchModule(IGreenfieldCorePlugin plugin) {
         super(plugin, ModuleConfig::isPaintingSwitchEnabled);
@@ -20,8 +19,12 @@ public class PaintingSwitchModule extends Module implements Listener {
     public IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
         return serviceProviderBuilder
                 .addSingleton(IPaintingSwitchService.class, PaintingSwitchServiceImpl.class)
-                .addSingleton(PaintingSwitchCommandService.class, PaintingSwitchCommandService.class)
                 .build(plugin);
+    }
+
+    @Override
+    protected void tryEnable() throws Exception {
+        moduleServiceProvider.initialize(PaintingSwitchCommandService.class);
     }
 
     @Override

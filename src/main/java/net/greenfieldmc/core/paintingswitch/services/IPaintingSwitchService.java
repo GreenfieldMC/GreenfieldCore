@@ -1,11 +1,9 @@
 package net.greenfieldmc.core.paintingswitch.services;
 
-import net.greenfieldmc.core.IModuleService;
-
 import java.util.List;
 import java.util.UUID;
 
-public interface IPaintingSwitchService extends IModuleService<IPaintingSwitchService> {
+public interface IPaintingSwitchService {
 
     List<UUID> getDisabledUsers();
 

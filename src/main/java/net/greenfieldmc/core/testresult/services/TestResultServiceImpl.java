@@ -1,8 +1,6 @@
 package net.greenfieldmc.core.testresult.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.shared.services.IVaultService;
 import net.greenfieldmc.core.testresult.TestAttempt;
 import net.greenfieldmc.core.testresult.TestResultMessages;
@@ -20,21 +18,19 @@ import java.util.UUID;
 
 import static net.greenfieldmc.core.Util.CONSOLE_UUID;
 
-public class TestResultServiceImpl extends ModuleService<ITestResultService> implements ITestResultService {
+public class TestResultServiceImpl implements ITestResultService {
 
+    private final IGreenfieldCorePlugin plugin;
     private final ITestResultStorageService storageService;
     private final IVaultService vaultService;
     private final IConfig config;
 
-    public TestResultServiceImpl(IGreenfieldCorePlugin plugin, Module module, ITestResultStorageService storageService, IVaultService vaultService) {
-        super(plugin, module);
+    public TestResultServiceImpl(IGreenfieldCorePlugin plugin, ITestResultStorageService storageService, IVaultService vaultService) {
+        this.plugin = plugin;
         this.config = ConfigType.YML.createNew(plugin, "testbuild-config");
         this.storageService = storageService;
         this.vaultService = vaultService;
-    }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         config.addEntry("testing-group", "Testing");
         config.addEntry("passing-group", "Apprentice");
         config.addEntry("failing-group", "Spectator");
@@ -52,9 +48,6 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
         ));
         config.save();
     }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {}
 
     @Override
     public String getTestingGroup() {
@@ -78,7 +71,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
 
     @Override
     public void startAttempt(UUID whoIsStarting, CommandSender whoIsStartingThem, Runnable callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             var attemptCount = storageService.getTestAttempts(whoIsStarting).size();
             var incomplete = getIncompleteAttempt(whoIsStarting);
             if (incomplete != null) {
@@ -98,7 +91,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
 
     @Override
     public void passUser(UUID whoIsBeingPassed, CommandSender whoIsPassingThem, String comments, Runnable callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             var currentAttempt = getIncompleteAttempt(whoIsBeingPassed);
             if (currentAttempt == null) {
                 whoIsPassingThem.sendMessage(Component.text("This user has no attempts to be passed.", NamedTextColor.RED));
@@ -119,7 +112,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
 
     @Override
     public void failAttempt(UUID whoIsBeingFailed, CommandSender whoIsFailingThem, String failureReason, Runnable callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             var currentAttempt = getIncompleteAttempt(whoIsBeingFailed);
             if (currentAttempt == null) {
                 whoIsFailingThem.sendMessage(Component.text("This user has no attempts to be failed.", NamedTextColor.RED));
@@ -140,7 +133,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
 
     @Override
     public void failUser(UUID whoIsBeingFailed, CommandSender whoIsFailingThem, String failureReason, Runnable callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             var currentAttempt = getIncompleteAttempt(whoIsBeingFailed);
             if (currentAttempt == null) {
                 whoIsFailingThem.sendMessage(Component.text("This user has no attempts to be failed.", NamedTextColor.RED));
@@ -157,7 +150,7 @@ public class TestResultServiceImpl extends ModuleService<ITestResultService> imp
                 if (!success) whoIsFailingThem.sendMessage(Component.text("Failed to remove the user from the failing group.", NamedTextColor.RED));
                 callback.run();
             });
-            Bukkit.getScheduler().runTaskLater(getPlugin(), () -> {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 var player = Bukkit.getPlayer(whoIsBeingFailed);
                 if (player != null) {
                     player.kick(TestResultMessages.KICK_FAIL_MESSAGE);

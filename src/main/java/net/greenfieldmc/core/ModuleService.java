@@ -2,6 +2,18 @@ package net.greenfieldmc.core;
 
 import org.bukkit.plugin.Plugin;
 
+/**
+ * Base class for a module service: a class registered in a {@link Module}'s service provider that has an
+ * enable/disable lifecycle (loading config or storage, saving on shutdown, hooking an external plugin).
+ * <p>
+ * The constructor registers the service with the module, which then calls {@code tryEnable}, {@code postTryEnable}
+ * and {@code tryDisable}. Obtain the {@link Module} parameter through DI; the module provider registers it.
+ * <p>
+ * Do not extend this for classes that need no lifecycle (commands, listeners, paginators, arguments, POJOs). Those
+ * are plain classes. See {@link Module} for the full breakdown.
+ *
+ * @param <T> the service interface, which extends {@link IModuleService}
+ */
 public abstract class ModuleService<T extends IModuleService<T>> implements IModuleService<T> {
 
     private final Plugin plugin;

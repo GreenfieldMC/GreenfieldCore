@@ -5,8 +5,6 @@ import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
-import net.greenfieldmc.core.shared.services.IVaultService;
-import net.greenfieldmc.core.shared.services.VaultServiceImpl;
 import net.greenfieldmc.core.testresult.services.ITestResultService;
 import net.greenfieldmc.core.testresult.services.ITestResultStorageService;
 import net.greenfieldmc.core.testresult.services.TestResultCommandService;
@@ -23,10 +21,13 @@ public final class TestResultModule extends Module {
     public IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
         return serviceProviderBuilder
                 .addSingleton(ITestResultStorageService.class, TestResultStorageServiceImpl.class)
-                .addSingleton(IVaultService.class, VaultServiceImpl.class)
                 .addSingleton(ITestResultService.class, TestResultServiceImpl.class)
-                .addSingleton(TestResultCommandService.class, TestResultCommandService.class)
                 .build(plugin);
+    }
+
+    @Override
+    protected void tryEnable() throws Exception {
+        moduleServiceProvider.initialize(TestResultCommandService.class);
     }
 
     @Override

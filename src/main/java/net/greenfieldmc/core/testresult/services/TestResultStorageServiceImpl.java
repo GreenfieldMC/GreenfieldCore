@@ -1,8 +1,6 @@
 package net.greenfieldmc.core.testresult.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.testresult.TestAttempt;
 import net.greenfieldmc.core.testresult.TestSet;
 import com.njdaeger.pdk.config.ConfigType;
@@ -14,17 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class TestResultStorageServiceImpl extends ModuleService<ITestResultStorageService> implements ITestResultStorageService {
+public class TestResultStorageServiceImpl implements ITestResultStorageService, AutoCloseable {
 
-    private IConfig config;
+    private final IConfig config;
     private final Map<UUID, List<TestAttempt>> attempts = new HashMap<>();
 
-    public TestResultStorageServiceImpl(IGreenfieldCorePlugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public TestResultStorageServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML.createNew(plugin, "testbuild-storage");
             if (config.hasSection("testsets")) {
@@ -62,7 +55,7 @@ public class TestResultStorageServiceImpl extends ModuleService<ITestResultStora
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         saveDatabase();
     }
 

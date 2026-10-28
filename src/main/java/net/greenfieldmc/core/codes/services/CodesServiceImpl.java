@@ -1,29 +1,21 @@
 package net.greenfieldmc.core.codes.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.codes.Code;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
-import org.bukkit.plugin.Plugin;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CodesServiceImpl extends ModuleService<ICodesService> implements ICodesService {
+public class CodesServiceImpl implements ICodesService, AutoCloseable {
 
-    private IConfig config;
+    private final IConfig config;
     private final Map<Integer, Code> codeMap = new HashMap<>();
 
-    public CodesServiceImpl(IGreenfieldCorePlugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public CodesServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML.createNew(plugin, "codes");
 
@@ -46,7 +38,7 @@ public class CodesServiceImpl extends ModuleService<ICodesService> implements IC
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         save();
     }
 

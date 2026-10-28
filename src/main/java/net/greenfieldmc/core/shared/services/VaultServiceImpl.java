@@ -1,52 +1,47 @@
 package net.greenfieldmc.core.shared.services;
 
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
-public class VaultServiceImpl extends ModuleService<IVaultService> implements IVaultService {
+/**
+ * Optional Vault integration. This always constructs: if Vault (or a permission/chat provider) is unavailable, a warning
+ * is logged and the service stays disabled, returning failed futures / empty lists.
+ */
+public class VaultServiceImpl implements IVaultService {
 
     private Permission permission;
     private Chat chat;
 
-    public VaultServiceImpl(IGreenfieldCorePlugin plugin, Module module) {
-        super(plugin, module);
-    }
+    public VaultServiceImpl(Logger logger) {
+        try {
+            if (Bukkit.getPluginManager().getPlugin("Vault") == null)
+                throw new Exception("Vault not found");
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        if (Bukkit.getPluginManager().getPlugin("Vault") == null)
-            throw new Exception("Vault not found for VaultServiceImpl");
+            RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServicesManager().getRegistration(Permission.class);
+            if (permissionProvider == null)
+                throw new Exception("No permission provider found");
 
-        RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServicesManager().getRegistration(Permission.class);
-        if (permissionProvider == null)
-            throw new Exception("No permission provider found for VaultServiceImpl");
+            RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServicesManager().getRegistration(Chat.class);
+            if (chatProvider == null)
+                throw new Exception("No chat provider found");
 
-        RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServicesManager().getRegistration(Chat.class);
-        if (chatProvider == null)
-            throw new Exception("No chat provider found for VaultServiceImpl");
-
-        permission = permissionProvider.getProvider();
-        chat = chatProvider.getProvider();
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
+            permission = permissionProvider.getProvider();
+            chat = chatProvider.getProvider();
+        } catch (Exception e) {
+            logger.warning("Vault service not enabled... " + e.getMessage());
+        }
     }
 
     @Override
     public boolean isEnabled() {
-        return super.isEnabled() && permission != null && permission.isEnabled();
+        return permission != null && permission.isEnabled();
     }
 
     @Override
@@ -67,6 +62,7 @@ public class VaultServiceImpl extends ModuleService<IVaultService> implements IV
 
     @Override
     public List<String> getGroupList() {
+        if (!isEnabled()) return List.of();
         return List.of(permission.getGroups());
     }
 }

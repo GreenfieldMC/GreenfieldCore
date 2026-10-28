@@ -1,11 +1,10 @@
 package net.greenfieldmc.core.codes.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.codes.Code;
 
 import java.util.List;
 
-public interface ICodesService extends IModuleService<ICodesService> {
+public interface ICodesService {
 
     void addCode(String code);
 

@@ -2,6 +2,11 @@ package net.greenfieldmc.core;
 
 import org.bukkit.plugin.Plugin;
 
+/**
+ * Marks a service interface as having a module-driven lifecycle. Service interfaces (e.g. {@code ICodesService})
+ * extend this and their implementation extends {@link ModuleService}. Interfaces for services without a lifecycle
+ * should not extend this. See {@link Module} for when to use a module service versus a plain class.
+ */
 public interface IModuleService<T extends IModuleService<T>> {
 
     Plugin getPlugin();

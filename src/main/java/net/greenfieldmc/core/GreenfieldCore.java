@@ -24,6 +24,8 @@ import net.greenfieldmc.core.powershovel.PowerShovelModule;
 import net.greenfieldmc.core.redblock.RedblockModule;
 import net.greenfieldmc.core.shared.services.EssentialsServiceImpl;
 import net.greenfieldmc.core.shared.services.IEssentialsService;
+import net.greenfieldmc.core.shared.services.IVaultService;
+import net.greenfieldmc.core.shared.services.VaultServiceImpl;
 import net.greenfieldmc.core.templates.TemplatesModule;
 import net.greenfieldmc.core.testresult.TestResultModule;
 import net.greenfieldmc.core.utilities.UtilitiesModule;
@@ -63,7 +65,7 @@ public final class GreenfieldCore extends JavaPlugin implements IGreenfieldCoreP
                 //end greenfield api services
 
                 //standalone services
-
+                .addSingleton(IVaultService.class, VaultServiceImpl.class)
                 //end standalone services
 
                 .build(this);

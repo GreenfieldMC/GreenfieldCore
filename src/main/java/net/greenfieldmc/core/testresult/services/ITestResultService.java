@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.testresult.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.testresult.TestAttempt;
 import net.greenfieldmc.core.testresult.TestSet;
 import org.bukkit.command.CommandSender;
@@ -8,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import java.util.List;
 import java.util.UUID;
 
-public interface ITestResultService extends IModuleService<ITestResultService> {
+public interface ITestResultService {
 
     /**
      * Returns the groups that users are added to when they are testing.

@@ -1,11 +1,7 @@
 package net.greenfieldmc.core.testresult.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.Util;
-import net.greenfieldmc.core.shared.arguments.OfflinePlayerArgument;
 import net.greenfieldmc.core.testresult.TestAttempt;
 import net.greenfieldmc.core.testresult.TestResultMessages;
 import net.greenfieldmc.core.testresult.TestSet;
@@ -23,7 +19,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -1,13 +1,12 @@
 package net.greenfieldmc.core.testresult.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.testresult.TestAttempt;
 import net.greenfieldmc.core.testresult.TestSet;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface ITestResultStorageService extends IModuleService<ITestResultStorageService> {
+public interface ITestResultStorageService {
 
     /**
      * Gets all test attempts for all users.

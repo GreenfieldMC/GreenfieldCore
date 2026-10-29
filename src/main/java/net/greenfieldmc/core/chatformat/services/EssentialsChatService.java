@@ -3,27 +3,19 @@ package net.greenfieldmc.core.chatformat.services;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.chat.EssentialsChat;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
+import java.util.logging.Logger;
 
-public class EssentialsChatService extends ModuleService<EssentialsChatService> implements IModuleService<EssentialsChatService> {
+/**
+ * Overrides the EssentialsChat chat handler. Throws on construction if Essentials/EssentialsChat is unavailable.
+ */
+public class EssentialsChatService {
 
-    private final IChatConfigService config;
-
-    public EssentialsChatService(Plugin plugin, Module module, IChatConfigService config) {
-        super(plugin, module);
-        this.config = config;
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public EssentialsChatService(IGreenfieldCorePlugin plugin, Logger logger, IChatConfigService config) throws Exception {
         if (Bukkit.getPluginManager().getPlugin("EssentialsChat") != null && Bukkit.getPluginManager().getPlugin("Essentials") != null) {
             try {
-                module.getLogger().info("Attempting to override EssentialsChat chat handler.");
+                logger.info("Attempting to override EssentialsChat chat handler.");
                 var essentialsChat = Bukkit.getPluginManager().getPlugin("EssentialsChat");
                 var essentials = Bukkit.getPluginManager().getPlugin("Essentials");
                 AsyncChatEvent.getHandlerList().unregister(essentialsChat);
@@ -37,10 +29,4 @@ public class EssentialsChatService extends ModuleService<EssentialsChatService> 
             throw new Exception("Essentials and/or EssentialsChat is not enabled or found.");
         }
     }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
-
 }

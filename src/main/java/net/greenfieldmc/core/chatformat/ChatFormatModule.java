@@ -1,6 +1,6 @@
 package net.greenfieldmc.core.chatformat;
 
-import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.IServiceProvider;
 import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
@@ -64,23 +64,32 @@ public class ChatFormatModule extends Module {
             }))
             .build();
 
-    private IChatConfigService config;
-
     public ChatFormatModule(IGreenfieldCorePlugin plugin) {
         super(plugin, ModuleConfig::isChatFormatEnabled);
     }
 
     @Override
-    public ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
-        this.config = enableIntegration(new ChatConfigServiceImpl(plugin, this), true);
-        if (enableIntegration(new EssentialsChatService(plugin, this, config), false).isEnabled()) getLogger().info("Using EssentialsChat integration for chat formatting.");
-        else if (enableIntegration(new DefaultChatService(plugin, this, config), true).isEnabled()) getLogger().info("Using DefaultChat integration for chat formatting.");
-        enableIntegration(new ChatFormatCommandService(plugin, this, config), true);
+    public IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
+        return serviceProviderBuilder
+                .addSingleton(IChatConfigService.class, ChatConfigServiceImpl.class)
+                .build(plugin);
+    }
+
+    @Override
+    protected void tryEnable() throws Exception {
+        try {
+            moduleServiceProvider.initialize(EssentialsChatService.class);
+            getLogger().info("Using EssentialsChat integration for chat formatting.");
+        } catch (Exception e) {
+            //EssentialsChat is optional, so fall back to the default chat handling
+            moduleServiceProvider.initialize(DefaultChatService.class);
+            getLogger().info("Using DefaultChat integration for chat formatting.");
+        }
+        moduleServiceProvider.initialize(ChatFormatCommandService.class);
     }
 
     @Override
     public void tryDisable() {
-        disableIntegration(config);
     }
 
     public static Map<Integer, String> getLinkIndices(String str) {

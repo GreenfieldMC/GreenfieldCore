@@ -1,9 +1,6 @@
 package net.greenfieldmc.core.chatformat.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.chatformat.ChatFormatModule;
 import com.njdaeger.pdk.utils.Pair;
 import io.papermc.paper.event.player.AsyncChatEvent;
@@ -11,16 +8,15 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 
-public class DefaultChatService extends ModuleService<DefaultChatService> implements IModuleService<DefaultChatService>, Listener {
+public class DefaultChatService implements Listener {
 
     private final LegacyComponentSerializer serializer = LegacyComponentSerializer.builder().build();
     private final IChatConfigService config;
 
-    public DefaultChatService(Plugin plugin, Module module, IChatConfigService config) {
-        super(plugin, module);
+    public DefaultChatService(IGreenfieldCorePlugin plugin, IChatConfigService config) {
         this.config = config;
+        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
@@ -32,15 +28,5 @@ public class DefaultChatService extends ModuleService<DefaultChatService> implem
             mentions.values().stream().map(Pair::getSecond).filter(config::allowsMentions).forEach(player -> player.playSound(player.getLocation(), config.getSound(player), config.getVolume(player), 1));
         }
         event.message(formattedMessage);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 }

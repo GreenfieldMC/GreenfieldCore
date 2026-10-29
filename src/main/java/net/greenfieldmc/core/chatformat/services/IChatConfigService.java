@@ -1,11 +1,10 @@
 package net.greenfieldmc.core.chatformat.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.chatformat.ChatUser;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-public interface IChatConfigService extends IModuleService<IChatConfigService> {
+public interface IChatConfigService {
 
     void saveDatabase();
 

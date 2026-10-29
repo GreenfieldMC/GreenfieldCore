@@ -1,9 +1,6 @@
 package net.greenfieldmc.core.chatformat.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
@@ -12,21 +9,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import static net.greenfieldmc.core.ComponentUtils.moduleMessage;
 
-public class ChatFormatCommandService extends ModuleService<ChatFormatCommandService> implements IModuleService<ChatFormatCommandService> {
+public class ChatFormatCommandService {
 
     private final IChatConfigService config;
 
-    public ChatFormatCommandService(Plugin plugin, Module module, IChatConfigService config) {
-        super(plugin, module);
+    public ChatFormatCommandService(IGreenfieldCorePlugin plugin, IChatConfigService config) {
         this.config = config;
-    }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         CommandBuilder.of("togglepings", "togglementions")
                 .description("Enables the ping sounds when you are mentioned in chat.")
                 .permission("greenfieldcore.chat.toggle-mentions")
@@ -59,10 +51,5 @@ public class ChatFormatCommandService extends ModuleService<ChatFormatCommandSer
                     ctx.send(moduleMessage("Chat").append(Component.text("Your ping sound has been reset to the default.", NamedTextColor.GRAY)));
                 }).end()
                 .register(plugin);
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 }

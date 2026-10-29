@@ -1,31 +1,23 @@
 package net.greenfieldmc.core.chatformat.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.chatformat.ChatUser;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ChatConfigServiceImpl extends ModuleService<IChatConfigService> implements IChatConfigService {
+public class ChatConfigServiceImpl implements IChatConfigService, AutoCloseable {
 
-    private IConfig config;
+    private final IConfig config;
     private final Map<UUID, ChatUser> users = new HashMap<>();
 
-    public ChatConfigServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public ChatConfigServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML.createNew(plugin, "chatconfig");
 
@@ -44,7 +36,7 @@ public class ChatConfigServiceImpl extends ModuleService<IChatConfigService> imp
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         saveDatabase();
     }
 

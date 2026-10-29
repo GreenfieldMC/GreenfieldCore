@@ -1,45 +1,27 @@
 package net.greenfieldmc.core.shared.services;
 
 import com.earth2me.essentials.IEssentials;
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
-public class EssentialsServiceImpl extends ModuleService<IEssentialsService> implements IEssentialsService {
+public class EssentialsServiceImpl implements IEssentialsService {
 
-    private IEssentials essentials;
+    private final IEssentials essentials;
 
-    public EssentialsServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
-            essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
-        } else {
-            throw new Exception("Essentials not found");
-        }
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
+    public EssentialsServiceImpl() throws Exception {
+        var essentialsPlugin = Bukkit.getPluginManager().getPlugin("Essentials");
+        if (essentialsPlugin == null) throw new Exception("Essentials not found");
+        this.essentials = (IEssentials) essentialsPlugin;
     }
 
     @Override
     public void setUserLastLocation(Player player, Location location) {
-        if (!isEnabled()) return;
         essentials.getUser(player).setLastLocation(location);
     }
 
 //    @Override
 //    public void loadUsernameMap() {
-//        if (!isEnabled()) return;
 //        var userMap = essentials.getUsers();
 //        getModule().getLogger().info("Loading uuid to username map... This could take a bit.");
 //        Bukkit.getWhitelistedPlayers().stream().map(OfflinePlayer::getUniqueId).map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));

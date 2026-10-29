@@ -1,13 +1,10 @@
 package net.greenfieldmc.core.hotspots.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.hotspots.Category;
 import net.greenfieldmc.core.hotspots.Hotspot;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
-import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,20 +12,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageService> implements IHotspotStorageService {
+public class HotspotStorageServiceImpl implements IHotspotStorageService, AutoCloseable {
 
     private final Map<String, Category> categories = new HashMap<>();
     private final Map<Integer, Hotspot> hotspots = new HashMap<>();
     private int hotspotIdCounter = 0;
 
-    private IConfig config;
+    private final IConfig config;
 
-    public HotspotStorageServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public HotspotStorageServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML.createNew(plugin, "hotspots");
 
@@ -105,12 +97,12 @@ public class HotspotStorageServiceImpl extends ModuleService<IHotspotStorageServ
             }
 
         } catch (Exception e) {
-            throw new Exception("Failed to enable HotspotStorageService", e);
+            throw new RuntimeException("Failed to enable HotspotStorageService", e);
         }
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         saveDatabase();
     }
 

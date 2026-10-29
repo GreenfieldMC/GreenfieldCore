@@ -8,22 +8,23 @@ import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
 import org.bukkit.command.CommandSender;
 import org.dynmap.markers.MarkerIcon;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class IconArgument extends AbstractStringTypedArgument<String> {
 
     private static final DynamicCommandExceptionType ICON_NOT_FOUND = new DynamicCommandExceptionType(o -> () -> "Icon " + o.toString() + " not found");
-    private final IDynmapService dynmapService;
+    private final @Nullable IDynmapService dynmapService;
 
-    public IconArgument(IDynmapService dynmapService) {
+    public IconArgument(@Nullable IDynmapService dynmapService) {
         super();
         this.dynmapService = dynmapService;
     }
 
     @Override
     public List<String> listBasicSuggestions(ICommandContext commandContext) {
-        if (!dynmapService.isEnabled()) {
+        if (dynmapService == null) {
             return List.of();
         }
         return dynmapService.getMarkerAPI().getMarkerIcons()
@@ -39,7 +40,7 @@ public class IconArgument extends AbstractStringTypedArgument<String> {
 
     @Override
     public String convertToCustom(CommandSender sender, String nativeType, StringReader reader) throws CommandSyntaxException {
-        if (!dynmapService.isEnabled()) {
+        if (dynmapService == null) {
             return nativeType;
         }
         var marker = dynmapService.getMarkerIcon(nativeType);

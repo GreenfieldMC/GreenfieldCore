@@ -1,13 +1,12 @@
 package net.greenfieldmc.core.hotspots.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.hotspots.Category;
 import net.greenfieldmc.core.hotspots.Hotspot;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public interface IHotspotStorageService extends IModuleService<IHotspotStorageService> {
+public interface IHotspotStorageService {
 
     /**
      * Creates a new category with the given parameters

@@ -1,9 +1,6 @@
 package net.greenfieldmc.core.hotspots.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.hotspots.Category;
 import net.greenfieldmc.core.hotspots.Hotspot;
 import net.greenfieldmc.core.hotspots.HotspotMessages;
@@ -22,7 +19,6 @@ import com.njdaeger.pdk.command.exception.CommandSenderTypeException;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.Pair;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,27 +26,27 @@ import java.util.Comparator;
 import java.util.List;
 
 @SuppressWarnings("DataFlowIssue")
-public class HotspotCommandService extends ModuleService<HotspotCommandService> implements IModuleService<HotspotCommandService> {
+public class HotspotCommandService {
 
     private final ChatPaginator<Hotspot, Pair<HotspotPaginator.HotspotPaginatorMode, ICommandContext>> hotspotPaginator = new HotspotPaginator().build();
     private final ChatPaginator<Category, CategoryPaginator.CategoryPaginatorMode> categoryPaginator = new CategoryPaginator().build();
 
     private final IHotspotService hotspotService;
-    private final IEssentialsService essentialsService;
-    private final IDynmapService dynmapService;
+    private final @Nullable IEssentialsService essentialsService;
+    private final @Nullable IDynmapService dynmapService;
 
-    public HotspotCommandService(Plugin plugin, Module module, IDynmapService dynmapService, IHotspotService hotspotService, IEssentialsService essentialsService) {
-        super(plugin, module);
+    public HotspotCommandService(IGreenfieldCorePlugin plugin, @Nullable IDynmapService dynmapService, IHotspotService hotspotService, @Nullable IEssentialsService essentialsService) {
         this.hotspotService = hotspotService;
         this.essentialsService = essentialsService;
         this.dynmapService = dynmapService;
+        registerCommands(plugin);
     }
 
     private void gotoHotspot(ICommandContext ctx) throws PDKCommandException {
         var hotspots = resolveHotspot(ctx);
         var player = ctx.asPlayer();
         if (hotspots.size() == 1) {
-            essentialsService.setUserLastLocation(player, player.getLocation());
+            if (essentialsService != null) essentialsService.setUserLastLocation(player, player.getLocation());
             player.teleport(hotspots.getFirst().getLocation());
             ctx.send(HotspotMessages.TELEPORT_SUCCESS.apply(hotspots.getFirst().getName()));
         } else {
@@ -219,8 +215,7 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
     }
 
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    private void registerCommands(IGreenfieldCorePlugin plugin) {
         CommandBuilder.of("hsgoto", "hstp", "hotspot", "hs")
                 .description("Teleport to a Hotspot")
                 .permission("greenfieldcore.hotspot.goto")
@@ -320,8 +315,4 @@ public class HotspotCommandService extends ModuleService<HotspotCommandService> 
                 .register(plugin);
     }
 
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
 }

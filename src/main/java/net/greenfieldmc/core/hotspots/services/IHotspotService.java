@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.hotspots.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.hotspots.Category;
 import net.greenfieldmc.core.hotspots.Hotspot;
 import org.bukkit.World;
@@ -8,7 +7,7 @@ import org.bukkit.World;
 import java.util.List;
 import java.util.function.Predicate;
 
-public interface IHotspotService extends IModuleService<IHotspotService> {
+public interface IHotspotService {
 
     /**
      * Creates a new hotspot with the given parameters

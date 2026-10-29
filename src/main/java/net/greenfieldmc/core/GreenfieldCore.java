@@ -22,7 +22,9 @@ import net.greenfieldmc.core.hotspots.HotspotModule;
 import net.greenfieldmc.core.paintingswitch.PaintingSwitchModule;
 import net.greenfieldmc.core.powershovel.PowerShovelModule;
 import net.greenfieldmc.core.redblock.RedblockModule;
+import net.greenfieldmc.core.shared.services.DynmapServiceImpl;
 import net.greenfieldmc.core.shared.services.EssentialsServiceImpl;
+import net.greenfieldmc.core.shared.services.IDynmapService;
 import net.greenfieldmc.core.shared.services.IEssentialsService;
 import net.greenfieldmc.core.shared.services.CoreProtectServiceImpl;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
@@ -91,6 +93,22 @@ public final class GreenfieldCore extends JavaPlugin implements IGreenfieldCoreP
                         return new WorldEditServiceImpl();
                     } catch (Exception e) {
                         getLogger().warning("WorldEditService not enabled... " + e.getMessage());
+                        return null;
+                    }
+                })
+                .addSingleton(IDynmapService.class, (s) -> {
+                    try {
+                        return new DynmapServiceImpl(this, getLogger());
+                    } catch (Exception e) {
+                        getLogger().warning("DynmapService not enabled... " + e.getMessage());
+                        return null;
+                    }
+                })
+                .addSingleton(IEssentialsService.class, (s) -> {
+                    try {
+                        return new EssentialsServiceImpl();
+                    } catch (Exception e) {
+                        getLogger().warning("EssentialsService not enabled... " + e.getMessage());
                         return null;
                     }
                 });

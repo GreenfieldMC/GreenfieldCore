@@ -1,36 +1,25 @@
 package net.greenfieldmc.core.hotspots.services;
 
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.hotspots.Category;
 import net.greenfieldmc.core.hotspots.Hotspot;
 import net.greenfieldmc.core.shared.services.IDynmapService;
 import org.bukkit.World;
-import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
-public class HotspotServiceImpl extends ModuleService<IHotspotService> implements IHotspotService {
+public class HotspotServiceImpl implements IHotspotService {
 
-    private final IDynmapService dynmapService;
+    private final Logger logger;
+    private final @Nullable IDynmapService dynmapService;
     private final IHotspotStorageService storageService;
 
-    public HotspotServiceImpl(Plugin plugin, Module module, IDynmapService dynmapService, IHotspotStorageService storageService) {
-        super(plugin, module);
+    public HotspotServiceImpl(Logger logger, @Nullable IDynmapService dynmapService, IHotspotStorageService storageService) {
+        this.logger = logger;
         this.dynmapService = dynmapService;
         this.storageService = storageService;
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 
     @Override
@@ -38,7 +27,7 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
         var hotspot = new Hotspot(name, category.getId(), storageService.getNextHotspotId(), x, y, z, yaw, pitch, world, customMarker);
         storageService.saveHotspot(hotspot);
         storageService.saveDatabase();
-        if (dynmapService.isEnabled()) dynmapService.tryCreateMarker(category.getId(), hotspot.getId() + "", hotspot.getName(), hotspot.getLocation(), resolveMarker(hotspot), false);
+        if (dynmapService != null) dynmapService.tryCreateMarker(category.getId(), hotspot.getId() + "", hotspot.getName(), hotspot.getLocation(), resolveMarker(hotspot), false);
         return hotspot;
     }
 
@@ -58,12 +47,12 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
         }
         storageService.saveHotspot(hotspot);
         storageService.saveDatabase();
-        if (dynmapService.isEnabled()) {
+        if (dynmapService != null) {
             if (!dynmapService.tryDeleteMarker(oldCategory, hotspot.getId() + "")) {
-                getModule().getLogger().warning("Failed to delete old marker for hotspot " + hotspot.getId());
+                logger.warning("Failed to delete old marker for hotspot " + hotspot.getId());
             }
             if (!dynmapService.tryCreateMarker(hotspot.getCategory(), hotspot.getId() + "", hotspot.getName(), hotspot.getLocation(), resolveMarker(hotspot), false)) {
-                getModule().getLogger().warning("Failed to create new marker for hotspot " + hotspot.getId());
+                logger.warning("Failed to create new marker for hotspot " + hotspot.getId());
             }
         }
     }
@@ -72,9 +61,9 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
     public void deleteHotspot(Hotspot hotspot) {
         storageService.deleteHotspot(hotspot.getId());
         storageService.saveDatabase();
-        if (dynmapService.isEnabled()) {
+        if (dynmapService != null) {
             if (!dynmapService.tryDeleteMarker(hotspot.getCategory(), hotspot.getId() + "")) {
-                getModule().getLogger().warning("Failed to delete marker for hotspot " + hotspot.getId());
+                logger.warning("Failed to delete marker for hotspot " + hotspot.getId());
             }
         }
     }
@@ -94,8 +83,8 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
         var category = new Category(name, marker, id);
         storageService.saveCategory(category);
         storageService.saveDatabase();
-        if (dynmapService.isEnabled() && !dynmapService.tryCreateMarkerSet(id, name, marker)) {
-            getModule().getLogger().warning("Failed to create marker for category " + name);
+        if (dynmapService != null && !dynmapService.tryCreateMarkerSet(id, name, marker)) {
+            logger.warning("Failed to create marker for category " + name);
         }
         return category;
     }
@@ -110,17 +99,17 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
         }
         storageService.saveCategory(editedCategory);
         storageService.saveDatabase();
-        if (dynmapService.isEnabled()) {
+        if (dynmapService != null) {
             var set = dynmapService.getMarkerSet(editedCategory.getId());
             if (set == null) {
-                getModule().getLogger().warning("Marker set for category " + editedCategory.getName() + " does not exist. Cannot update marker.");
+                logger.warning("Marker set for category " + editedCategory.getName() + " does not exist. Cannot update marker.");
                 return;
             }
             if (name != null) set.setMarkerSetLabel(name);
             if (marker != null) {
                 var icon = dynmapService.getMarkerIcon(marker);
                 if (icon == null) {
-                    getModule().getLogger().warning("Marker icon " + marker + " for category " + editedCategory.getName() + " does not exist. Cannot update marker.");
+                    logger.warning("Marker icon " + marker + " for category " + editedCategory.getName() + " does not exist. Cannot update marker.");
                     return;
                 }
                 set.setDefaultMarkerIcon(icon);
@@ -139,9 +128,9 @@ public class HotspotServiceImpl extends ModuleService<IHotspotService> implement
         }
         storageService.deleteCategory(category.getId());
         storageService.saveDatabase();
-        if (dynmapService.isEnabled()) {
+        if (dynmapService != null) {
             if (!dynmapService.tryDeleteMarkerSet(category.getId())) {
-                getModule().getLogger().warning("Failed to delete marker set for category " + category.getId());
+                logger.warning("Failed to delete marker set for category " + category.getId());
             }
         }
     }

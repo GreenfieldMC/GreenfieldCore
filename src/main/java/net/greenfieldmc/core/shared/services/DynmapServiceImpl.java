@@ -1,45 +1,29 @@
 package net.greenfieldmc.core.shared.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import org.bukkit.Location;
-import org.bukkit.plugin.Plugin;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
-import org.jetbrains.annotations.UnknownNullability;
 
-public class DynmapServiceImpl extends ModuleService<IDynmapService> implements IDynmapService {
+import java.util.logging.Logger;
 
-    protected MarkerAPI markerApi;
+public class DynmapServiceImpl implements IDynmapService {
 
-    public DynmapServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
+    private final IGreenfieldCorePlugin plugin;
+    private final Logger logger;
+    private final MarkerAPI markerApi;
 
-    @Override
-    public void tryEnable(@UnknownNullability IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public DynmapServiceImpl(IGreenfieldCorePlugin plugin, Logger logger) throws Exception {
+        this.plugin = plugin;
+        this.logger = logger;
         var dynmapPlugin = plugin.getServer().getPluginManager().getPlugin("dynmap");
-        if (dynmapPlugin != null) {
-            markerApi = ((org.dynmap.DynmapCommonAPI) dynmapPlugin).getMarkerAPI();
-        } else {
-            throw new Exception("Dynmap not found");
-        }
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return markerApi != null && super.isEnabled();
+        if (dynmapPlugin == null) throw new Exception("Dynmap not found");
+        this.markerApi = ((org.dynmap.DynmapCommonAPI) dynmapPlugin).getMarkerAPI();
     }
 
     @Override
     public boolean tryCreateMarker(String markerSet, String markerId, String html, Location location, String iconName, boolean persistent) {
-        if (!isEnabled()) return false;
         var set = getOrCreateMarkerSet(markerSet);
         var icon = getOrCreateMarkerIcon(iconName);
         if (set == null || icon == null) return false;
@@ -49,7 +33,6 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
 
     @Override
     public boolean tryDeleteMarker(String markerSet, String markerId) {
-        if (!isEnabled()) return false;
         var set = getOrCreateMarkerSet(markerSet);
         if (set == null) return false;
         var marker = set.findMarker(markerId);
@@ -61,12 +44,11 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
 
     @Override
     public boolean tryCreateMarkerSet(String setId, String setName, String icon) {
-        if (!isEnabled()) return false;
         var set = markerApi.getMarkerSet(setId);
         if (set != null) return false; // already exists
         set = markerApi.createMarkerSet(setId, setName, null, false);
         if (set == null) {
-            getModule().getLogger().warning("Unable to create marker set " + setId);
+            logger.warning("Unable to create marker set " + setId);
             return false;
         }
         if (icon != null) {
@@ -74,7 +56,7 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
             if (markerIcon != null) {
                 set.setDefaultMarkerIcon(markerIcon);
             } else {
-                getModule().getLogger().warning("Unable to load icon " + icon + " for marker set " + setId);
+                logger.warning("Unable to load icon " + icon + " for marker set " + setId);
             }
         }
         return true;
@@ -82,7 +64,6 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
 
     @Override
     public boolean tryDeleteMarkerSet(String setId) {
-        if (!isEnabled()) return false;
         var set = markerApi.getMarkerSet(setId);
         if (set == null) return false; // doesn't exist
         set.deleteMarkerSet();
@@ -91,41 +72,40 @@ public class DynmapServiceImpl extends ModuleService<IDynmapService> implements 
 
     @Override
     public MarkerSet getMarkerSet(String setId) {
-        if (!isEnabled()) return null;
         return markerApi.getMarkerSet(setId);
     }
 
     @Override
     public MarkerIcon getMarkerIcon(String iconName) {
-        if (!isEnabled()) return null;
         return markerApi.getMarkerIcon(iconName);
     }
 
     @Override
     public MarkerAPI getMarkerAPI() {
-        if (!isEnabled()) return null;
         return markerApi;
     }
 
-    protected MarkerSet getOrCreateMarkerSet(String setName) {
+    @Override
+    public MarkerSet getOrCreateMarkerSet(String setName) {
         var set = markerApi.getMarkerSet(setName);
         if (set == null) {
             set = markerApi.createMarkerSet(setName, setName, null, false);
-            if (set == null) getModule().getLogger().warning("Unable to create marker set " + setName);
+            if (set == null) logger.warning("Unable to create marker set " + setName);
         }
         return set;
     }
 
-    protected MarkerIcon getOrCreateMarkerIcon(String iconName) {
+    @Override
+    public MarkerIcon getOrCreateMarkerIcon(String iconName) {
         var icon = markerApi.getMarkerIcon(iconName.endsWith(".png") ? iconName.split("\\.")[0] : iconName);
-        var stream = getPlugin().getResource(iconName);
+        var stream = plugin.getResource(iconName);
         if (icon != null) {
             if (stream != null) {
                 icon.setMarkerIconImage(stream);
             }
         } else {
             if (stream == null) {
-                getModule().getLogger().warning("Unable to load icon " + iconName);
+                logger.warning("Unable to load icon " + iconName);
                 return null;
             }
             icon = markerApi.createMarkerIcon(iconName, iconName, stream);

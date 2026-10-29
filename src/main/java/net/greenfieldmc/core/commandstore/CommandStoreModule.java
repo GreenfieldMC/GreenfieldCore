@@ -1,6 +1,6 @@
 package net.greenfieldmc.core.commandstore;
 
-import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.IServiceProvider;
 import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
@@ -11,20 +11,23 @@ import net.greenfieldmc.core.commandstore.services.ICommandStoreService;
 
 public class CommandStoreModule extends Module {
 
-    private ICommandStoreService commandStoreService;
-    
     public CommandStoreModule(IGreenfieldCorePlugin plugin) {
         super(plugin, ModuleConfig::isCommandStoreEnabled);
     }
-    
+
     @Override
-    public ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
-        this.commandStoreService = enableIntegration(new CommandStoreServiceImpl(plugin, this), true);
-        enableIntegration(new CommandStoreCommandService(plugin, this, commandStoreService), true);
+    public IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
+        return serviceProviderBuilder
+                .addSingleton(ICommandStoreService.class, CommandStoreServiceImpl.class)
+                .build(plugin);
     }
-    
+
+    @Override
+    protected void tryEnable() throws Exception {
+        moduleServiceProvider.initialize(CommandStoreCommandService.class);
+    }
+
     @Override
     public void tryDisable() {
-        disableIntegration(commandStoreService);
     }
 }

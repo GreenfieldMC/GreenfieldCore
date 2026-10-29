@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.commandstore.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.commandstore.SavedCommand;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Comparator;
 import java.util.List;
 
-public interface ICommandDatabaseService extends IModuleService<ICommandDatabaseService> {
+public interface ICommandDatabaseService {
 
     SavedCommand getCommand(int id);
 

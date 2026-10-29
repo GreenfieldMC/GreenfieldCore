@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.commandstore.storage;
 
-import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.commandstore.SavedCommand;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.Configuration;
@@ -9,13 +8,14 @@ import org.bukkit.plugin.Plugin;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class AbstractCommandDatabase extends Configuration implements ICommandDatabase {
     
     private final Map<Integer, SavedCommand> commands;
     private int commandIndex;
     
-    public AbstractCommandDatabase(Plugin plugin, Module module, String configName) {
+    public AbstractCommandDatabase(Plugin plugin, Logger logger, String configName) {
         super(plugin, ConfigType.YML, configName);
         this.commands =  new HashMap<>();
         this.commandIndex = 0;
@@ -29,12 +29,12 @@ public class AbstractCommandDatabase extends Configuration implements ICommandDa
                 try {
                     id = Integer.parseInt(key);
                 } catch (NumberFormatException e) {
-                    module.getLogger().warning("Unable to load command " + key + ". Invalid command ID.");
+                    logger.warning("Unable to load command " + key + ". Invalid command ID.");
                     continue; // Skip invalid keys
                 }
                 if (id >= commandIndex) commandIndex = id + 1;
                 if (command == null || command.isBlank() || description == null || description.isBlank()) {
-                    module.getLogger().warning("Unable to load command " + key + ". Command or description is empty.");
+                    logger.warning("Unable to load command " + key + ". Command or description is empty.");
                     continue; // Skip empty commands
                 }
                 var savedCommand = new SavedCommand(command, description, used, id);

@@ -1,11 +1,12 @@
 package net.greenfieldmc.core.commandstore.storage;
 
-import net.greenfieldmc.core.Module;
 import org.bukkit.plugin.Plugin;
+
+import java.util.logging.Logger;
 
 public class ServerCommandDatabase extends AbstractCommandDatabase {
     
-    public ServerCommandDatabase(Plugin plugin, Module module) {
-        super(plugin, module, "server-commands");
+    public ServerCommandDatabase(Plugin plugin, Logger logger) {
+        super(plugin, logger, "server-commands");
     }
 }

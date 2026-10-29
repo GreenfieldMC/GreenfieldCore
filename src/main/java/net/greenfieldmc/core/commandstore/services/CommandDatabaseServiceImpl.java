@@ -1,31 +1,21 @@
 package net.greenfieldmc.core.commandstore.services;
 
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.commandstore.SavedCommand;
 import net.greenfieldmc.core.commandstore.storage.ICommandDatabase;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class CommandDatabaseServiceImpl extends ModuleService<ICommandDatabaseService> implements ICommandDatabaseService {
+public class CommandDatabaseServiceImpl implements ICommandDatabaseService, AutoCloseable {
 
     private final ICommandDatabase commandDatabase;
 
-    public CommandDatabaseServiceImpl(Plugin plugin, Module module, ICommandDatabase commandDatabase) {
-        super(plugin, module);
+    public CommandDatabaseServiceImpl(ICommandDatabase commandDatabase) {
         this.commandDatabase = commandDatabase;
     }
 
     @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         commandDatabase.saveDatabase();
     }
 

@@ -1,9 +1,6 @@
 package net.greenfieldmc.core.commandstore.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.commandstore.CommandStoreMessages;
 import net.greenfieldmc.core.commandstore.SavedCommand;
 import net.greenfieldmc.core.commandstore.arguments.CommandIdArgument;
@@ -18,18 +15,17 @@ import com.njdaeger.pdk.command.exception.CommandSenderTypeException;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 
-public class CommandStoreCommandService extends ModuleService<CommandStoreCommandService> implements IModuleService<CommandStoreCommandService> {
+public class CommandStoreCommandService {
 
     private static final ChatPaginator<SavedCommand, ICommandContext> LIST_PAGINATOR = new CommandPaginator(CommandPaginator.CommandPaginatorMode.LIST).build();
     private static final ChatPaginator<SavedCommand, ICommandContext> QUERY_PAGINATOR = new CommandPaginator(CommandPaginator.CommandPaginatorMode.QUERY).build();
 
     private final ICommandStoreService commandStorageService;
 
-    public CommandStoreCommandService(Plugin plugin, Module module, ICommandStoreService commandStorageService) {
-        super(plugin, module);
+    public CommandStoreCommandService(IGreenfieldCorePlugin plugin, ICommandStoreService commandStorageService) {
         this.commandStorageService = commandStorageService;
+        registerCommands(plugin);
     }
 
     private void addCommand(ICommandContext ctx) throws PDKCommandException {
@@ -130,9 +126,7 @@ public class CommandStoreCommandService extends ModuleService<CommandStoreComman
         return commandStorageService.getUserStorage(ctx.asPlayer().getUniqueId());
     }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
+    private void registerCommands(IGreenfieldCorePlugin plugin) {
         CommandBuilder.of("scmd", "savecmd", "addcmd", "acmd", "sc")
                 .description("Saves a command to the command storage")
                 .flag("confirm", "Confirm the saving of this command")
@@ -209,10 +203,5 @@ public class CommandStoreCommandService extends ModuleService<CommandStoreComman
                     .then("query", PdkArgumentTypes.quotedString(false, () -> "The query to search for")).executes(this::searchCommand)
                 .end()
                 .register(plugin);
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 }

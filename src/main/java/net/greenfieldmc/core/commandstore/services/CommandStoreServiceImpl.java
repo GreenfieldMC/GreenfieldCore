@@ -1,34 +1,31 @@
 package net.greenfieldmc.core.commandstore.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.commandstore.storage.ServerCommandDatabase;
 import net.greenfieldmc.core.commandstore.storage.UserCommandDatabase;
-import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
-public class CommandStoreServiceImpl extends ModuleService<ICommandStoreService> implements ICommandStoreService {
+public class CommandStoreServiceImpl implements ICommandStoreService, AutoCloseable {
 
-    private ICommandDatabaseService serverStorage;
-    private final Map<UUID, ICommandDatabaseService> userStorage = new HashMap<>();
+    private final IGreenfieldCorePlugin plugin;
+    private final Logger logger;
+    private final CommandDatabaseServiceImpl serverStorage;
+    private final Map<UUID, CommandDatabaseServiceImpl> userStorage = new HashMap<>();
 
-    public CommandStoreServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
+    public CommandStoreServiceImpl(IGreenfieldCorePlugin plugin, Logger logger) {
+        this.plugin = plugin;
+        this.logger = logger;
+        this.serverStorage = new CommandDatabaseServiceImpl(new ServerCommandDatabase(plugin, logger));
     }
 
     @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        this.serverStorage = module.enableIntegration(new CommandDatabaseServiceImpl(plugin, module, new ServerCommandDatabase(plugin, module)), true);
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        module.disableIntegration(serverStorage);
-        userStorage.forEach((uuid, storage) -> module.disableIntegration(storage));
+    public void close() {
+        serverStorage.close();
+        userStorage.values().forEach(CommandDatabaseServiceImpl::close);
     }
 
     @Override
@@ -38,9 +35,6 @@ public class CommandStoreServiceImpl extends ModuleService<ICommandStoreService>
 
     @Override
     public ICommandDatabaseService getUserStorage(UUID uuid) {
-        if (!userStorage.containsKey(uuid)) {
-            userStorage.put(uuid, getModule().enableIntegration(new CommandDatabaseServiceImpl(getPlugin(), getModule(), new UserCommandDatabase(getPlugin(), getModule(), uuid)), true));
-        }
-        return userStorage.get(uuid);
+        return userStorage.computeIfAbsent(uuid, id -> new CommandDatabaseServiceImpl(new UserCommandDatabase(plugin, logger, id)));
     }
 }

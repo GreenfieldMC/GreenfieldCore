@@ -7,9 +7,6 @@ import com.njdaeger.pdk.command.exception.CommandSenderTypeException;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.Triple;
 import net.greenfieldmc.core.templates.TemplateMessages;
 import net.greenfieldmc.core.templates.WorldEditTemplateBrush;
@@ -41,18 +38,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TemplateCommandService extends ModuleService<TemplateCommandService> implements IModuleService<TemplateCommandService> {
+public class TemplateCommandService {
 
     private final ChatPaginator<Template, Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush>> BRUSH_MODIFY_PAGINATOR = new TemplatePaginator(TemplatePaginator.TemplatePaginatorMode.BRUSH_MODIFY).build();
     private final ChatPaginator<Template, Triple<TemplatePaginator.TemplatePaginatorMode, ICommandContext, TemplateBrush>> LIST_PAGINATOR = new TemplatePaginator(TemplatePaginator.TemplatePaginatorMode.LIST).build();
 
+    private final Plugin plugin;
     private final ITemplateService templateService;
     private final ITemplateWorldEditService worldEditService;
 
-    public TemplateCommandService(Plugin plugin, Module module, ITemplateService templateService, ITemplateWorldEditService worldEditService) {
-        super(plugin, module);
+    public TemplateCommandService(IGreenfieldCorePlugin plugin, ITemplateService templateService, ITemplateWorldEditService worldEditService) {
+        this.plugin = plugin;
         this.templateService = templateService;
         this.worldEditService = worldEditService;
+        registerCommands(plugin);
     }
 
     private void create(ICommandContext ctx) {
@@ -131,7 +130,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
 
         if (template != null) {
             templateBrush.addTemplate(template.getTemplateName());
-            Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     template.loadClipboard();
                 } catch (CommandSenderTypeException e) {
@@ -200,7 +199,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
 
     private void copy(ICommandContext ctx) {
         var template = ctx.getTyped("templateName", Template.class);
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 worldEditService.loadToClipboard(template, ctx.asPlayer());
                 ctx.send(TemplateMessages.TEMPLATE_COPIED.apply(template));
@@ -312,8 +311,7 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
         return templateBrush;
     }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    private void registerCommands(IGreenfieldCorePlugin plugin) {
         CommandBuilder.of("tcreate", "createtemplate", "ct")
                 .permission("greenfieldcore.template.create")
                 .description("Create a new template.")
@@ -407,11 +405,6 @@ public class TemplateCommandService extends ModuleService<TemplateCommandService
                 .canExecute(this::list)
                 .then("filter", new FilterArgument(templateService)).executes(this::list)
                 .register(plugin);
-
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
     }
 }

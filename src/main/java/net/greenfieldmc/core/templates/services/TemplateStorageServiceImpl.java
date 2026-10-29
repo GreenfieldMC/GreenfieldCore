@@ -1,12 +1,9 @@
 package net.greenfieldmc.core.templates.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.templates.models.Template;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
-import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,17 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageService> implements ITemplateStorageService {
+public class TemplateStorageServiceImpl implements ITemplateStorageService, AutoCloseable {
 
-    private IConfig config;
+    private final IConfig config;
     private final Map<String, Template> templates = new HashMap<>();
 
-    public TemplateStorageServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public TemplateStorageServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML.createNew(plugin, "templates");
 
@@ -37,12 +29,12 @@ public class TemplateStorageServiceImpl extends ModuleService<ITemplateStorageSe
                 }
             }
         } catch (Exception e) {
-            throw new Exception("Failed to enable TemplateStorageService", e);
+            throw new RuntimeException("Failed to enable TemplateStorageService", e);
         }
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         saveDatabase();
     }
 

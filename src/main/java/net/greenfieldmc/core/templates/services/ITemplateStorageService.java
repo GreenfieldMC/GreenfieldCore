@@ -1,12 +1,11 @@
 package net.greenfieldmc.core.templates.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.templates.models.Template;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public interface ITemplateStorageService extends IModuleService<ITemplateStorageService> {
+public interface ITemplateStorageService {
 
     /**
      * Get a template by name

@@ -1,11 +1,10 @@
 package net.greenfieldmc.core.templates;
 
-import com.njdaeger.pdk.serviceprovider.ServiceProvider;
+import com.njdaeger.pdk.serviceprovider.IServiceProvider;
 import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
-import net.greenfieldmc.core.shared.services.IWorldEditService;
 import net.greenfieldmc.core.templates.services.ITemplateService;
 import net.greenfieldmc.core.templates.services.ITemplateStorageService;
 import net.greenfieldmc.core.templates.services.ITemplateViewerService;
@@ -18,29 +17,26 @@ import net.greenfieldmc.core.templates.services.TemplateWorldEditServiceImpl;
 
 public class TemplatesModule extends Module {
 
-    private ITemplateViewerService viewerService;
-    private ITemplateStorageService storageService;
-    private ITemplateService templateService;
-    private IWorldEditService worldEditService;
-
     public TemplatesModule(IGreenfieldCorePlugin plugin) {
         super(plugin, ModuleConfig::isTemplatesEnabled);
     }
 
     @Override
-    protected ServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) throws Exception {
-        this.viewerService = enableIntegration(new TemplateViewerServiceImpl(plugin, this), true);
-        this.storageService = enableIntegration(new TemplateStorageServiceImpl(plugin, this), true);
-        this.templateService = enableIntegration(new TemplateServiceImpl(plugin, this, storageService, viewerService), true);
-        this.worldEditService = enableIntegration(new TemplateWorldEditServiceImpl(plugin, this, templateService), true);
-        enableIntegration(new TemplateCommandService(plugin, this, templateService, (ITemplateWorldEditService) worldEditService), true);
+    protected IServiceProvider buildModuleServices(ServiceProviderBuilder serviceProviderBuilder) {
+        return serviceProviderBuilder
+                .addSingleton(ITemplateViewerService.class, TemplateViewerServiceImpl.class)
+                .addSingleton(ITemplateStorageService.class, TemplateStorageServiceImpl.class)
+                .addSingleton(ITemplateService.class, TemplateServiceImpl.class)
+                .addSingleton(ITemplateWorldEditService.class, TemplateWorldEditServiceImpl.class)
+                .build(plugin);
     }
 
     @Override
-    protected void tryDisable() throws Exception {
-        disableIntegration(worldEditService);
-        disableIntegration(templateService);
-        disableIntegration(storageService);
-        disableIntegration(viewerService);
+    protected void tryEnable() throws Exception {
+        moduleServiceProvider.initialize(TemplateCommandService.class);
+    }
+
+    @Override
+    protected void tryDisable() {
     }
 }

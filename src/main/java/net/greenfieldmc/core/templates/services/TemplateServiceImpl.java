@@ -1,8 +1,6 @@
 package net.greenfieldmc.core.templates.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.templates.TemplateMessages;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
@@ -22,26 +20,17 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class TemplateServiceImpl extends ModuleService<ITemplateService> implements ITemplateService {
+public class TemplateServiceImpl implements ITemplateService {
 
     private final Map<UUID, TemplateSession> sessions = new HashMap<>();
+    private final Plugin plugin;
     private final ITemplateStorageService storageService;
     private final ITemplateViewerService viewerService;
 
-    public TemplateServiceImpl(Plugin plugin, Module module, ITemplateStorageService storageService, ITemplateViewerService viewerService) {
-        super(plugin, module);
+    public TemplateServiceImpl(IGreenfieldCorePlugin plugin, ITemplateStorageService storageService, ITemplateViewerService viewerService) {
+        this.plugin = plugin;
         this.storageService = storageService;
         this.viewerService = viewerService;
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 
     @Override
@@ -128,7 +117,7 @@ public class TemplateServiceImpl extends ModuleService<ITemplateService> impleme
     public void startTemplateView(Player player, Template template, double scale, boolean ignoreSizeLimit, Consumer<Exception> onComplete) {
         if (viewerService.isTemplateViewActive(player)) viewerService.destroyTemplateView(player);
 
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             if (!template.isLoaded()) {
                 try {
                     template.loadClipboard();
@@ -164,7 +153,7 @@ public class TemplateServiceImpl extends ModuleService<ITemplateService> impleme
 
             }
 
-            Bukkit.getScheduler().runTask(getPlugin(), () -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
                 viewerService.startTemplateView(player, template, spawnLocation, scale);
                 onComplete.accept(null);
             });

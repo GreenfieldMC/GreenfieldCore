@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.templates.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateBrush;
 import net.greenfieldmc.core.templates.models.TemplateSession;
@@ -13,7 +12,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public interface ITemplateService extends IModuleService<ITemplateService> {
+public interface ITemplateService {
 
     /**
      * Get the template session for the given UUID

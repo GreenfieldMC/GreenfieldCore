@@ -6,8 +6,6 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.models.TemplateView;
 import net.kyori.adventure.text.Component;
@@ -36,18 +34,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerService> implements ITemplateViewerService, Listener {
+public class TemplateViewerServiceImpl implements ITemplateViewerService, Listener, AutoCloseable {
 
-    private Team originTeam;
+    private final Plugin plugin;
+    private final Team originTeam;
     private final Map<UUID, TemplateView> templateViewers = new HashMap<>();
     private final Display.Brightness defaultBrightness = new Display.Brightness(15, 15);
 
-    public TemplateViewerServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(@UnknownNullability IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public TemplateViewerServiceImpl(IGreenfieldCorePlugin plugin) {
+        this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
         this.originTeam = plugin.getServer().getScoreboardManager().getMainScoreboard().registerNewTeam("template_origin");
@@ -55,7 +50,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         for (var viewer : templateViewers.values()) {
             for (var entity : viewer.getSpawnedDisplays()) {
                 if (originTeam.hasEntry(entity.getUniqueId().toString())) originTeam.removeEntry(entity.getUniqueId().toString());
@@ -92,7 +87,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
                     var computedSpawnLocation = location.clone().add(x * scale, y * scale, z * scale);
                     var spawnLocation = new Location(computedSpawnLocation.getWorld(), computedSpawnLocation.getX(), computedSpawnLocation.getY(), computedSpawnLocation.getZ());
                     var display = spawnDisplay(spawnLocation, BukkitAdapter.adapt(block), transformation, defaultBrightness, null);
-                    player.showEntity(getPlugin(), display);
+                    player.showEntity(plugin, display);
                     displays.add(display);
                 }
             }
@@ -105,7 +100,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
             originDisplay.customName(Component.text("Origin Point", NamedTextColor.RED));
             originDisplay.setCustomNameVisible(true);
         }
-        player.showEntity(getPlugin(), originDisplay);
+        player.showEntity(plugin, originDisplay);
         displays.add(originDisplay);
 
         templateViewers.put(player.getUniqueId(), new TemplateView(displays));
@@ -116,7 +111,7 @@ public class TemplateViewerServiceImpl extends ModuleService<ITemplateViewerServ
         var viewer = templateViewers.get(player.getUniqueId());
         for (var entity : viewer.getSpawnedDisplays()) {
             if (originTeam.hasEntry(entity.getUniqueId().toString())) originTeam.removeEntry(entity.getUniqueId().toString());
-            player.hideEntity(getPlugin(), entity);
+            player.hideEntity(plugin, entity);
             entity.remove();
         }
         templateViewers.remove(player.getUniqueId());

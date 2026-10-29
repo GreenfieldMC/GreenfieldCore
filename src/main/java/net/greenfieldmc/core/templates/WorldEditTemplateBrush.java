@@ -18,15 +18,19 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import org.bukkit.plugin.Plugin;
+
 import java.util.UUID;
 
 public class WorldEditTemplateBrush implements Brush {
 
     private final int brushId;
     private final UUID uuid;
+    private final Plugin plugin;
     private final ITemplateService templateService;
 
-    public WorldEditTemplateBrush(ITemplateService templateService, UUID user, int brushId) {
+    public WorldEditTemplateBrush(Plugin plugin, ITemplateService templateService, UUID user, int brushId) {
+        this.plugin = plugin;
         this.uuid = user;
         this.brushId = brushId;
         this.templateService = templateService;
@@ -60,7 +64,7 @@ public class WorldEditTemplateBrush implements Brush {
 
         brush.randomizeNextTemplate();
         if (!template.isLoaded()) {
-            Bukkit.getScheduler().runTaskAsynchronously(templateService.getPlugin(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 player.sendMessage(TemplateMessages.TEMPLATE_LOADING.apply(template));
                 try {
                     template.loadClipboard();

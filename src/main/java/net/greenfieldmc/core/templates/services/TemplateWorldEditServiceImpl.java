@@ -5,13 +5,11 @@ import com.sk89q.worldedit.command.tool.InvalidToolBindException;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.HandSide;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.shared.services.WorldEditServiceImpl;
 import net.greenfieldmc.core.templates.WorldEditTemplateBrush;
 import net.greenfieldmc.core.templates.models.Template;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -21,29 +19,28 @@ import java.nio.file.WatchKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
-public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implements ITemplateWorldEditService {
+public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implements ITemplateWorldEditService, AutoCloseable {
 
+    private final IGreenfieldCorePlugin plugin;
     private final ITemplateService templateService;
     private final List<Path> schematicFiles = new ArrayList<>();
+    private volatile boolean running = true;
     private Thread watcherThread;
 
-    public TemplateWorldEditServiceImpl(Plugin plugin, Module module, ITemplateService templateService) {
-        super(plugin, module);
+    public TemplateWorldEditServiceImpl(IGreenfieldCorePlugin plugin, Logger logger, ITemplateService templateService) throws Exception {
+        super();
+        this.plugin = plugin;
         this.templateService = templateService;
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        super.tryEnable(plugin, module);
         var schemPath = impl.getWorldEdit().getWorkingDirectoryPath(impl.getWorldEdit().getConfiguration().saveDir);
         schematicFiles.addAll(getAllFiles(schemPath));
 
-        module.getLogger().info("Starting schematic watcher for path: " + schemPath);
+        logger.info("Starting schematic watcher for path: " + schemPath);
         var ws = FileSystems.getDefault().newWatchService();
         schemPath.register(ws, java.nio.file.StandardWatchEventKinds.ENTRY_CREATE, java.nio.file.StandardWatchEventKinds.ENTRY_DELETE);
         this.watcherThread = new Thread(() -> {
-            module.getLogger().info("[SchematicWatcher] Watching for schematic file changes in: " + schemPath);
+            logger.info("[SchematicWatcher] Watching for schematic file changes in: " + schemPath);
             while (isEnabled()) {
                 try {
                     WatchKey key = ws.poll(5, TimeUnit.SECONDS);
@@ -53,18 +50,18 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
                             if (event.kind() == java.nio.file.StandardWatchEventKinds.ENTRY_CREATE) {
                                 if ((path.toString().endsWith(".schematic") || path.toString().endsWith(".schem")) && !schematicFiles.contains(path)) {
                                     schematicFiles.add(path);
-                                    module.getLogger().info("[SchematicWatcher] Schematic file added: " + path);
+                                    logger.info("[SchematicWatcher] Schematic file added: " + path);
                                 }
 
                             } else if (event.kind() == java.nio.file.StandardWatchEventKinds.ENTRY_DELETE) {
-                                module.getLogger().info("[SchematicWatcher] Schematic file removed: " + path);
+                                logger.info("[SchematicWatcher] Schematic file removed: " + path);
                                 schematicFiles.remove(path);
                             }
                         }
                         key.reset();
                     }
                 } catch (InterruptedException e) {
-                    module.getLogger().severe("Watcher thread interrupted: " + e.getMessage());
+                    logger.severe("Watcher thread interrupted: " + e.getMessage());
                     Thread.currentThread().interrupt();
                 }
             }
@@ -73,7 +70,7 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            module.getLogger().info("[SchematicWatcher] Stopped watching for schematic file changes.");
+            logger.info("[SchematicWatcher] Stopped watching for schematic file changes.");
         });
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> watcherThread.start(), 120L);
@@ -81,8 +78,12 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        super.tryDisable(plugin, module);
+    public void close() {
+        running = false;
+    }
+
+    private boolean isEnabled() {
+        return running;
     }
 
     public List<Path> getSchematicFiles() {
@@ -125,7 +126,7 @@ public class TemplateWorldEditServiceImpl extends WorldEditServiceImpl implement
         try {
             localSession.forceBrush(
                     bukkitPlayer.getItemInHand(HandSide.MAIN_HAND).getType(),
-                    new WorldEditTemplateBrush(templateService, player.getUniqueId(), brushId),
+                    new WorldEditTemplateBrush(plugin, templateService, player.getUniqueId(), brushId),
                     "greenfieldcore.template.brush"
             );
         } catch (InvalidToolBindException e) {

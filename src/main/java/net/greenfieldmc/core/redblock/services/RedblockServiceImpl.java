@@ -1,40 +1,32 @@
 package net.greenfieldmc.core.redblock.services;
 
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
 import net.greenfieldmc.core.redblock.RedblockMessages;
 import net.greenfieldmc.core.shared.services.IDynmapService;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
 import static net.greenfieldmc.core.Util.resolvePlayerName;
 import static net.greenfieldmc.core.redblock.services.RedblockServiceHelpers.*;
 
-public class RedblockServiceImpl extends ModuleService<IRedblockService> implements IRedblockService {
+public class RedblockServiceImpl implements IRedblockService {
 
-    private final IDynmapService dynmapService;
+    private final Logger logger;
+    private final @Nullable IDynmapService dynmapService;
     private final IRedblockStorageService storageService;
 
-    public RedblockServiceImpl(Plugin plugin, Module module, IDynmapService dynmapService, IRedblockStorageService storageService) {
-        super(plugin, module);
+    public RedblockServiceImpl(Logger logger, @Nullable IDynmapService dynmapService, IRedblockStorageService storageService) {
+        this.logger = logger;
         this.dynmapService = dynmapService;
         this.storageService = storageService;
     }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {}
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {}
 
     @Override
     public Redblock getRedblock(int id) {
@@ -55,7 +47,7 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
         storageService.saveRedblock(redblock);
         storageService.saveDatabase();
         var markerHtml = createMarkerHtml(redblock);
-        if (dynmapService.isEnabled()) dynmapService.tryCreateMarker(RedblockDynmapServiceImpl.INCOMPLETE_MARKER_SET, redblock.getId() + "_redblock", markerHtml, location, RedblockDynmapServiceImpl.INCOMPLETE_MARKER_ICON, true);
+        if (dynmapService != null) dynmapService.tryCreateMarker(RedblockDynmapLoader.INCOMPLETE_MARKER_SET, redblock.getId() + "_redblock", markerHtml, location, RedblockDynmapLoader.INCOMPLETE_MARKER_ICON, true);
         return redblock;
     }
 
@@ -110,9 +102,9 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
         storageService.saveRedblock(redblock);
         storageService.saveDatabase();
 
-        if (dynmapService.isEnabled() && !dynmapService.tryDeleteMarker(RedblockDynmapServiceImpl.PENDING_MARKER_SET, redblock.getId() + "_redblock")) {
-            if (!dynmapService.tryDeleteMarker(RedblockDynmapServiceImpl.INCOMPLETE_MARKER_SET, redblock.getId() + "_redblock"))
-                getPlugin().getLogger().warning("Failed to delete RedBlock marker for #" + redblock.getId());
+        if (dynmapService != null && !dynmapService.tryDeleteMarker(RedblockDynmapLoader.PENDING_MARKER_SET, redblock.getId() + "_redblock")) {
+            if (!dynmapService.tryDeleteMarker(RedblockDynmapLoader.INCOMPLETE_MARKER_SET, redblock.getId() + "_redblock"))
+                logger.warning("Failed to delete RedBlock marker for #" + redblock.getId());
         }
 
         return redblock;
@@ -138,9 +130,9 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
         storageService.saveRedblock(redblock);
         storageService.saveDatabase();
 
-        if (dynmapService.isEnabled() && !dynmapService.tryDeleteMarker(RedblockDynmapServiceImpl.PENDING_MARKER_SET, redblock.getId() + "_redblock")) {
-            if (!dynmapService.tryDeleteMarker(RedblockDynmapServiceImpl.INCOMPLETE_MARKER_SET, redblock.getId() + "_redblock"))
-                getPlugin().getLogger().warning("Failed to delete RedBlock marker for #" + redblock.getId());
+        if (dynmapService != null && !dynmapService.tryDeleteMarker(RedblockDynmapLoader.PENDING_MARKER_SET, redblock.getId() + "_redblock")) {
+            if (!dynmapService.tryDeleteMarker(RedblockDynmapLoader.INCOMPLETE_MARKER_SET, redblock.getId() + "_redblock"))
+                logger.warning("Failed to delete RedBlock marker for #" + redblock.getId());
         }
 
         return redblock;
@@ -150,17 +142,17 @@ public class RedblockServiceImpl extends ModuleService<IRedblockService> impleme
 
     private void updateDynmapMarker(Redblock redblock) {
         var markerId = redblock.getId() + "_redblock";
-        var set = redblock.isIncomplete() ? RedblockDynmapServiceImpl.INCOMPLETE_MARKER_SET : RedblockDynmapServiceImpl.PENDING_MARKER_SET;
-        var icon = redblock.isIncomplete() ? RedblockDynmapServiceImpl.INCOMPLETE_MARKER_ICON : RedblockDynmapServiceImpl.PENDING_MARKER_ICON;
+        var set = redblock.isIncomplete() ? RedblockDynmapLoader.INCOMPLETE_MARKER_SET : RedblockDynmapLoader.PENDING_MARKER_SET;
+        var icon = redblock.isIncomplete() ? RedblockDynmapLoader.INCOMPLETE_MARKER_ICON : RedblockDynmapLoader.PENDING_MARKER_ICON;
         var markerHtml = createMarkerHtml(redblock);
 
-        if (dynmapService.isEnabled() && !dynmapService.tryDeleteMarker(RedblockDynmapServiceImpl.INCOMPLETE_MARKER_SET, markerId)) {
-            if (!dynmapService.tryDeleteMarker(RedblockDynmapServiceImpl.PENDING_MARKER_SET, markerId))
-                getPlugin().getLogger().warning("Failed to delete RedBlock marker for #" + redblock.getId());
+        if (dynmapService != null && !dynmapService.tryDeleteMarker(RedblockDynmapLoader.INCOMPLETE_MARKER_SET, markerId)) {
+            if (!dynmapService.tryDeleteMarker(RedblockDynmapLoader.PENDING_MARKER_SET, markerId))
+                logger.warning("Failed to delete RedBlock marker for #" + redblock.getId());
         }
 
-        if (dynmapService.isEnabled() && !dynmapService.tryCreateMarker(set, redblock.getId() + "_redblock", markerHtml, redblock.getLocation(), icon, true))
-            getPlugin().getLogger().warning("Failed to create RedBlock marker for #" + redblock.getId());
+        if (dynmapService != null && !dynmapService.tryCreateMarker(set, redblock.getId() + "_redblock", markerHtml, redblock.getLocation(), icon, true))
+            logger.warning("Failed to create RedBlock marker for #" + redblock.getId());
     }
 
     // endregion

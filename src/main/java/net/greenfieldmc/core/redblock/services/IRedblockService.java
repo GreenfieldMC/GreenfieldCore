@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.redblock.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public interface IRedblockService extends IModuleService<IRedblockService> {
+public interface IRedblockService {
 
     /**
      * Gets a redblock by its id

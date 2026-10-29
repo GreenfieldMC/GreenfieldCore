@@ -1,13 +1,10 @@
 package net.greenfieldmc.core.redblock.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
 import org.bukkit.Location;
-import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,18 +12,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageService> implements IRedblockStorageService {
+public class RedblockStorageServiceImpl implements IRedblockStorageService, AutoCloseable {
 
-    private IConfig config;
+    private final IConfig config;
     private int redblockIndex = 0;
     private final Map<Integer, Redblock> redblockMap = new HashMap<>();
 
-    public RedblockStorageServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public RedblockStorageServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML_CONFIGURATE.createNew(plugin, "redblocks");
 
@@ -71,7 +63,7 @@ public class RedblockStorageServiceImpl extends ModuleService<IRedblockStorageSe
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         saveDatabase();
     }
 

@@ -1,9 +1,6 @@
 package net.greenfieldmc.core.redblock.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.Util;
 import net.greenfieldmc.core.redblock.RedblockMessages;
 import org.bukkit.Bukkit;
@@ -17,15 +14,16 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.plugin.Plugin;
 
-public class RedblockListenerService extends ModuleService<RedblockListenerService> implements IModuleService<RedblockListenerService>, Listener {
+public class RedblockListenerService implements Listener {
 
+    private final IGreenfieldCorePlugin plugin;
     private final IRedblockService redblockService;
 
-    public RedblockListenerService(Plugin plugin, Module module, IRedblockService redblockService) {
-        super(plugin, module);
+    public RedblockListenerService(IGreenfieldCorePlugin plugin, IRedblockService redblockService) {
+        this.plugin = plugin;
         this.redblockService = redblockService;
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
@@ -77,19 +75,10 @@ public class RedblockListenerService extends ModuleService<RedblockListenerServi
                 && rb.isIncomplete());
         if (redblocks.isEmpty()) return;
 
-        Bukkit.getScheduler().runTaskLater(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             var onlinePlayer = Bukkit.getPlayer(e.getPlayer().getName());
             if (onlinePlayer != null) onlinePlayer.sendMessage(RedblockMessages.REDBLOCK_JOIN_NOTIFICATION.apply(redblocks.size()));
         }, 100);
     }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        Bukkit.getPluginManager().registerEvents(this, plugin);
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
 }

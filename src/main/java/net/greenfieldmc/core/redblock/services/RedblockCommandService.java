@@ -2,9 +2,6 @@ package net.greenfieldmc.core.redblock.services;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
 import net.greenfieldmc.core.redblock.RedblockMessages;
 import net.greenfieldmc.core.redblock.arguments.RankArgument;
@@ -21,27 +18,27 @@ import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import net.greenfieldmc.core.shared.services.IVaultService;
 import org.bukkit.Location;
-import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class RedblockCommandService extends ModuleService<RedblockCommandService> implements IModuleService<RedblockCommandService> {
+public class RedblockCommandService {
 
-    private final IVaultService vaultService;
+    private final @Nullable IVaultService vaultService;
     private final IRedblockService redblockService;
-    private final IEssentialsService essentialsService;
+    private final @Nullable IEssentialsService essentialsService;
 
     private final ChatPaginator<Redblock.RedblockInfo, ICommandContext> infoPaginator = new RedblockInfoPaginator().build();
     private final ChatPaginator<Redblock, ICommandContext> listPaginator = new RedblockListPaginator().build();
 
-    public RedblockCommandService(Plugin plugin, Module module, IRedblockService redblockService, IEssentialsService essentialsService, IVaultService vaultService) {
-        super(plugin, module);
+    public RedblockCommandService(IGreenfieldCorePlugin plugin, IRedblockService redblockService, @Nullable IEssentialsService essentialsService, @Nullable IVaultService vaultService) {
         this.vaultService = vaultService;
         this.redblockService = redblockService;
         this.essentialsService = essentialsService;
+        registerCommands(plugin);
     }
 
     private void create(ICommandContext ctx) throws PDKCommandException {
@@ -117,7 +114,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
 
         if (rb == null) ctx.error(RedblockMessages.ERROR_GOTO_NO_REDBLOCK_FOUND.apply(radius));
 
-        essentialsService.setUserLastLocation(player, location);
+        if (essentialsService != null) essentialsService.setUserLastLocation(player, location);
         player.teleport(rb.getLocation().clone().add(0.5, 0, 1.5));
         ctx.send(RedblockMessages.REDBLOCK_GOTO.apply(rb.getId()));
     }
@@ -211,8 +208,7 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
 
     // region Service Methods
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    private void registerCommands(IGreenfieldCorePlugin plugin) {
         CommandBuilder.of("rbcreate", "rbc")
                 .description("Create a new RedBlock")
                 .permission("greenfieldcore.redblock.create")
@@ -297,10 +293,6 @@ public class RedblockCommandService extends ModuleService<RedblockCommandService
                 .register(plugin);
     }
 
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
 
     // endregion
 

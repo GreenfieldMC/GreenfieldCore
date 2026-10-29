@@ -6,9 +6,6 @@ import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
 import com.njdaeger.pdk.command.exception.PDKCommandException;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockSearchRequest;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
@@ -18,26 +15,24 @@ import net.greenfieldmc.core.redblock.arguments.RoleListArgument;
 import net.greenfieldmc.core.redblock.arguments.UserListArgument;
 import net.greenfieldmc.core.shared.services.IUserService;
 import net.greenfieldmc.core.shared.services.IVaultService;
-import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class RedblockCommandServiceV2 extends ModuleService<RedblockCommandServiceV2> implements IModuleService<RedblockCommandServiceV2> {
+public class RedblockCommandServiceV2 {
 
     private final IRedblockServiceV2 redblockService;
     private final IUserService userService;
-    private final IVaultService vaultService;
+    private final @Nullable IVaultService vaultService;
 
-    public RedblockCommandServiceV2(Plugin plugin, Module module, IRedblockServiceV2 redblockService, IUserService userService, IVaultService vaultService) {
-        super(plugin, module);
-
+    public RedblockCommandServiceV2(IGreenfieldCorePlugin plugin, IRedblockServiceV2 redblockService, IUserService userService, @Nullable IVaultService vaultService) {
         this.redblockService = redblockService;
         this.userService = userService;
         this.vaultService = vaultService;
+        registerCommands(plugin);
     }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    private void registerCommands(IGreenfieldCorePlugin plugin) {
         CommandBuilder.ofAsync("rbcreate", "rbc")
                 .description("Create a new RedBlock")
                 .permission("greenfieldcore.redblock.create")
@@ -55,10 +50,6 @@ public class RedblockCommandServiceV2 extends ModuleService<RedblockCommandServi
                 .register(plugin);
     }
 
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
 
     private void create(IAsyncCommandContext ctx) throws PDKCommandException {
         var assignUserList = ctx.<List<GfUser>>getFlag("assign");

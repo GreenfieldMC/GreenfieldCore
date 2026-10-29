@@ -1,11 +1,8 @@
 package net.greenfieldmc.core.shared.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldUserApiService;
-import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,8 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class UserServiceImpl extends ModuleService<IUserService> implements IUserService {
+public class UserServiceImpl implements IUserService {
 
+    private final IGreenfieldCorePlugin plugin;
     private final IGreenfieldUserApiService userApi;
 
     private final Map<Long, GfUser> userIdCache = new HashMap<>();
@@ -26,20 +24,10 @@ public class UserServiceImpl extends ModuleService<IUserService> implements IUse
     private final Set<String> usernamesBeingFetched = new HashSet<>();
     private boolean isRefreshingCache = false;
 
-    public UserServiceImpl(Plugin plugin, Module module, IGreenfieldUserApiService userApiService) {
-        super(plugin, module);
-
+    public UserServiceImpl(IGreenfieldCorePlugin plugin, IGreenfieldUserApiService userApiService) {
+        this.plugin = plugin;
         this.userApi = userApiService;
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         refreshCache();
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 
     @Override
@@ -59,7 +47,7 @@ public class UserServiceImpl extends ModuleService<IUserService> implements IUse
                     }
                 })
                 .exceptionally(ex -> {
-                    getPlugin().getLogger().warning("Failed to fetch user by ID " + userId + ": " + ex.getMessage());
+                    plugin.getLogger().warning("Failed to fetch user by ID " + userId + ": " + ex.getMessage());
                     return null;
                 })
                 .whenComplete((result, ex) -> userIdsBeingFetched.remove(userId));
@@ -87,7 +75,7 @@ public class UserServiceImpl extends ModuleService<IUserService> implements IUse
                     }
                 })
                 .exceptionally(ex -> {
-                    getPlugin().getLogger().warning("Failed to fetch user by UUID " + userUid + ": " + ex.getMessage());
+                    plugin.getLogger().warning("Failed to fetch user by UUID " + userUid + ": " + ex.getMessage());
                     return null;
                 })
                 .whenComplete((result, ex) -> userUuidsBeingFetched.remove(userUid));
@@ -116,7 +104,7 @@ public class UserServiceImpl extends ModuleService<IUserService> implements IUse
                     }
                 })
                 .exceptionally(ex -> {
-                    getPlugin().getLogger().warning("Failed to fetch user by username " + username + ": " + ex.getMessage());
+                    plugin.getLogger().warning("Failed to fetch user by username " + username + ": " + ex.getMessage());
                     return null;
                 })
                 .whenComplete((result, ex) -> usernamesBeingFetched.remove(username));
@@ -148,7 +136,7 @@ public class UserServiceImpl extends ModuleService<IUserService> implements IUse
                     }
                 })
                 .exceptionally(ex -> {
-                    getPlugin().getLogger().warning("Failed to refresh user cache: " + ex.getMessage());
+                    plugin.getLogger().warning("Failed to refresh user cache: " + ex.getMessage());
                     return null;
                 })
                 .whenComplete((result, ex) -> isRefreshingCache = false);

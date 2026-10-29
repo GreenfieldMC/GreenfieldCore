@@ -1,12 +1,11 @@
 package net.greenfieldmc.core.redblock.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.redblock.Redblock;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public interface IRedblockStorageService extends IModuleService<IRedblockStorageService> {
+public interface IRedblockStorageService {
 
     /**
      * Gets the next id for a redblock

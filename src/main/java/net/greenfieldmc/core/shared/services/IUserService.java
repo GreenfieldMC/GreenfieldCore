@@ -1,12 +1,11 @@
 package net.greenfieldmc.core.shared.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface IUserService extends IModuleService<IUserService> {
+public interface IUserService {
 
     /**
      * Attempt to find a user by their internal GreenfieldCoreApi userId. If the user is not in memory yet, this will return null and attempt to find the user in the api to cache them for later use. If the user is not found in the api, this will return null.

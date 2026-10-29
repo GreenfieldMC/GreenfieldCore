@@ -24,7 +24,11 @@ import net.greenfieldmc.core.powershovel.PowerShovelModule;
 import net.greenfieldmc.core.redblock.RedblockModule;
 import net.greenfieldmc.core.shared.services.EssentialsServiceImpl;
 import net.greenfieldmc.core.shared.services.IEssentialsService;
+import net.greenfieldmc.core.shared.services.CoreProtectServiceImpl;
+import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import net.greenfieldmc.core.shared.services.IVaultService;
+import net.greenfieldmc.core.shared.services.IWorldEditService;
+import net.greenfieldmc.core.shared.services.WorldEditServiceImpl;
 import net.greenfieldmc.core.shared.services.VaultServiceImpl;
 import net.greenfieldmc.core.templates.TemplatesModule;
 import net.greenfieldmc.core.testresult.TestResultModule;
@@ -35,6 +39,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 public final class GreenfieldCore extends JavaPlugin implements IGreenfieldCorePlugin {
@@ -49,7 +54,7 @@ public final class GreenfieldCore extends JavaPlugin implements IGreenfieldCoreP
         Util.userNameMap.put(Util.CONSOLE_UUID, "Console");
         Util.getAllPlayers();
 
-        this.serviceProvider = ServiceProviderBuilder.builder()
+        var builder = ServiceProviderBuilder.builder()
                 .addTransient(Logger.class, (sp) -> getLogger())
                 .addTransient(IGreenfieldCorePlugin.class, (sp) -> this)
 
@@ -64,11 +69,34 @@ public final class GreenfieldCore extends JavaPlugin implements IGreenfieldCoreP
                 .addTransient(IGreenfieldRedblockApiService.class, GreenfieldRedblockApiServiceImpl.class)
                 //end greenfield api services
 
-                //standalone services
-                .addSingleton(IVaultService.class, VaultServiceImpl.class)
+                //standalone services - these depend on other plugins, so they are only registered if they can be created
+                .addSingleton(IVaultService.class, (s) -> {
+                    try {
+                        return new VaultServiceImpl();
+                    } catch (Exception e) {
+                        getLogger().warning("VaultService not enabled... " + e.getMessage());
+                        return null;
+                    }
+                })
+                .addSingleton(ICoreProtectService.class, (s) -> {
+                    try {
+                        return new CoreProtectServiceImpl();
+                    } catch (Exception e) {
+                        getLogger().warning("CoreProtectService not enabled... " + e.getMessage());
+                        return null;
+                    }
+                })
+                .addSingleton(IWorldEditService.class, (s) -> {
+                    try {
+                        return new WorldEditServiceImpl();
+                    } catch (Exception e) {
+                        getLogger().warning("WorldEditService not enabled... " + e.getMessage());
+                        return null;
+                    }
+                });
                 //end standalone services
 
-                .build(this);
+        this.serviceProvider = builder.build(this);
 
         serviceProvider.initialize(GreenfieldApiListenerService.class);
         serviceProvider.initialize(CodesModule.class);

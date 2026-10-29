@@ -1,45 +1,32 @@
 package net.greenfieldmc.core.shared.services;
 
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.plugin.Plugin;
 
-public class CoreProtectServiceImpl extends ModuleService<ICoreProtectService> implements ICoreProtectService {
+/**
+ * Throws on construction if CoreProtect is unavailable, so it is only registered when CoreProtect is present.
+ */
+public class CoreProtectServiceImpl implements ICoreProtectService {
 
-    private CoreProtectAPI coreApi;
+    private final CoreProtectAPI coreApi;
 
-    public CoreProtectServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
+    public CoreProtectServiceImpl() throws Exception {
+        var coreProtectPlugin = Bukkit.getPluginManager().getPlugin("CoreProtect");
+        if (coreProtectPlugin == null) {
+            throw new Exception("CoreProtect not found");
+        }
+        var cp = (CoreProtect) coreProtectPlugin;
+        if (!cp.getAPI().isEnabled() || cp.getAPI().APIVersion() < 6) throw new Exception("CoreProtect API is not enabled or version is too low");
+        this.coreApi = cp.getAPI();
     }
 
     @Override
     public boolean isEnabled() {
-        return coreApi != null && coreApi.isEnabled() && super.isEnabled();
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        try {
-            var coreProtectPlugin = plugin.getServer().getPluginManager().getPlugin("CoreProtect");
-            if (coreProtectPlugin == null) {
-                throw new Exception("CoreProtect not found");
-            }
-            var cp = (CoreProtect) coreProtectPlugin;
-            if (!cp.getAPI().isEnabled() || cp.getAPI().APIVersion() < 6) throw new Exception("CoreProtect API is not enabled or version is too low");
-            this.coreApi = cp.getAPI();
-        } catch (Exception e) {
-            throw new Exception("Failed to enable CoreProtectService", e);
-        }
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+        return coreApi.isEnabled();
     }
 
     @Override

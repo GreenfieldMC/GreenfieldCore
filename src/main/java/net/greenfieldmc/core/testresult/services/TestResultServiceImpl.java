@@ -12,6 +12,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class TestResultServiceImpl implements ITestResultService {
     private final IVaultService vaultService;
     private final IConfig config;
 
-    public TestResultServiceImpl(IGreenfieldCorePlugin plugin, ITestResultStorageService storageService, IVaultService vaultService) {
+    public TestResultServiceImpl(IGreenfieldCorePlugin plugin, ITestResultStorageService storageService, @Nullable IVaultService vaultService) {
         this.plugin = plugin;
         this.config = ConfigType.YML.createNew(plugin, "testbuild-config");
         this.storageService = storageService;
@@ -82,10 +83,14 @@ public class TestResultServiceImpl implements ITestResultService {
             newAttempt.setHasChanged(true);
             storageService.saveTestAttempt(whoIsStarting, newAttempt);
             storageService.saveDatabase();
-            vaultService.addUserToGroup(null, whoIsStarting, getTestingGroup()).thenAccept(success -> {
-                if (!success) whoIsStartingThem.sendMessage(Component.text("Failed to add the user to the testing group. Please perform the promotion manually.", NamedTextColor.RED));
+            if (vaultService != null) {
+                vaultService.addUserToGroup(null, whoIsStarting, getTestingGroup()).thenAccept(success -> {
+                    if (!success) whoIsStartingThem.sendMessage(Component.text("Failed to add the user to the testing group. Please perform the promotion manually.", NamedTextColor.RED));
+                    callback.run();
+                });
+            } else {
                 callback.run();
-            });
+            }
         });
     }
 
@@ -103,10 +108,14 @@ public class TestResultServiceImpl implements ITestResultService {
             currentAttempt.setSuccessful(true);
             storageService.saveTestAttempt(whoIsBeingPassed, currentAttempt);
             storageService.saveDatabase();
-            vaultService.addUserToGroup(null, whoIsBeingPassed, getPassingGroup()).thenAccept(success -> {
-                if (!success) whoIsPassingThem.sendMessage(Component.text("Failed to add the user to the passing group.", NamedTextColor.RED));
+            if (vaultService != null) {
+                vaultService.addUserToGroup(null, whoIsBeingPassed, getPassingGroup()).thenAccept(success -> {
+                    if (!success) whoIsPassingThem.sendMessage(Component.text("Failed to add the user to the passing group.", NamedTextColor.RED));
+                    callback.run();
+                });
+            } else {
                 callback.run();
-            });
+            }
         });
     }
 
@@ -145,11 +154,15 @@ public class TestResultServiceImpl implements ITestResultService {
             currentAttempt.setSuccessful(false);
             storageService.saveTestAttempt(whoIsBeingFailed, currentAttempt);
             storageService.saveDatabase();
-            vaultService.removeUserFromGroup(null, whoIsBeingFailed, getTestingGroup());
-            vaultService.addUserToGroup(null, whoIsBeingFailed, getFailingGroup()).thenAccept(success -> {
-                if (!success) whoIsFailingThem.sendMessage(Component.text("Failed to remove the user from the failing group.", NamedTextColor.RED));
+            if (vaultService != null) {
+                vaultService.removeUserFromGroup(null, whoIsBeingFailed, getTestingGroup());
+                vaultService.addUserToGroup(null, whoIsBeingFailed, getFailingGroup()).thenAccept(success -> {
+                    if (!success) whoIsFailingThem.sendMessage(Component.text("Failed to remove the user from the failing group.", NamedTextColor.RED));
+                    callback.run();
+                });
+            } else {
                 callback.run();
-            });
+            }
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 var player = Bukkit.getPlayer(whoIsBeingFailed);
                 if (player != null) {

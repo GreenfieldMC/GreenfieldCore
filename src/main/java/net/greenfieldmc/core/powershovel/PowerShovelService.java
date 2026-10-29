@@ -5,9 +5,6 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import com.njdaeger.pdk.command.brigadier.builder.CommandBuilder;
 import com.njdaeger.pdk.command.brigadier.builder.PdkArgumentTypes;
@@ -21,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Skull;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Fence;
 import org.bukkit.block.data.type.Wall;
 import org.bukkit.event.EventHandler;
@@ -28,19 +26,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import static net.greenfieldmc.core.ComponentUtils.moduleMessage;
 
-public class PowerShovelService extends ModuleService<PowerShovelService> implements IModuleService<PowerShovelService>, Listener {
+public class PowerShovelService implements Listener {
 
-    private PlayerProfile PROFILE;
+    private final PlayerProfile PROFILE;
     private static final PowerShovel SHOVEL = new PowerShovel();
     private static final Map<UUID, Long> TIMEOUTS = new HashMap<>();
     private static final Map<UUID, Mode> PLAYER_MODES = new HashMap<>();
@@ -52,27 +51,20 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
 
     private enum Mode { POWERCONNECTOR, POWERLINE }
 
-    public PowerShovelService(Plugin plugin, Module module, ICoreProtectService coreProtectService, IWorldEditService worldEditService) {
-        super(plugin, module);
+    public PowerShovelService(IGreenfieldCorePlugin plugin, Logger logger, @Nullable ICoreProtectService coreProtectService, IWorldEditService worldEditService) throws Exception {
         this.coreProtectService = coreProtectService;
         this.worldEditService = worldEditService;
-    }
 
-    @Override
-    public boolean isEnabled() {
-        return super.isEnabled() && PROFILE != null;
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        module.getLogger().info("Loading custom head...");
+        logger.info("Loading custom head...");
         PROFILE = Bukkit.createProfile(UUID.fromString("e4ac149f-2815-4e06-8ce1-770a628a2cfc"));
         var texture = PROFILE.getTextures();
         texture.setSkin(URI.create("http://textures.minecraft.net/texture/633c0bb37ebe1193ee4618103460a7f129277a8c7fd081b6aedb34a92bd5").toURL());
         PROFILE.setTextures(texture);
         PROFILE.complete();
-        module.getLogger().info("Custom head loaded.");
-        Bukkit.getPluginManager().registerEvents(this, plugin);        CommandBuilder.of("powershovel", "ps")
+        logger.info("Custom head loaded.");
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+
+        CommandBuilder.of("powershovel", "ps")
                 .permission("greenfieldcore.powershovel")
                 .description("Select power shovel mode and receive shovel")
             .then("powerconnector")
@@ -107,14 +99,17 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
             .register(plugin);
     }
 
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    //CoreProtect is optional, so these skip logging when it isn't installed
+    private void logRemoval(String player, Location location, Material type, BlockData blockData) {
+        if (coreProtectService != null) coreProtectService.logRemoval(player, location, type, blockData);
+    }
 
+    private void logPlacement(String player, Location location, Material type, BlockData blockData) {
+        if (coreProtectService != null) coreProtectService.logPlacement(player, location, type, blockData);
     }
 
     @EventHandler
     public void interactEvent(PlayerInteractEvent e) {
-        if (!isEnabled()) return;
         var player = e.getPlayer();
         UUID id = player.getUniqueId();
         if (!player.hasPermission("greenfieldcore.powershovel") || !SHOVEL.equals(player.getInventory().getItemInMainHand()) || e.getHand() == EquipmentSlot.OFF_HAND) return;
@@ -217,30 +212,30 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
     }
 
     private void handleTransformerPlacement(PlayerInteractEvent e, org.bukkit.entity.Player player, Block clickedBlock, BlockFace clickedFace, Fence fence) {
-        coreProtectService.logRemoval(player.getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+        logRemoval(player.getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
         fence.setFace(clickedFace, true);
         clickedBlock.setBlockData(fence, false);
-        coreProtectService.logPlacement(player.getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
+        logPlacement(player.getName(), clickedBlock.getLocation(), clickedBlock.getType(), clickedBlock.getBlockData());
         Location transformerLocation = new Location(clickedBlock.getWorld(), clickedBlock.getX() + clickedFace.getDirection().getBlockX(), clickedBlock.getY(), clickedBlock.getZ()  + clickedFace.getDirection().getBlockZ());
-        coreProtectService.logRemoval(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+        logRemoval(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
         transformerLocation.getBlock().setType(Material.MOSSY_COBBLESTONE_WALL, false);
         Wall wall = (Wall) transformerLocation.getBlock().getBlockData();
         wall.setUp(true);
         wall.setHeight(clickedFace.getOppositeFace(), Wall.Height.LOW);
         transformerLocation.getBlock().setBlockData(wall, false);
-        coreProtectService.logPlacement(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+        logPlacement(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
         transformerLocation = new Location(transformerLocation.getWorld(), transformerLocation.getX(), transformerLocation.getY() + 1, transformerLocation.getZ());
-        coreProtectService.logRemoval(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+        logRemoval(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
         transformerLocation.getBlock().setType(Material.PLAYER_HEAD);
         Skull skull = (Skull) transformerLocation.getBlock().getState();
         skull.setPlayerProfile(PROFILE);
         skull.update();
-        coreProtectService.logPlacement(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
+        logPlacement(player.getName(), transformerLocation, transformerLocation.getBlock().getType(), transformerLocation.getBlock().getBlockData());
     }
 
     private void handleMeterPlacement(PlayerInteractEvent e, org.bukkit.entity.Player player, Block clickedBlock, BlockFace clickedFace) {
         Location meterLocation = new Location(clickedBlock.getWorld(), clickedBlock.getX() + clickedFace.getDirection().getBlockX(), clickedBlock.getY(), clickedBlock.getZ()  + clickedFace.getDirection().getBlockZ());
-        coreProtectService.logRemoval(player.getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
+        logRemoval(player.getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
         meterLocation.getBlock().setType(Material.MOSSY_COBBLESTONE_WALL, false);
         Wall wall = (Wall) meterLocation.getBlock().getBlockData();
         wall.setUp(true);
@@ -249,7 +244,7 @@ public class PowerShovelService extends ModuleService<PowerShovelService> implem
         if (clickedFace != BlockFace.EAST) wall.setHeight(BlockFace.EAST, Wall.Height.TALL);
         if (clickedFace != BlockFace.WEST) wall.setHeight(BlockFace.WEST, Wall.Height.TALL);
         meterLocation.getBlock().setBlockData(wall, false);
-        coreProtectService.logPlacement(player.getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
+        logPlacement(player.getName(), meterLocation, meterLocation.getBlock().getType(), meterLocation.getBlock().getBlockData());
     }
 
     private ArrayList<Location> createContiguousPath(Location start, Location end, int steps, int yStart, 

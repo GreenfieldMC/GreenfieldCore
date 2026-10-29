@@ -66,7 +66,7 @@ public class ItemFrameInteraction extends InteractionHandler {
         Material itemFrameMaterialToPlace = rightClickedGlowItemFrame ? Material.ITEM_FRAME : Material.GLOW_ITEM_FRAME;
         Material itemFrameMaterialRemoved = rightClickedGlowItemFrame ? Material.GLOW_ITEM_FRAME : Material.ITEM_FRAME;
 
-        coreProtectService.logRemoval(player.getName(), itemFrame.getLocation(), itemFrameMaterialRemoved, null);
+        if (coreProtectService != null) coreProtectService.logRemoval(player.getName(), itemFrame.getLocation(), itemFrameMaterialRemoved, null);
 
         itemFrame.remove();
         ItemFrame newFrame = itemFrame.getWorld().spawn(itemFrame.getLocation(), itemFrameToPlaceClass);
@@ -79,7 +79,7 @@ public class ItemFrameInteraction extends InteractionHandler {
         newFrame.setFixed(itemFrame.isFixed());
         newFrame.setGlowing(itemFrame.isGlowing());
 
-        coreProtectService.logPlacement(player.getName(), newFrame.getLocation(), itemFrameMaterialToPlace, null);
+        if (coreProtectService != null) coreProtectService.logPlacement(player.getName(), newFrame.getLocation(), itemFrameMaterialToPlace, null);
 
     }
 

@@ -8,40 +8,34 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
 
 /**
- * Optional Vault integration. This always constructs: if Vault (or a permission/chat provider) is unavailable, a warning
- * is logged and the service stays disabled, returning failed futures / empty lists.
+ * Throws on construction if Vault (or a permission/chat provider) is unavailable, so it is only registered when Vault is present.
  */
 public class VaultServiceImpl implements IVaultService {
 
-    private Permission permission;
-    private Chat chat;
+    private final Permission permission;
+    private final Chat chat;
 
-    public VaultServiceImpl(Logger logger) {
-        try {
-            if (Bukkit.getPluginManager().getPlugin("Vault") == null)
-                throw new Exception("Vault not found");
+    public VaultServiceImpl() throws Exception {
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null)
+            throw new Exception("Vault not found");
 
-            RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServicesManager().getRegistration(Permission.class);
-            if (permissionProvider == null)
-                throw new Exception("No permission provider found");
+        RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServicesManager().getRegistration(Permission.class);
+        if (permissionProvider == null)
+            throw new Exception("No permission provider found");
 
-            RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServicesManager().getRegistration(Chat.class);
-            if (chatProvider == null)
-                throw new Exception("No chat provider found");
+        RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServicesManager().getRegistration(Chat.class);
+        if (chatProvider == null)
+            throw new Exception("No chat provider found");
 
-            permission = permissionProvider.getProvider();
-            chat = chatProvider.getProvider();
-        } catch (Exception e) {
-            logger.warning("Vault service not enabled... " + e.getMessage());
-        }
+        permission = permissionProvider.getProvider();
+        chat = chatProvider.getProvider();
     }
 
     @Override
     public boolean isEnabled() {
-        return permission != null && permission.isEnabled();
+        return permission.isEnabled();
     }
 
     @Override

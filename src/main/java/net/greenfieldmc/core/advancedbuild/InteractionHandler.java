@@ -198,7 +198,7 @@ public abstract class InteractionHandler implements PageItem<ICommandContext> {
      * @param changedBlock The block that was placed or removed.
      */
     public final void log(boolean placement, Player player, Block changedBlock) {
-        if (!coreProtectService.isEnabled()) return;
+        if (coreProtectService == null || !coreProtectService.isEnabled()) return;
         if (placement) coreProtectService.logPlacement(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
         else coreProtectService.logRemoval(player.getName(), changedBlock.getLocation(), changedBlock.getType(), changedBlock.getBlockData());
     }

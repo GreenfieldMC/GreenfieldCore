@@ -1,8 +1,6 @@
 package net.greenfieldmc.core.advancedbuild.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 import net.greenfieldmc.core.advancedbuild.handlers.*;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
@@ -20,43 +18,37 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> implements IAdvBuildService, Listener {
+public class AdvBuildServiceImpl implements IAdvBuildService, Listener, AutoCloseable {
 
-    private IConfig config;
-    private List<UUID> enabled;
-    private List<InteractionHandler> interactionHandlers;
+    private final IConfig config;
+    private final List<UUID> enabled;
+    private final List<InteractionHandler> interactionHandlers;
 
     private final IWorldEditService worldEditService;
     private final ICoreProtectService coreProtectService;
 
-    public AdvBuildServiceImpl(Plugin plugin, Module module, IWorldEditService worldEditService, ICoreProtectService coreProtectService) {
-        super(plugin, module);
+    public AdvBuildServiceImpl(IGreenfieldCorePlugin plugin, IWorldEditService worldEditService, @Nullable ICoreProtectService coreProtectService) {
         this.worldEditService = worldEditService;
         this.coreProtectService = coreProtectService;
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
         try {
             this.config = ConfigType.YML.createNew(plugin, "advancedbuildmode");
             config.addEntry("enabled", new ArrayList<>());
             this.enabled = new ArrayList<>(config.getStringList("enabled").stream().map(UUID::fromString).toList());
-            loadInteractionHandlers();
+            this.interactionHandlers = loadInteractionHandlers(plugin);
             Bukkit.getPluginManager().registerEvents(this, plugin);
         } catch (Exception e) {
-            throw new Exception("Failed to load AdvBuildService", e);
+            throw new RuntimeException("Failed to load AdvBuildService", e);
         }
-
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public void close() {
         config.setEntry("enabled", enabled.stream().map(UUID::toString).toList());
         config.save();
     }
@@ -71,12 +63,12 @@ public class AdvBuildServiceImpl extends ModuleService<IAdvBuildService> impleme
         return interactionHandlers;
     }
 
-    private void loadInteractionHandlers() {
-        this.interactionHandlers = List.of(
+    private List<InteractionHandler> loadInteractionHandlers(IGreenfieldCorePlugin plugin) {
+        return List.of(
                 new DefaultInteraction(worldEditService, coreProtectService),
                 new CandleInteraction(worldEditService, coreProtectService),
                 new AmethystInteraction(worldEditService, coreProtectService),
-                new ChiseledBookshelfInteraction(worldEditService, coreProtectService, getPlugin(), this),
+                new ChiseledBookshelfInteraction(worldEditService, coreProtectService, plugin, this),
                 new DoorInteraction(worldEditService, coreProtectService),
                 new JigsawInteraction(worldEditService, coreProtectService),
                 new PinkPetalsInteraction(worldEditService, coreProtectService),

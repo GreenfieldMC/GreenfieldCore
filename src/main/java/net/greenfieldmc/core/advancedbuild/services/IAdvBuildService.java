@@ -1,12 +1,11 @@
 package net.greenfieldmc.core.advancedbuild.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface IAdvBuildService extends IModuleService<IAdvBuildService> {
+public interface IAdvBuildService {
 
     List<UUID> getEnabledUsers();
 

@@ -1,9 +1,6 @@
 package net.greenfieldmc.core.advancedbuild.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.IModuleService;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.advancedbuild.AdvBuildMessages;
 import net.greenfieldmc.core.advancedbuild.InteractionHandler;
 import net.greenfieldmc.core.advancedbuild.arguments.InteractionHandlerArgument;
@@ -16,17 +13,25 @@ import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.plugin.Plugin;
 
-public class AdvBuildCommandService extends ModuleService<AdvBuildCommandService> implements IModuleService<AdvBuildCommandService> {
+public class AdvBuildCommandService {
 
     private final ChatPaginator<InteractionHandler, ICommandContext> interactionPaginator = new InteractionPaginator().build();
 
     private final IAdvBuildService advBuildService;
 
-    public AdvBuildCommandService(Plugin plugin, Module module, IAdvBuildService advBuildService) {
-        super(plugin, module);
+    public AdvBuildCommandService(IGreenfieldCorePlugin plugin, IAdvBuildService advBuildService) {
         this.advBuildService = advBuildService;
+
+        CommandBuilder.of("advbuild", "avb", "abm")
+                .description("The advanced build mode commands.")
+                .permission("greenfieldcore.advbuild")
+                .then("help").canExecute(this::help)
+                    .then("page", PdkArgumentTypes.integer(1, () -> "What page of interaction handlers to view")).executes(this::help)
+                .end()
+                .then("handler", new InteractionHandlerArgument(advBuildService)).executes(this::handlerInfo)
+                .canExecute(this::toggle)
+                .register(plugin);
     }
 
     @SuppressWarnings("DataFlowIssue")
@@ -61,25 +66,5 @@ public class AdvBuildCommandService extends ModuleService<AdvBuildCommandService
         var wasEnabled = advBuildService.isEnabledFor(id);
         advBuildService.setEnabledFor(id, !wasEnabled);
         ctx.send(!wasEnabled ? AdvBuildMessages.ENABLED_AVB : AdvBuildMessages.DISABLED_AVB);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-        CommandBuilder.of("advbuild", "avb", "abm")
-                .description("The advanced build mode commands.")
-                .permission("greenfieldcore.advbuild")
-                .then("help").canExecute(this::help)
-                    .then("page", PdkArgumentTypes.integer(1, () -> "What page of interaction handlers to view")).executes(this::help)
-                .end()
-                .then("handler", new InteractionHandlerArgument(advBuildService)).executes(this::handlerInfo)
-                .canExecute(this::toggle)
-                .register(plugin);
-
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
     }
 }

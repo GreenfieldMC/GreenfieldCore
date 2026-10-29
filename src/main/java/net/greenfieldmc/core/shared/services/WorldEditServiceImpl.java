@@ -1,51 +1,32 @@
 package net.greenfieldmc.core.shared.services;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.UnknownNullability;
 
-public class WorldEditServiceImpl extends ModuleService<IWorldEditService> implements IWorldEditService {
+/**
+ * Throws on construction if WorldEdit is unavailable, so it is only registered when WorldEdit is present.
+ */
+public class WorldEditServiceImpl implements IWorldEditService {
 
-    protected WorldEditServiceActualImpl impl;
+    protected final WorldEditServiceActualImpl impl;
 
-    public WorldEditServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return super.isEnabled() && impl != null;
-    }
-
-    @Override
-    public void tryEnable(@UnknownNullability IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public WorldEditServiceImpl() throws Exception {
+        var wePlugin = Bukkit.getPluginManager().getPlugin("WorldEdit");
+        if (wePlugin == null) throw new Exception("WorldEdit not found");
         try {
-            var wePlugin = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
-            if (wePlugin != null) {
-                this.impl = new WorldEditServiceActualImpl((WorldEditPlugin) wePlugin);
-            } else throw new Exception("Failed to enable WorldEditService");
-
+            this.impl = new WorldEditServiceActualImpl((WorldEditPlugin) wePlugin);
         } catch (NoClassDefFoundError e) {
+            //the service provider only catches Exceptions, so rethrow as one
             throw new Exception("Failed to enable WorldEditService", e);
         }
     }
 
     @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
-
-    @Override
     public void setBlock(Location location, BlockData data) {
-        if (!isEnabled()) return;
         //had to do this weird workaround due to getting a NoClassDefFoundError from some of the worldedit api classes if they were referenced in this class.
-        if (impl != null) impl.setBlock(location, data);
+        impl.setBlock(location, data);
     }
-
 
 }

@@ -4,7 +4,7 @@ import net.greenfieldmc.core.hotspots.Category;
 import net.greenfieldmc.core.hotspots.Hotspot;
 import net.greenfieldmc.core.shared.services.IDynmapService;
 import org.bukkit.World;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 import java.util.function.Predicate;

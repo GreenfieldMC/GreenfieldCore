@@ -1,37 +1,25 @@
 package net.greenfieldmc.core.authhub.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
-import org.bukkit.plugin.Plugin;
 
-public class AuthhubServiceImpl extends ModuleService<IAuthhubService> implements IAuthhubService {
+public class AuthhubServiceImpl implements IAuthhubService {
 
-    private IConfig config;
-    private int requiredPatreonPledgeCents;
+    private final IConfig config;
+    private final int requiredPatreonPledgeCents;
 
-    public AuthhubServiceImpl(Plugin plugin, Module module) {
-        super(plugin, module);
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
+    public AuthhubServiceImpl(IGreenfieldCorePlugin plugin) {
         try {
             this.config = ConfigType.YML.createNew(plugin, "authhub");
 
             config.addEntry("authhub.requiredPatreonPledgeCents", 1000);
             this.requiredPatreonPledgeCents = config.getInt("authhub.requiredPatreonPledgeCents");
         } catch (Exception e) {
-            throw new Exception("Failed to load AuthhubService", e);
+            throw new RuntimeException("Failed to load AuthhubService", e);
         }
     }
 
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
 
     @Override
     public int getRequiredPatreonPledge() {

@@ -6,7 +6,7 @@ import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblock
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

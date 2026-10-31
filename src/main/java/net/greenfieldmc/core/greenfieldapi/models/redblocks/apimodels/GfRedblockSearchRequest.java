@@ -2,7 +2,7 @@ package net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels;
 
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 

@@ -20,7 +20,7 @@ import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.Pair;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.Comparator;
 import java.util.List;

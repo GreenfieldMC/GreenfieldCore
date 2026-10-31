@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfDiscordConnection;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfPatreonConnection;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface IGreenfieldUserApiService extends IModuleService<IGreenfieldUserApiService> {
+public interface IGreenfieldUserApiService {
 
     /**
      * Gets all users from the Greenfield API.

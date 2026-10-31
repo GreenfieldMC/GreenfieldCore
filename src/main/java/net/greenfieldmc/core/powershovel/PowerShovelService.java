@@ -26,7 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.net.URI;
 import java.util.ArrayList;

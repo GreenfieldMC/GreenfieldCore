@@ -4,11 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParseException;
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
-import org.bukkit.plugin.Plugin;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,8 +20,9 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
-public class GreenfieldApiClientImpl extends ModuleService<IAuthedClientService> implements IAuthedClientService {
+public class GreenfieldApiClientImpl implements IAuthedClientService {
 
     private static final DateTimeFormatter API_LOCAL_DATE_TIME = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
@@ -34,17 +31,42 @@ public class GreenfieldApiClientImpl extends ModuleService<IAuthedClientService>
             .optionalEnd()
             .toFormatter();
 
-    private final IGreenfieldApiConfigService configService;
+    private final Logger logger;
     private final OAuthClientCredentialsHandler authHandler;
 
-    private HttpClient httpClient;
-    private Gson gson;
-    private String apiUrl;
+    private final HttpClient httpClient;
+    private final Gson gson;
+    private final String apiUrl;
 
-    public GreenfieldApiClientImpl(Plugin plugin, Module module, IGreenfieldApiConfigService configService, OAuthClientCredentialsHandler authHandler) {
-        super(plugin, module);
-        this.configService = configService;
+    public GreenfieldApiClientImpl(Logger logger, IGreenfieldApiConfigService configService, OAuthClientCredentialsHandler authHandler) {
+        this.logger = logger;
         this.authHandler = authHandler;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(30))
+                .build();
+
+        this.gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
+                    if (json == null || json.isJsonNull()) {
+                        return null;
+                    }
+                    String value = json.getAsString();
+                    try {
+                        return Date.from(OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant());
+                    } catch (DateTimeParseException ignored) {
+                        // Fall back to local date-time assumed to be UTC.
+                    }
+                    try {
+                        LocalDateTime localDateTime = LocalDateTime.parse(value, API_LOCAL_DATE_TIME);
+                        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+                    } catch (DateTimeParseException e) {
+                        throw new JsonParseException("Unsupported date format: " + value, e);
+                    }
+                })
+                .create();
+
+        this.apiUrl = configService.getApiUrl();
     }
 
     @Override
@@ -156,53 +178,14 @@ public class GreenfieldApiClientImpl extends ModuleService<IAuthedClientService>
                             T data = gson.fromJson(responseJson, responseClass);
                             return Result.success(data);
                         } catch (Exception e) {
-                            getModule().getLogger().severe("Failed to parse API response: " + e.getMessage());
+                            logger.severe("Failed to parse API response: " + e.getMessage());
                             return Result.<T>failure("Failed to parse response: " + e.getMessage());
                         }
                     })
                     .exceptionally(throwable -> {
-                        getModule().getLogger().severe("API request failed: " + throwable.getMessage());
+                        logger.severe("API request failed: " + throwable.getMessage());
                         return Result.failure("Network error: " + throwable.getMessage());
                     });
         }).exceptionally(throwable -> Result.failure("Authentication error: " + throwable.getMessage()));
-    }
-
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(30))
-                .build();
-
-        this.gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                .registerTypeAdapter(Date.class, (JsonDeserializer<Date>) (json, typeOfT, context) -> {
-                    if (json == null || json.isJsonNull()) {
-                        return null;
-                    }
-                    String value = json.getAsString();
-                    try {
-                        return Date.from(OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant());
-                    } catch (DateTimeParseException ignored) {
-                        // Fall back to local date-time assumed to be UTC.
-                    }
-                    try {
-                        LocalDateTime localDateTime = LocalDateTime.parse(value, API_LOCAL_DATE_TIME);
-                        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
-                    } catch (DateTimeParseException e) {
-                        throw new JsonParseException("Unsupported date format: " + value, e);
-                    }
-                })
-                .create();
-
-        this.apiUrl = configService.getApiUrl();
-
-        getModule().getLogger().info("Greenfield Core API client initialized");
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-        if (authHandler != null) {
-            authHandler.shutdown();
-        }
     }
 }

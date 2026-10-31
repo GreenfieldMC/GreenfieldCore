@@ -6,7 +6,7 @@ import net.greenfieldmc.core.shared.services.IDynmapService;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 import java.util.UUID;

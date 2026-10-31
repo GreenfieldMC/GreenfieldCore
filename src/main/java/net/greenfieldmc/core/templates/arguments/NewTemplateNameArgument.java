@@ -6,7 +6,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
 import net.greenfieldmc.core.templates.services.ITemplateService;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 public class NewTemplateNameArgument extends AbstractStringTypedArgument<String> {
 

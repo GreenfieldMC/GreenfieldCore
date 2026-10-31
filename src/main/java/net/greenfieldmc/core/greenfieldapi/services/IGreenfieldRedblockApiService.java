@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
-import net.greenfieldmc.core.IModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockProject;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public interface IGreenfieldRedblockApiService extends IModuleService<IGreenfieldRedblockApiService> {
+public interface IGreenfieldRedblockApiService {
 
     /**
      * Gets a list of all Redblock projects.

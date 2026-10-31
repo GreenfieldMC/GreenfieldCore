@@ -1,8 +1,5 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockProject;
@@ -19,30 +16,20 @@ import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblock
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockUpdateRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockUserAssignRequest;
 import org.bukkit.Location;
-import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class GreenfieldRedblockApiServiceImpl extends ModuleService<IGreenfieldRedblockApiService> implements IGreenfieldRedblockApiService {
+public class GreenfieldRedblockApiServiceImpl implements IGreenfieldRedblockApiService {
 
     private final IAuthedClientService clientService;
 
-    public GreenfieldRedblockApiServiceImpl(Plugin plugin, Module module, IAuthedClientService clientService) {
-        super(plugin, module);
+    public GreenfieldRedblockApiServiceImpl(IAuthedClientService clientService) {
         this.clientService = clientService;
     }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
 
     @Override
     public CompletableFuture<Result<List<GfRedblockProject>>> getProjects() {

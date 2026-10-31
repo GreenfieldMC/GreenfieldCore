@@ -1,39 +1,26 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
-import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfDiscordConnection;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfPatreonConnection;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
-import org.bukkit.plugin.Plugin;
 
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class GreenfieldUserApiServiceImpl extends ModuleService<IGreenfieldUserApiService> implements IGreenfieldUserApiService {
+public class GreenfieldUserApiServiceImpl implements IGreenfieldUserApiService {
 
     private final IAuthedClientService clientService;
     private final IGreenfieldApiConfigService configService;
 
-    public GreenfieldUserApiServiceImpl(Plugin plugin, Module module, IAuthedClientService clientService, IGreenfieldApiConfigService configService) {
-        super(plugin, module);
+    public GreenfieldUserApiServiceImpl(IAuthedClientService clientService, IGreenfieldApiConfigService configService) {
         this.configService = configService;
         this.clientService = clientService;
     }
 
-    @Override
-    public void tryEnable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
 
-    }
-
-    @Override
-    public void tryDisable(IGreenfieldCorePlugin plugin, Module module) throws Exception {
-
-    }
 
     @Override
     public CompletableFuture<Result<List<GfUser>>> getAllUsers() {

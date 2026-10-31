@@ -9,7 +9,7 @@ import net.greenfieldmc.core.Util;
 import net.greenfieldmc.core.testresult.TestSet;
 import net.greenfieldmc.core.testresult.services.ITestResultService;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 import java.util.UUID;

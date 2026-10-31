@@ -18,7 +18,7 @@ import com.njdaeger.pdk.command.exception.PDKCommandException;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginator;
 import net.greenfieldmc.core.shared.services.IVaultService;
 import org.bukkit.Location;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.Comparator;
 import java.util.List;

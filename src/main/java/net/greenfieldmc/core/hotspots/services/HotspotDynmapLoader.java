@@ -2,7 +2,7 @@ package net.greenfieldmc.core.hotspots.services;
 
 import net.greenfieldmc.core.shared.services.IDynmapService;
 import org.dynmap.markers.MarkerIcon;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;

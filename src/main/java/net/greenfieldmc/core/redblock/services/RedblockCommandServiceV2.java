@@ -15,7 +15,7 @@ import net.greenfieldmc.core.redblock.arguments.RoleListArgument;
 import net.greenfieldmc.core.redblock.arguments.UserListArgument;
 import net.greenfieldmc.core.shared.services.IUserService;
 import net.greenfieldmc.core.shared.services.IVaultService;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 

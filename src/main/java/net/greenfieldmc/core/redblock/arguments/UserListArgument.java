@@ -9,7 +9,7 @@ import com.njdaeger.pdk.command.brigadier.arguments.AbstractDelimitedTypedArgume
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import net.greenfieldmc.core.shared.services.IUserService;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.Map;
 

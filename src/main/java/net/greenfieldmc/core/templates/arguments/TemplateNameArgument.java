@@ -8,7 +8,7 @@ import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
 import net.greenfieldmc.core.templates.models.Template;
 import net.greenfieldmc.core.templates.services.ITemplateService;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 

@@ -7,7 +7,7 @@ import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
 import net.greenfieldmc.core.templates.services.ITemplateWorldEditService;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.nio.file.Path;
 import java.util.List;

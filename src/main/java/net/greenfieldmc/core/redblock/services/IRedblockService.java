@@ -3,7 +3,7 @@ package net.greenfieldmc.core.redblock.services;
 import net.greenfieldmc.core.redblock.Redblock;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 import java.util.UUID;

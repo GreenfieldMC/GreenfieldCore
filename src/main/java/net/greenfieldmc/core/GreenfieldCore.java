@@ -7,7 +7,6 @@ import net.greenfieldmc.core.authhub.AuthhubModule;
 import net.greenfieldmc.core.chatformat.ChatFormatModule;
 import net.greenfieldmc.core.codes.CodesModule;
 import net.greenfieldmc.core.commandstore.CommandStoreModule;
-import net.greenfieldmc.core.greenfieldapi.GreenfieldApiModule;
 import net.greenfieldmc.core.greenfieldapi.services.GreenfieldApiClientImpl;
 import net.greenfieldmc.core.greenfieldapi.services.GreenfieldApiConfigService;
 import net.greenfieldmc.core.greenfieldapi.services.GreenfieldApiListenerService;

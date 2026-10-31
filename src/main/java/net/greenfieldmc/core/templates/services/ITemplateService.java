@@ -5,7 +5,7 @@ import net.greenfieldmc.core.templates.models.TemplateBrush;
 import net.greenfieldmc.core.templates.models.TemplateSession;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 import java.util.UUID;

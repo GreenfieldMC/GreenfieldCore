@@ -5,7 +5,7 @@ import net.greenfieldmc.core.redblock.Redblock;
 import net.greenfieldmc.core.shared.services.IDynmapService;
 import org.bukkit.Bukkit;
 import org.dynmap.markers.Marker;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import static net.greenfieldmc.core.redblock.services.RedblockServiceHelpers.createMarkerHtml;
 

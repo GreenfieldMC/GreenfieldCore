@@ -1,11 +1,8 @@
 package net.greenfieldmc.core.greenfieldapi.services;
 
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
-import net.greenfieldmc.core.Module;
-import net.greenfieldmc.core.ModuleService;
 import com.njdaeger.pdk.config.ConfigType;
 import com.njdaeger.pdk.config.IConfig;
-import org.bukkit.plugin.Plugin;
 
 /**
  * Implementation of the Greenfield API configuration service.

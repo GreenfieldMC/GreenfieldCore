@@ -2,7 +2,7 @@ package net.greenfieldmc.core.commandstore.services;
 
 import net.greenfieldmc.core.commandstore.SavedCommand;
 import net.greenfieldmc.core.commandstore.storage.ICommandDatabase;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package net.greenfieldmc.core.greenfieldapi.models.redblocks;
 
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.Date;
 

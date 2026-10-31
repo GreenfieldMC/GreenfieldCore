@@ -3,8 +3,6 @@ package net.greenfieldmc.core;
 import com.njdaeger.pdk.serviceprovider.IServiceProvider;
 import com.njdaeger.pdk.serviceprovider.ServiceProviderBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -19,19 +17,20 @@ import java.util.logging.Logger;
  * <ul>
  *     <li><b>Module</b> - extends {@code Module}. Represents the whole feature, owns the service provider, and decides
  *     which services are registered and what runs on enable/disable. Contains no feature logic itself.</li>
- *     <li><b>Module service</b> - extends {@link ModuleService} (implements {@link IModuleService}). Registered in
- *     {@link #buildModuleServices}. Use when the class holds state or logic that other classes inject AND it needs
- *     to be loaded on enable and/or saved on disable (config, storage, API/Vault hooks). The module drives its
- *     {@code tryEnable}/{@code tryDisable}, so a failing service logs a warning instead of killing the module.</li>
- *     <li><b>Neither</b> - a plain class with no module base class. Use when there is no enable/disable lifecycle:
- *     command registrations (built in {@link #tryEnable} with {@code moduleServiceProvider.initialize(X.class)},
- *     never registered as a service), listeners, paginators, arguments, messages, POJOs. Dependencies come in
- *     through the constructor.</li>
+ *     <li><b>Service</b> - a plain class registered as a singleton in {@link #buildModuleServices}. Use when other
+ *     classes inject it. Its constructor does the "enable" work (load config, read storage, hook another plugin); if
+ *     the constructor throws, the module fails to enable. Dependencies come in through the constructor, and a
+ *     dependency that may be missing (Vault, CoreProtect, Dynmap...) is annotated {@code @Nullable}.</li>
+ *     <li><b>Closeable service</b> - a service that also implements {@link AutoCloseable}. When the module disables,
+ *     {@link #disable()} calls {@code close()} on every closeable singleton the module registered (save storage,
+ *     unregister listeners...). Implementing it is optional; a service with nothing to do on shutdown can skip it.</li>
+ *     <li><b>Neither</b> - a plain class that is not registered as a service. Use when nothing injects it and it has
+ *     no shutdown work: command registrations, listeners, paginators, arguments, messages, POJOs. Build it in
+ *     {@link #tryEnable} with {@code moduleServiceProvider.initialize(X.class)}. Instances created this way are
+ *     never closed, so anything that needs shutdown work must be a registered singleton instead.</li>
  * </ul>
- * Rule of thumb: needs enable/disable hooks -> module service; otherwise -> plain class. A module service must be
- * registered in {@link #buildModuleServices}, as its constructor registers it with the module.
- *
- * @see ModuleService
+ * Services that depend on other plugins and are shared between modules (Vault, CoreProtect, WorldEdit, Essentials,
+ * Dynmap) are registered at the plugin level in {@code GreenfieldCore}, not in a module.
  */
 public abstract class Module {
 
@@ -42,7 +41,6 @@ public abstract class Module {
 
     private final ModuleLogger moduleLogger;
     private final Predicate<ModuleConfig> canEnable;
-    private final List<IModuleService<?>> integrations = new ArrayList<>();
 
     public Module(IGreenfieldCorePlugin plugin, Predicate<ModuleConfig> canEnable) {
         this.plugin = plugin;
@@ -50,29 +48,6 @@ public abstract class Module {
         this.moduleLogger = new ModuleLogger(this);
         plugin.registerModule(this);
         this.pluginServiceProvider = plugin.getServiceProvider();
-    }
-
-    public <T extends IModuleService<T>> T enableIntegration(IModuleService<T> integration, boolean required) {
-        try {
-            integration.tryEnable(plugin, this);
-            integration.setEnabled(true);
-            integration.postTryEnable(plugin, this);
-            return (T) integration;
-        } catch (Exception e) {
-            if (required) throw new RuntimeException(e);
-            getLogger().warning("Integration " + integration.getClass().getSimpleName() + " not enabled... " + e.getMessage());
-            return (T) integration;
-        }
-    }
-
-    public <T extends IModuleService<T>> void disableIntegration(IModuleService<T> integration) {
-        if (!integration.isEnabled()) return;
-        try {
-            integration.tryDisable(plugin, this);
-            integration.setEnabled(false);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Logger getLogger() {
@@ -89,17 +64,9 @@ public abstract class Module {
             this.moduleServiceProvider = buildModuleServices(ServiceProviderBuilder.builder(moduleLogger.getPrefix(), pluginServiceProvider)
                     .addSingleton(Logger.class, (s) -> moduleLogger)
                     .addSingleton(Module.class, (s) -> this));
-            integrations.forEach(integration -> {
-                try {
-                    integration.tryEnable(plugin, this);
-                    integration.setEnabled(true);
-                    integration.postTryEnable(plugin, this);
-                } catch (Exception e) {
-                    getLogger().warning("Integration " + integration.getClass().getSimpleName() + " not enabled... " + e.getMessage());
-                }
-            });
             tryEnable();
             this.enabled = true;
+            getLogger().info("Module enabled.");
         } catch (Exception e) {
             this.enabled = false;
             getLogger().severe("Failed to enable module: " + e.getMessage());
@@ -110,16 +77,9 @@ public abstract class Module {
         if (!enabled || !canEnable.test(plugin.getModuleConfig())) return;
         try {
             tryDisable();
-            integrations.forEach(integration -> {
-                try {
-                    integration.tryDisable(plugin, this);
-                    integration.setEnabled(false);
-                } catch (Exception e) {
-                    getLogger().warning("Integration " + integration.getClass().getSimpleName() + " not disabled... " + e.getMessage());
-                }
-            });
             closeSingletons();
             this.enabled = false;
+            getLogger().info("Module disabled.");
         } catch (Exception e) {
             getLogger().severe("Failed to disable module: " + e.getMessage());
         }
@@ -148,9 +108,5 @@ public abstract class Module {
     protected abstract void tryEnable() throws Exception;
 
     protected abstract void tryDisable() throws Exception;
-
-    public void registerIntegration(IModuleService<?> integration) {
-        integrations.add(integration);
-    }
 
 }

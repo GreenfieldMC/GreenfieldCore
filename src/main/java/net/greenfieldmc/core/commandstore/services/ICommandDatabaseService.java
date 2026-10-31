@@ -2,7 +2,7 @@ package net.greenfieldmc.core.commandstore.services;
 
 import net.greenfieldmc.core.commandstore.SavedCommand;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
+import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.Comparator;
 import java.util.List;

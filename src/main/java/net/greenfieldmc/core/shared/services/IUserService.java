@@ -28,6 +28,9 @@ public interface IUserService {
      */
     GfUser getUserByUsername(String username);
 
+
+    GfUser getUserByUsernameCacheOnly(String username);
+
     /**
      * Get the list of currently cached users.
      * @return The list of currently cached users

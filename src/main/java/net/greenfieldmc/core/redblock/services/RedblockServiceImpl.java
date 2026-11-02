@@ -1,8 +1,10 @@
 package net.greenfieldmc.core.redblock.services;
 
+import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.redblock.Redblock;
 import net.greenfieldmc.core.redblock.RedblockMessages;
 import net.greenfieldmc.core.shared.services.IDynmapService;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,10 +24,12 @@ public class RedblockServiceImpl implements IRedblockService {
     private final @Nullable IDynmapService dynmapService;
     private final IRedblockStorageService storageService;
 
-    public RedblockServiceImpl(Logger logger, @Nullable IDynmapService dynmapService, IRedblockStorageService storageService) {
+    // dynmapLoader is only taken so the marker sets are created before this service adds markers
+    public RedblockServiceImpl(IGreenfieldCorePlugin plugin, Logger logger, @Nullable IDynmapService dynmapService, RedblockDynmapLoader dynmapLoader, IRedblockStorageService storageService) {
         this.logger = logger;
         this.dynmapService = dynmapService;
         this.storageService = storageService;
+        if (dynmapService != null) loadRedblocksToDynmap(plugin, dynmapService);
     }
 
     @Override
@@ -139,6 +143,20 @@ public class RedblockServiceImpl implements IRedblockService {
     }
 
     // region Helper Methods
+
+    private void loadRedblocksToDynmap(IGreenfieldCorePlugin plugin, IDynmapService dynmap) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            logger.info("Adding RedBlock markers to Dynmap...");
+            storageService.getRedblocks(Redblock::isPending).forEach(rb -> {
+                dynmap.tryCreateMarker(RedblockDynmapLoader.PENDING_MARKER_SET, rb.getId() + "_redblock", createMarkerHtml(rb), rb.getLocation(), RedblockDynmapLoader.PENDING_MARKER_ICON, true);
+            });
+
+            storageService.getRedblocks(Redblock::isIncomplete).forEach(rb -> {
+                dynmap.tryCreateMarker(RedblockDynmapLoader.INCOMPLETE_MARKER_SET, rb.getId() + "_redblock", createMarkerHtml(rb), rb.getLocation(), RedblockDynmapLoader.INCOMPLETE_MARKER_ICON, true);
+            });
+            logger.info("Done adding RedBlock markers to Dynmap.");
+        });
+    }
 
     private void updateDynmapMarker(Redblock redblock) {
         var markerId = redblock.getId() + "_redblock";

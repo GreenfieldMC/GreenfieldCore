@@ -26,11 +26,12 @@ public class RedblockArgumentV2 extends AbstractStringTypedArgument<GfRedblock> 
 
     @Override
     public Map<GfRedblock, Message> listSuggestions(ICommandContext commandContext) {
-        var serviceResult = redblockService.getRedblocks().join();
-        if (serviceResult.isFailure()) {
-            return Map.of();
-        }
-        return serviceResult.getData().stream().collect(java.util.stream.Collectors.toMap(redblock -> redblock, redblock -> redblock::getMessage));
+        var serviceResult = redblockService.getRedblocks(null);
+        return serviceResult.stream().collect(java.util.stream.Collectors.toMap(redblock -> redblock, redblock -> redblock::getMessage));
+//        if (serviceResult.isFailure()) {
+//            return Map.of();
+//        }
+//        return serviceResult.getData().stream().collect(java.util.stream.Collectors.toMap(redblock -> redblock, redblock -> redblock::getMessage));
     }
 
     @Override

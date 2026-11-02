@@ -36,7 +36,7 @@ public class UserListArgument extends AbstractDelimitedTypedArgument<GfUser> {
             reader.setCursor(reader.getCursor() - nativeType.length());
             throw USER_SERVICE_NOT_INITIALIZED.createWithContext(reader, nativeType);
         }
-        var potentialUser = userService.getUserByUsername(username);
+        var potentialUser = userService.getUserByUsernameCacheOnly(username);
         if (potentialUser == null) {
 
             reader.setCursor(reader.getCursor() - nativeType.length());

@@ -1,7 +1,12 @@
 package net.greenfieldmc.core.greenfieldapi.models.redblocks;
 
 import com.njdaeger.pdk.serviceprovider.Nullable;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockSearchRequest;
+import net.greenfieldmc.core.redblock.services.IRedblockServiceV2;
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -43,6 +48,9 @@ public class GfRedblock {
     private List<GfRedblockRoleAssignment> roleAssignments;
 
     private List<UUID> entities;
+
+    private final Vector boxUpperBound = new Vector(x + 1, y - 1, z + 1);
+    private final Vector boxLowerBound = new Vector(x - 1, y - 3, z - 1);
 
     public GfRedblock() {
     }
@@ -173,6 +181,82 @@ public class GfRedblock {
      */
     public List<GfRedblockStatus> getStatuses() {
         return statuses;
+    }
+
+    /**
+     * Get the world agnostic location of this Redblock.
+     * @return the world agnostic location of this Redblock
+     */
+    public Vector getVector() {
+        return new Vector(x, y, z);
+    }
+
+    /**
+     * Determine if a location is within the bounds of this Redblock. This checks both the sign location and the cube area.
+     * @param vector The location to check
+     * @return true if the location is within the bounds of this Redblock
+     */
+    public boolean isPartOfRedblock(Vector vector) {
+        if (getVector().equals(vector)) return true; //where the sign is
+        return vector.isInAABB(boxLowerBound, boxUpperBound); //where the cube is
+    }
+
+    /**
+     * Checks whether this Redblock is deleted.
+     * @return true if this Redblock is deleted
+     */
+    public boolean isDeleted() {
+        return deletedBy != null || deletedOn != null;
+    }
+
+    /**
+     * Checks whether this Redblock is approved, meaning its latest status is "approved".
+     * @return true if this Redblock is approved
+     */
+    public boolean isApproved() {
+        var status = getLatestStatus();
+        return IRedblockServiceV2.STATUS_APPROVED.equalsIgnoreCase(status);
+    }
+
+    /**
+     * Checks whether this Redblock is incomplete
+     * @return true if this Redblock is incomplete
+     */
+    public boolean isIncomplete() {
+        var status = getLatestStatus();
+        return IRedblockServiceV2.STATUS_INCOMPLETE.equalsIgnoreCase(status);
+    }
+
+    /**
+     * Checks whether this Redblock is pending
+     * @return true if this Redblock is pending
+     */
+    public boolean isPending() {
+        var status = getLatestStatus();
+        return IRedblockServiceV2.STATUS_PENDING.equalsIgnoreCase(status);
+    }
+
+    /**
+     * Gets the most recent status of this Redblock, or null if it has no statuses.
+     * @return the most recent status of this Redblock
+     */
+    @Nullable
+    public String getLatestStatus() {
+        if (statuses == null) return null;
+        return statuses.stream()
+                .max(Comparator.comparingLong(GfRedblockStatus::getStatusId))
+                .map(GfRedblockStatus::getStatus)
+                .orElse(null);
+    }
+
+    /**
+     * Checks whether this Redblock is active, meaning it is not deleted and its latest status is incomplete or pending.
+     * @return true if this Redblock is active
+     */
+    public boolean isActive() {
+        var status = getLatestStatus();
+        return deletedBy == null && deletedOn == null
+                && (IRedblockServiceV2.STATUS_INCOMPLETE.equalsIgnoreCase(status) || IRedblockServiceV2.STATUS_PENDING.equalsIgnoreCase(status));
     }
 
     /**

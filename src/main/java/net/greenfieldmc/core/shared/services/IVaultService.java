@@ -15,6 +15,8 @@ public interface IVaultService {
 
     CompletableFuture<Boolean> removeUserFromGroup(String world, UUID uuid, String group);
 
+    CompletableFuture<String[]> getUserGroups(String world, UUID uuid);
+
     List<String> getGroupList();
 
 }

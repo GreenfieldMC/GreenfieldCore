@@ -1,11 +1,14 @@
 package net.greenfieldmc.core.redblock;
 
+import com.njdaeger.pdk.utils.TriFunction;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -26,7 +29,13 @@ public class RedblockMessages {
     public static final TextComponent ERROR_NO_RESULTS_TO_DISPLAY = Component.text("There are no results to display.", NamedTextColor.RED);
 
     public static final Function<String, String> ERROR_REDBLOCK_NOT_GENERATED = (errorMessage) -> "Could not generate RedBlock: " + errorMessage;
-
+    public static final Function<String, String> ERROR_WORLD_NOT_MAPPED = (worldName) -> "World " + worldName + " is not mapped to a RedBlock project.";
+    public static final Function<String, String> ERROR_PROJECT_WORLD_NOT_LOADED = (redblockKey) -> "No loaded world is mapped to the project of RedBlock " + redblockKey + ".";
+    public static final BiFunction<String, List<String>, String> ERROR_EDIT_PARTIALLY_SAVED = (redblockKey, errors) -> "Some changes to RedBlock " + redblockKey + " could not be saved: " + String.join("; ", errors);
+    public static final BiFunction<GfRedblock, String, String> ERROR_REDBLOCK_NOT_DELETABLE = (redblock, state) -> "RedBlock " + redblock.getKey() + " cannot be deleted because it is " + state + ".";
+    public static final TriFunction<GfRedblock, String, String, String> ERROR_REDBLOCK_WRONG_STATUS = (redblock, requiredStatus, currentState) -> "RedBlock " + redblock.getKey() + " must be " + requiredStatus.toLowerCase() + ", but it is " + currentState + ".";
+    public static final Function<String, String> ERROR_REDBLOCK_NOT_PLACED = (redblockKey) -> "Failed to place RedBlock " + redblockKey + " in the world.";
+    public static final Function<String, String> ERROR_REDBLOCK_NOT_REMOVED = (redblockKey) -> "Failed to remove RedBlock " + redblockKey + " from the world.";
 
     // All other messages
     public static final Function<Integer, TextComponent> REDBLOCK_CREATED = id -> MODULE.append(Component.text("Created RedBlock #" + id, NamedTextColor.GRAY));

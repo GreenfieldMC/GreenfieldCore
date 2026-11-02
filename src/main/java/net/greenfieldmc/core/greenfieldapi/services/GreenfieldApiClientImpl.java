@@ -71,31 +71,37 @@ public class GreenfieldApiClientImpl implements IAuthedClientService {
 
     @Override
     public <T> CompletableFuture<Result<T>> makeGetRequest(String endpoint, Class<T> responseType) {
+        logger.info("GET: " + endpoint);
         return makeAuthenticatedRequest(endpoint, "GET", null, responseType);
     }
 
     @Override
     public <T> CompletableFuture<Result<T>> makePostRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        logger.info("POST: " + endpoint + " with body: " + gson.toJson(requestBody));
         return makeAuthenticatedRequest(endpoint, "POST", requestBody, responseType);
     }
 
     @Override
     public <T> CompletableFuture<Result<T>> makePutRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        logger.info("PUT: " + endpoint + " with body: " + gson.toJson(requestBody));
         return makeAuthenticatedRequest(endpoint, "PUT", requestBody, responseType);
     }
 
     @Override
     public <T> CompletableFuture<Result<T>> makePatchRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        logger.info("PATCH: " + endpoint + " with body: " + gson.toJson(requestBody));
         return makeAuthenticatedRequest(endpoint, "PATCH", requestBody, responseType);
     }
 
     @Override
     public <T> CompletableFuture<Result<T>> makeDeleteRequest(String endpoint, Class<T> responseType) {
+        logger.info("DELETE: " + endpoint);
         return makeAuthenticatedRequest(endpoint, "DELETE", null, responseType);
     }
 
     @Override
     public <T> CompletableFuture<Result<T>> makeDeleteRequest(String endpoint, Object requestBody, Class<T> responseType) {
+        logger.info("DELETE: " + endpoint + " with body: " + gson.toJson(requestBody));
         return makeAuthenticatedRequest(endpoint, "DELETE", requestBody, responseType);
     }
 

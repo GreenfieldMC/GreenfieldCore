@@ -1,5 +1,7 @@
 package net.greenfieldmc.core.redblock.services;
 
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
+import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import net.greenfieldmc.core.redblock.Redblock;
 import com.njdaeger.pdk.utils.text.TextUtils;
 import net.kyori.adventure.text.Component;
@@ -18,12 +20,14 @@ import org.bukkit.entity.TextDisplay;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static net.greenfieldmc.core.Util.resolvePlayerName;
 
 public final class RedblockServiceHelpers {
+
+    private record DisplayHeader(String label, String value) {}
 
     static String createMarkerHtml(Redblock redblock) {
         var html = new StringBuilder();
@@ -37,6 +41,24 @@ public final class RedblockServiceHelpers {
         html.append("<hr style=\"width: 100%;\"><span style=\"white-space: pre-wrap;\">").append(redblock.getContent()).append("</span>").append("</div>");
         return html.toString();
 
+    }
+
+    static String createMarkerHtml(GfRedblock redblock, String status, List<GfUser> assignedUsers, List<String> assignedRoles) {
+        var html = new StringBuilder();
+        html.append("<div style=\"display:flex; flex-direction: column; padding: .25rem; max-width: 12rem; min-width: 8rem;\">");
+        html.append("<span><strong>").append(escapeHtml(redblock.getKey())).append(" - ").append(escapeHtml(status)).append("</strong></span>");
+        if (assignedUsers != null && !assignedUsers.isEmpty()) {
+            var usernames = assignedUsers.stream().map(GfUser::getUsername).collect(Collectors.joining(", "));
+            html.append("<span>Assigned To: <strong>").append(escapeHtml(usernames)).append("</strong></span>");
+        }
+        if (assignedRoles != null && !assignedRoles.isEmpty())
+            html.append("<span>Roles: <strong>").append(escapeHtml(String.join(", ", assignedRoles))).append("</strong></span>");
+        html.append("<hr style=\"width: 100%;\"><span style=\"white-space: pre-wrap;\">").append(escapeHtml(redblock.getMessage())).append("</span>").append("</div>");
+        return html.toString();
+    }
+
+    private static String escapeHtml(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 
     private static int countContentLines(int maxLineWidth, String content) {
@@ -54,8 +76,24 @@ public final class RedblockServiceHelpers {
     }
 
     static UUID createDisplay(int id, String minRank, String assignedTo, Location location, String content) {
+        var headers = new ArrayList<DisplayHeader>();
+        headers.add(new DisplayHeader("ID", String.valueOf(id)));
+        if (minRank != null) headers.add(new DisplayHeader("Recommended Rank", minRank));
+        if (assignedTo != null) headers.add(new DisplayHeader("Assigned To", assignedTo));
+        return createDisplay(headers, location, content);
+    }
+
+    static UUID createDisplay(String key, List<GfUser> assignedUsers, List<String> assignedRoles, Location location, String content) {
+        var headers = new ArrayList<DisplayHeader>();
+        headers.add(new DisplayHeader("Key", key));
+        if (assignedUsers != null && !assignedUsers.isEmpty()) headers.add(new DisplayHeader("Assigned To", assignedUsers.stream().map(GfUser::getUsername).collect(Collectors.joining(", "))));
+        if (assignedRoles != null && !assignedRoles.isEmpty()) headers.add(new DisplayHeader("Roles", String.join(", ", assignedRoles)));
+        return createDisplay(headers, location, content);
+    }
+
+    private static UUID createDisplay(List<DisplayHeader> headers, Location location, String content) {
         //each new line is about .2 of a block tall
-        var yOffset = 1.0 + (minRank != null ? .2 : 0) + (assignedTo != null ? .2 : 0) + (countContentLines(200, content) * .2);
+        var yOffset = 1.0 + ((headers.size() - 1) * .2) + (countContentLines(200, content) * .2);
 
         var actualLocation = location.clone().add(0.5, yOffset, 0.5);
         var display = (TextDisplay) actualLocation.getWorld().spawnEntity(actualLocation, EntityType.TEXT_DISPLAY);
@@ -68,18 +106,11 @@ public final class RedblockServiceHelpers {
         display.setSeeThrough(true);
 
         var displayComponent = Component.text();
-        displayComponent.append(Component.text("ID: ", NamedTextColor.GRAY, TextDecoration.BOLD).append(Component.text(id, NamedTextColor.BLUE)));
-        if (minRank != null)
-            displayComponent
-                    .appendNewline()
-                    .append(Component.text("Recommended Rank: ", NamedTextColor.GRAY, TextDecoration.BOLD)
-                            .append(Component.text(minRank, NamedTextColor.BLUE)));
-
-        if (assignedTo != null)
-            displayComponent
-                    .appendNewline()
-                    .append(Component.text("Assigned To: ", NamedTextColor.GRAY, TextDecoration.BOLD)
-                            .append(Component.text(assignedTo, NamedTextColor.BLUE)));
+        for (int i = 0; i < headers.size(); i++) {
+            if (i > 0) displayComponent.appendNewline();
+            displayComponent.append(Component.text(headers.get(i).label() + ": ", NamedTextColor.GRAY, TextDecoration.BOLD)
+                    .append(Component.text(headers.get(i).value(), NamedTextColor.BLUE)));
+        }
 
         displayComponent
                 .appendNewline()
@@ -91,7 +122,10 @@ public final class RedblockServiceHelpers {
     }
 
     static List<UUID> removeEntities(List<UUID> entityUuids) {
-        entityUuids.forEach(uuid -> Objects.requireNonNull(Bukkit.getEntity(uuid)).remove());
+        entityUuids.forEach(uuid -> {
+            var entity = Bukkit.getEntity(uuid);
+            if (entity != null) entity.remove();
+        });
         return new ArrayList<>();
     }
 

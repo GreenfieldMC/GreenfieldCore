@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.shared.services;
 
-import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -15,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 public class VaultServiceImpl implements IVaultService {
 
     private final Permission permission;
-    private final Chat chat;
 
     public VaultServiceImpl() throws Exception {
         if (Bukkit.getPluginManager().getPlugin("Vault") == null)
@@ -25,12 +23,7 @@ public class VaultServiceImpl implements IVaultService {
         if (permissionProvider == null)
             throw new Exception("No permission provider found");
 
-        RegisteredServiceProvider<Chat> chatProvider = Bukkit.getServicesManager().getRegistration(Chat.class);
-        if (chatProvider == null)
-            throw new Exception("No chat provider found");
-
         permission = permissionProvider.getProvider();
-        chat = chatProvider.getProvider();
     }
 
     @Override
@@ -52,6 +45,14 @@ public class VaultServiceImpl implements IVaultService {
             return CompletableFuture.supplyAsync(() -> false);
         }
         return CompletableFuture.supplyAsync(() -> permission.playerRemoveGroup(world, Bukkit.getOfflinePlayer(uuid), group));
+    }
+
+    @Override
+    public CompletableFuture<String[]> getUserGroups(String world, UUID uuid) {
+        if (!isEnabled()) {
+            return CompletableFuture.supplyAsync(() -> new String[0]);
+        }
+        return CompletableFuture.supplyAsync(() -> permission.getPlayerGroups(world, Bukkit.getOfflinePlayer(uuid)));
     }
 
     @Override

@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels;
 
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import com.njdaeger.pdk.serviceprovider.Nullable;
 

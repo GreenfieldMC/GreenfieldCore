@@ -11,6 +11,7 @@ import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfProjectC
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockAddStatusRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockCreateRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockDeleteRequest;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockEntitiesRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockRoleAssignRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockSearchRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockUpdateRequest;
@@ -28,8 +29,6 @@ public class GreenfieldRedblockApiServiceImpl implements IGreenfieldRedblockApiS
     public GreenfieldRedblockApiServiceImpl(IAuthedClientService clientService) {
         this.clientService = clientService;
     }
-
-
 
     @Override
     public CompletableFuture<Result<List<GfRedblockProject>>> getProjects() {
@@ -77,13 +76,13 @@ public class GreenfieldRedblockApiServiceImpl implements IGreenfieldRedblockApiS
     @Override
     public CompletableFuture<Result<Void>> updateRedblock(String redblockKey, String message, long updatedBy) {
         var endpoint = "/redblocks/" + redblockKey;
-        return clientService.makePatchRequest(endpoint, new GfRedblockUpdateRequest(message, updatedBy), Void.class);
+        return clientService.makePutRequest(endpoint, new GfRedblockUpdateRequest(message, updatedBy), Void.class);
     }
 
     @Override
     public CompletableFuture<Result<List<UUID>>> replaceRedblockEntities(String redblockKey, List<UUID> entities) {
         var endpoint = "/redblocks/" + redblockKey + "/entities";
-        return clientService.makePutRequest(endpoint, entities, UUID[].class)
+        return clientService.makePutRequest(endpoint, new GfRedblockEntitiesRequest(entities), UUID[].class)
                 .thenApply(result -> result.map(List::of));
     }
 

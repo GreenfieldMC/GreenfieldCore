@@ -25,6 +25,8 @@ import net.greenfieldmc.core.shared.services.DynmapServiceImpl;
 import net.greenfieldmc.core.shared.services.EssentialsServiceImpl;
 import net.greenfieldmc.core.shared.services.IDynmapService;
 import net.greenfieldmc.core.shared.services.IEssentialsService;
+import net.greenfieldmc.core.shared.services.IUserService;
+import net.greenfieldmc.core.shared.services.UserServiceImpl;
 import net.greenfieldmc.core.shared.services.CoreProtectServiceImpl;
 import net.greenfieldmc.core.shared.services.ICoreProtectService;
 import net.greenfieldmc.core.shared.services.IVaultService;
@@ -68,6 +70,7 @@ public final class GreenfieldCore extends JavaPlugin implements IGreenfieldCoreP
                 .addTransient(IAuthedClientService.class, GreenfieldApiClientImpl.class)
                 .addTransient(IGreenfieldUserApiService.class, GreenfieldUserApiServiceImpl.class)
                 .addTransient(IGreenfieldRedblockApiService.class, GreenfieldRedblockApiServiceImpl.class)
+                .addSingleton(IUserService.class, UserServiceImpl.class)
                 //end greenfield api services
 
                 //standalone services - these depend on other plugins, so they are only registered if they can be created

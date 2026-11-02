@@ -24,9 +24,11 @@ public class RedblockCommandServiceV2 {
     private final IRedblockServiceV2 redblockService;
     private final IUserService userService;
     private final @Nullable IVaultService vaultService;
+    private final IRedblockConfigService configService;
 
-    public RedblockCommandServiceV2(IGreenfieldCorePlugin plugin, IRedblockServiceV2 redblockService, IUserService userService, @Nullable IVaultService vaultService) {
+    public RedblockCommandServiceV2(IGreenfieldCorePlugin plugin, IRedblockServiceV2 redblockService, IRedblockConfigService configService, IUserService userService, @Nullable IVaultService vaultService) {
         this.redblockService = redblockService;
+        this.configService = configService;
         this.userService = userService;
         this.vaultService = vaultService;
         registerCommands(plugin);
@@ -62,8 +64,9 @@ public class RedblockCommandServiceV2 {
     }
 
     private void delete(IAsyncCommandContext ctx) throws PDKCommandException {
-        var rb = resolveRedblock(ctx, new GfRedblockSearchRequest.StatusFilter(List.of("incomplete", "pending"), GfRedblockSearchRequest.StatusFilter.MatchType.OR), "pending or incomplete");
-        redblockService.deleteRedblock(rb.getKey(), ctx.asPlayer()).join();
+        var rb = resolveRedblock(ctx, new GfRedblockSearchRequest.StatusFilter(List.of(IRedblockServiceV2.STATUS_INCOMPLETE, IRedblockServiceV2.STATUS_PENDING), GfRedblockSearchRequest.StatusFilter.MatchType.OR), "pending or incomplete");
+        var deleteResult = redblockService.deleteRedblock(rb.getKey(), ctx.asPlayer()).join();
+        if (deleteResult.isFailure()) ctx.error(deleteResult.getErrorMessage());
         ctx.send(RedblockMessages.REDBLOCK_DELETED_NEW.apply(rb.getKey()));
     }
 
@@ -80,10 +83,12 @@ public class RedblockCommandServiceV2 {
         search.resultsPerPage = 1;
         search.deletionFilter = new GfRedblockSearchRequest.DeletionFilter(List.of(), GfRedblockSearchRequest.DeletionFilter.MatchType.AND);
 
-        var searchResult = redblockService.searchRedblocks(search).join();
-        if (searchResult.isFailure() || searchResult.getData().isEmpty()) ctx.error(RedblockMessages.ERROR_REDBLOCK_NOT_FOUND_RADIUS.apply(typeMessage, 10));
+        var searchResult = redblockService.searchRedblocks(ctx.getLocation().getWorld(), search).join();
+        if (searchResult.isFailure() || searchResult.getData().getResults().isEmpty()) ctx.error(RedblockMessages.ERROR_REDBLOCK_NOT_FOUND_RADIUS.apply(typeMessage, 10));
 
-        return searchResult.getData().get(0);
+        var rbResult = redblockService.getRedblock(searchResult.getData().getResults().get(0).getKey()).join();
+        if (rbResult.isFailure()) ctx.error(RedblockMessages.ERROR_REDBLOCK_NOT_FOUND_RADIUS.apply(typeMessage, 10));
+        return rbResult.getData();
     }
 
 }

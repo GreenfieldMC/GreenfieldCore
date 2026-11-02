@@ -113,6 +113,17 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public GfUser getUserByUsernameCacheOnly(String username) {
+        // Check if we have a cached user with this username
+        for (var user : userIdCache.values()) {
+            if (user.getUsername().equalsIgnoreCase(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<GfUser> getUsers() {
         if (isRefreshingCache) return List.copyOf(userIdCache.values());
         if (userIdCache.isEmpty()) {

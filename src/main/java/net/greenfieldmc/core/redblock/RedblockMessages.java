@@ -32,8 +32,7 @@ public class RedblockMessages {
     public static final Function<String, String> ERROR_WORLD_NOT_MAPPED = (worldName) -> "World " + worldName + " is not mapped to a RedBlock project.";
     public static final Function<String, String> ERROR_PROJECT_WORLD_NOT_LOADED = (redblockKey) -> "No loaded world is mapped to the project of RedBlock " + redblockKey + ".";
     public static final BiFunction<String, List<String>, String> ERROR_EDIT_PARTIALLY_SAVED = (redblockKey, errors) -> "Some changes to RedBlock " + redblockKey + " could not be saved: " + String.join("; ", errors);
-    public static final BiFunction<GfRedblock, String, String> ERROR_REDBLOCK_NOT_DELETABLE = (redblock, state) -> "RedBlock " + redblock.getKey() + " cannot be deleted because it is " + state + ".";
-    public static final TriFunction<GfRedblock, String, String, String> ERROR_REDBLOCK_WRONG_STATUS = (redblock, requiredStatus, currentState) -> "RedBlock " + redblock.getKey() + " must be " + requiredStatus.toLowerCase() + ", but it is " + currentState + ".";
+    public static final String ERROR_GOTO_CONFLICTING_FLAGS = "You cannot use -key and -nearest flags simultaneously.";
     public static final Function<String, String> ERROR_REDBLOCK_NOT_PLACED = (redblockKey) -> "Failed to place RedBlock " + redblockKey + " in the world.";
     public static final Function<String, String> ERROR_REDBLOCK_NOT_REMOVED = (redblockKey) -> "Failed to remove RedBlock " + redblockKey + " from the world.";
 
@@ -41,12 +40,17 @@ public class RedblockMessages {
     public static final Function<Integer, TextComponent> REDBLOCK_CREATED = id -> MODULE.append(Component.text("Created RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<String, TextComponent> REDBLOCK_CREATED_NEW = id -> MODULE.append(Component.text("Created RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_DENIED = id -> MODULE.append(Component.text("Denied RedBlock #" + id, NamedTextColor.GRAY));
+    public static final Function<String, TextComponent> REDBLOCK_DENIED_NEW = id -> MODULE.append(Component.text("Denied RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_APPROVED = id -> MODULE.append(Component.text("Approved RedBlock #" + id, NamedTextColor.GRAY));
+    public static final Function<String, TextComponent> REDBLOCK_APPROVED_NEW = id -> MODULE.append(Component.text("Approved RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_COMPLETED = id -> MODULE.append(Component.text("Completed RedBlock #" + id, NamedTextColor.GRAY));
+    public static final Function<String, TextComponent> REDBLOCK_COMPLETED_NEW = id -> MODULE.append(Component.text("Completed RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_DELETED = id -> MODULE.append(Component.text("Deleted RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<String, TextComponent> REDBLOCK_DELETED_NEW = id -> MODULE.append(Component.text("Deleted RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_EDITED = id -> MODULE.append(Component.text("Edited RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_GOTO = id -> MODULE.append(Component.text("Teleported to RedBlock #" + id, NamedTextColor.GRAY));
+    public static final Function<String, TextComponent> REDBLOCK_GOTO_NEW = id -> MODULE.append(Component.text("Teleported to RedBlock " + id, NamedTextColor.GRAY));
+
     public static final Function<Integer, TextComponent> REDBLOCK_JOIN_NOTIFICATION = count -> MODULE.append(Component.text("You have ", NamedTextColor.GRAY))
             .append(Component.text(count, NamedTextColor.LIGHT_PURPLE))
             .append(Component.text(" RedBlocks assigned to you. ", NamedTextColor.GRAY))

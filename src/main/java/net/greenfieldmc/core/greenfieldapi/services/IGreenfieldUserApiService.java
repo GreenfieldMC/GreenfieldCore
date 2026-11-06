@@ -39,6 +39,12 @@ public interface IGreenfieldUserApiService {
     CompletableFuture<Result<GfUser>> getUserByUsername(String username);
 
     /**
+     * Gets the system user, which is used for actions performed by the system rather than a specific user.
+     * @return A CompletableFuture containing a Result with the system user or error message
+     */
+    CompletableFuture<Result<GfUser>> getSystemUser();
+
+    /**
      * Creates or updates a user by their Minecraft UUID (PUT operation).
      * @param minecraftUuid The Minecraft UUID of the user
      * @param username The username data to create or update

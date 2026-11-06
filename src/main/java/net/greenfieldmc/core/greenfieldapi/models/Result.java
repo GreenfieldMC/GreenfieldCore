@@ -1,6 +1,7 @@
 package net.greenfieldmc.core.greenfieldapi.models;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -13,11 +14,17 @@ public class Result<T> {
     private final boolean success;
     private final T data;
     private final String errorMessage;
+    private final Integer statusCode;
 
     protected Result(boolean success, T data, String errorMessage) {
+        this(success, data, errorMessage, null);
+    }
+
+    protected Result(boolean success, T data, String errorMessage, Integer statusCode) {
         this.success = success;
         this.data = data;
         this.errorMessage = errorMessage;
+        this.statusCode = statusCode;
     }
 
     /**
@@ -38,6 +45,35 @@ public class Result<T> {
      */
     public static <T> Result<T> failure(String errorMessage) {
         return new Result<>(false, null, errorMessage);
+    }
+
+    /**
+     * Creates a failed result with the given error message and the HTTP status code the api responded with.
+     * @param errorMessage The error message
+     * @param statusCode The HTTP status code of the response
+     * @param <T> The type of the data (unused in failure case)
+     * @return A failed Result containing the error message and status code
+     */
+    public static <T> Result<T> failure(String errorMessage, int statusCode) {
+        return new Result<>(false, null, errorMessage, statusCode);
+    }
+
+    /**
+     * Gets the HTTP status code of the api response, if there was one. Failures that never got a response (network
+     * errors, authentication errors, parsing errors...) have no status code.
+     * @return The status code, or empty if there is none
+     */
+    public OptionalInt getStatusCode() {
+        return statusCode == null ? OptionalInt.empty() : OptionalInt.of(statusCode);
+    }
+
+    /**
+     * Checks if this result is a failure because the requested resource does not exist (HTTP 404), as opposed to a
+     * request that failed for some other reason.
+     * @return true if the resource was not found, false otherwise
+     */
+    public boolean isNotFound() {
+        return statusCode != null && statusCode == 404;
     }
 
     /**
@@ -114,7 +150,7 @@ public class Result<T> {
         if (success && data != null) {
             return Result.success(mapper.apply(data));
         }
-        return Result.failure(errorMessage);
+        return new Result<>(false, null, errorMessage, statusCode);
     }
 
     @Override
@@ -122,7 +158,7 @@ public class Result<T> {
         if (success) {
             return "Result{success=true, data=" + data + "}";
         } else {
-            return "Result{success=false, error='" + errorMessage + "'}";
+            return "Result{success=false, error='" + errorMessage + "'" + (statusCode == null ? "" : ", statusCode=" + statusCode) + "}";
         }
     }
 }

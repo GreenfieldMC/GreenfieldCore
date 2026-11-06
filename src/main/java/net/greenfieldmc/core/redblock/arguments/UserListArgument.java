@@ -47,7 +47,7 @@ public class UserListArgument extends AbstractDelimitedTypedArgument<GfUser> {
 
     @Override
     public Map<GfUser, Message> listDelimitedSuggestions(ICommandContext commandContext) {
-            var users = userService.getUsers();
+            var users = userService.getUsersCached();
             return users.stream().collect(java.util.stream.Collectors.toMap(user -> user, user -> user.getMinecraftUuid()::toString));
     }
 }

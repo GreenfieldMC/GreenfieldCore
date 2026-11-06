@@ -103,7 +103,7 @@ public final class RedblockServiceHelpers {
         display.setBillboard(Display.Billboard.CENTER);
         display.setTextOpacity((byte) 0xFF);
         display.setAlignment(TextDisplay.TextAlignment.CENTER);
-        display.setSeeThrough(true);
+        display.setSeeThrough(false);
 
         var displayComponent = Component.text();
         for (int i = 0; i < headers.size(); i++) {

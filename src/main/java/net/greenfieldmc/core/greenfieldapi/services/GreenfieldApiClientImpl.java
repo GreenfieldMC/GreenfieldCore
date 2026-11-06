@@ -147,23 +147,23 @@ public class GreenfieldApiClientImpl implements IAuthedClientService {
                         // Handle 401 - token might be expired, invalidate and retry once
                         if (response.statusCode() == 401) {
                             authHandler.invalidateToken();
-                            return Result.<T>failure("Authentication failed - invalid or expired token");
+                            return Result.<T>failure("Authentication failed - invalid or expired token", 401);
                         }
 
                         // Handle 404 - resource not found
                         if (response.statusCode() == 404) {
-                            return Result.<T>failure("Resource not found");
+                            return Result.<T>failure("Resource not found", 404);
                         }
 
                         // Handle other error codes
                         if (response.statusCode() < 200 || response.statusCode() >= 300) {
                             String errorBody = response.body();
-                            return Result.<T>failure("API error (" + response.statusCode() + "): " + errorBody);
+                            return Result.<T>failure("API error (" + response.statusCode() + "): " + errorBody, response.statusCode());
                         }
 
                         // Parse successful response
                         String responseJson = response.body();
-                        if (responseJson == null || responseJson.isEmpty()) {
+                        if ((responseJson == null || responseJson.isEmpty()) && !responseClass.equals(Void.class)) {
                             return Result.<T>failure("Empty response from API");
                         }
 

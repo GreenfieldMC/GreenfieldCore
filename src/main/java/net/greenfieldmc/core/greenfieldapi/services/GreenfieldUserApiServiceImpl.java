@@ -48,6 +48,12 @@ public class GreenfieldUserApiServiceImpl implements IGreenfieldUserApiService {
     }
 
     @Override
+    public CompletableFuture<Result<GfUser>> getSystemUser() {
+        String endpoint = "/user/system";
+        return clientService.makeGetRequest(endpoint, GfUser.class);
+    }
+
+    @Override
     public CompletableFuture<Result<GfUser>> createUser(UUID minecraftUuid, String username) {
         String endpoint = "/user/" + minecraftUuid.toString();
         return clientService.makePutRequest(endpoint, new UsernameModel(username), GfUser.class);

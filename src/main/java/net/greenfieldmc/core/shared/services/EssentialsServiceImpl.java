@@ -22,7 +22,7 @@ public class EssentialsServiceImpl implements IEssentialsService {
 
 //    @Override
 //    public void loadUsernameMap() {
-//        var userMap = essentials.getUsers();
+//        var userMap = essentials.getUsersCached();
 //        getModule().getLogger().info("Loading uuid to username map... This could take a bit.");
 //        Bukkit.getWhitelistedPlayers().stream().map(OfflinePlayer::getUniqueId).map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));
 //        userMap.getAllUserUUIDs().stream().map(userMap::loadUncachedUser).filter(Objects::nonNull).forEach(user -> Util.userNameMap.put(user.getUUID(), user.getLastAccountName()));

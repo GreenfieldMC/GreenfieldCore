@@ -55,6 +55,10 @@ public class GfUser {
         return createdOn;
     }
 
+    public boolean isSystemUser() {
+        return minecraftUuid.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    }
+
     @Override
     public String toString() {
         return "GfUser{" +

@@ -18,10 +18,10 @@ public class CodesPaginator extends ChatPaginatorBuilder<Code, ICommandContext> 
         addComponent(Component.text("Build Codes", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         addComponent(new ResultCountComponent<>(false), ComponentPosition.TOP_LEFT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/codes page 1",
-                (ctx, res, pg) -> "/codes page " + (pg - 1),
-                (ctx, res, pg) -> "/codes page " + (pg + 1),
-                (ctx, res, pg) -> "/codes page " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, res, pg, _) -> "/codes page 1",
+                (ctx, res, pg, _) -> "/codes page " + (pg - 1),
+                (ctx, res, pg, _) -> "/codes page " + (pg + 1),
+                (ctx, res, pg, _) -> "/codes page " + ((int) Math.ceil(res.size() / 8.0))
         ), ComponentPosition.BOTTOM_CENTER);
     }
 

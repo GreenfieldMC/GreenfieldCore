@@ -40,4 +40,10 @@ public interface IRedblockConfigService {
      */
     Set<String> getMappedProjectKeys();
 
+    /**
+     * Get all worlds that are mapped to a project.
+     * @return The mapped worlds
+     */
+    Set<World> getMappedWorlds();
+
 }

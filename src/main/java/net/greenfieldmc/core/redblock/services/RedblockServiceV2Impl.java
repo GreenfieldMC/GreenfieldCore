@@ -4,8 +4,10 @@ import com.njdaeger.pdk.serviceprovider.Nullable;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockProject;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockRoleAssignment;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockSearchResult;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockUserAssignment;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockSearchRequest;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
 import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldRedblockApiService;
@@ -27,8 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static net.greenfieldmc.core.Util.*;
+import static net.greenfieldmc.core.redblock.RedblockConstants.*;
 import static net.greenfieldmc.core.redblock.services.RedblockDynmapLoader.*;
 import static net.greenfieldmc.core.redblock.services.RedblockServiceHelpers.*;
 
@@ -54,6 +58,8 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
     // only active (incomplete or pending, not deleted) redblocks are kept in here
     private final Map<String, GfRedblock> activeRedblocks = new ConcurrentHashMap<>();
 
+    private final Map<String, GfRedblockProject> projects = new ConcurrentHashMap<>();
+
     // dynmapLoader is only taken so the marker sets are created before this service adds markers
     public RedblockServiceV2Impl(IGreenfieldCorePlugin plugin, Logger logger, @Nullable IDynmapService dynmapService, RedblockDynmapLoader dynmapLoader, IGreenfieldRedblockApiService redblockApiService, IGreenfieldUserApiService userApiService, IUserService userService, IRedblockConfigService configService) {
         this.plugin = plugin;
@@ -78,7 +84,7 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
     public CompletableFuture<Result<GfRedblock>> getRedblock(String redblockKey) {
         var cached = activeRedblocks.get(redblockKey);
         if (cached != null) {
-            fetchRedblock(redblockKey).thenAccept(result -> {
+            refreshRedblock(redblockKey).thenAccept(result -> {
                 if (result.isFailure()) logger.warning("Failed to refresh redblock cache for key " + redblockKey + ": " + result.getErrorMessage());
             });
             return CompletableFuture.completedFuture(Result.success(cached));
@@ -113,28 +119,51 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
     }
 
     @Override
-    public CompletableFuture<Result<GfRedblock>> editRedblock(String redblockKey, @Nullable String message, @Nullable List<GfUser> userAdditions, @Nullable List<GfUser> userRemovals, @Nullable List<String> roleAdditions, @Nullable List<String> roleRemovals, Player editedBy) {
-        return fetchRedblock(redblockKey).thenCompose(ifSuccess(redblock -> resolveUserId(editedBy).thenCompose(ifSuccess(userId -> {
+    public CompletableFuture<Result<GfRedblock>> editRedblock(String redblockKey, @Nullable String message, @Nullable List<GfUser> userAdditions, @Nullable List<GfUser> userRemovals, @Nullable List<String> roleAdditions, @Nullable List<String> roleRemovals, GfUser editedBy) {
+        return fetchRedblock(redblockKey).thenCompose(ifSuccess(redblock -> {
             var changes = new ArrayList<CompletableFuture<? extends Result<?>>>();
 
             if (message != null && !message.isBlank() && !message.equals(redblock.getMessage()))
-                changes.add(redblockApiService.updateRedblock(redblockKey, message, userId));
+                changes.add(redblockApiService.updateRedblock(redblockKey, message, editedBy.getUserId()));
 
-            if (userAdditions != null) userAdditions.forEach(user -> changes.add(redblockApiService.addRedblockUserAssignment(redblockKey, user.getUserId(), userId)));
-            if (userRemovals != null) userRemovals.forEach(user -> changes.add(redblockApiService.removeRedblockUserAssignment(redblockKey, user.getUserId())));
-            if (roleAdditions != null) roleAdditions.forEach(role -> changes.add(redblockApiService.addRedblockRoleAssignment(redblockKey, role, userId)));
-            if (roleRemovals != null) roleRemovals.forEach(role -> changes.add(redblockApiService.removeRedblockRoleAssignment(redblockKey, role)));
+            var userIdsToRemove = userRemovals != null
+                    ? userRemovals.isEmpty()
+                      ? redblock.getUserAssignments().stream().map(GfRedblockUserAssignment::getAssignedTo).toList()
+                      : userRemovals.stream().map(GfUser::getUserId).toList()
+                    : List.<Long>of();
+
+            userIdsToRemove.stream()
+                    .filter(redblock::isUserAssigned)
+                    .forEach(userIdToRemove -> changes.add(redblockApiService.removeRedblockUserAssignment(redblockKey, userIdToRemove)));
+
+            if (userAdditions != null) userAdditions.stream()
+                    .filter(user -> !redblock.isUserAssigned(user))
+                    .forEach(user -> changes.add(redblockApiService.addRedblockUserAssignment(redblockKey, user.getUserId(), editedBy.getUserId())));
+
+            var rolesToRemove = roleRemovals != null
+                    ? roleRemovals.isEmpty()
+                      ? redblock.getRoleAssignments().stream().map(GfRedblockRoleAssignment::getRoleName).toList()
+                      : roleRemovals
+                    : List.<String>of();
+
+            rolesToRemove.stream()
+                    .filter(redblock::isRoleAssigned)
+                    .forEach(role -> changes.add(redblockApiService.removeRedblockRoleAssignment(redblockKey, role)));
+
+            if (roleAdditions != null) roleAdditions.stream()
+                    .filter(role -> !redblock.isRoleAssigned(role))
+                    .forEach(role -> changes.add(redblockApiService.addRedblockRoleAssignment(redblockKey, role, editedBy.getUserId())));
 
             return CompletableFuture.allOf(changes.toArray(CompletableFuture[]::new)).thenCompose(v -> {
                 var errors = changes.stream().map(CompletableFuture::join).filter(Result::isFailure).map(Result::getErrorMessage).toList();
                 // re-render with the assignments the api now has, so the world matches whatever did get saved
-                return fetchRedblock(redblockKey)
+                return refreshRedblock(redblockKey)
                         .thenCompose(ifSuccess(rb -> resolveAssignedUsers(rb).thenCompose(users -> createRedblockDisplay(rb, users, rb.getRoleAssignments().stream().map(GfRedblockRoleAssignment::getRoleName).toList()))))
                         .thenApply(rendered -> errors.isEmpty() || rendered.isFailure()
                                 ? rendered
                                 : Result.failure(RedblockMessages.ERROR_EDIT_PARTIALLY_SAVED.apply(redblockKey, errors)));
             });
-        }))));
+        }));
     }
 
     @Override
@@ -159,6 +188,12 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
                 .thenCompose(ifSuccess(v -> removeRedblockDisplay(redblock)))));
     }
 
+    @Override
+    public CompletableFuture<Result<List<GfRedblockProject>>> getProjects() {
+        if (!projects.isEmpty()) return CompletableFuture.completedFuture(Result.success(List.copyOf(projects.values())));
+        return redblockApiService.getProjects().thenApply(result -> result.ifSuccess(projectList -> projectList.forEach(project -> projects.put(project.getProjectKey(), project))));
+    }
+
     // region Helper Methods
 
     // region Display methods
@@ -168,6 +203,7 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
      * its Dynmap marker. Any display entities previously saved for the redblock are removed first.
      */
     private CompletableFuture<Result<GfRedblock>> createRedblockDisplay(GfRedblock redblock, List<GfUser> assignedUsers, List<String> assignedRoles) {
+        logger.info("Creating display for RedBlock " + redblock.getKey() + " in the world.");
         var location = getLocation(redblock);
         if (location == null) return failed(RedblockMessages.ERROR_PROJECT_WORLD_NOT_LOADED.apply(redblock.getKey()));
 
@@ -187,7 +223,8 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
         }).thenCompose(displayUuid -> redblockApiService.replaceRedblockEntities(redblock.getKey(), List.of(displayUuid)))
           .thenCompose(entitiesResult -> {
               if (entitiesResult.isFailure()) logger.warning("Failed to save the display entity of RedBlock " + redblock.getKey() + ": " + entitiesResult.getErrorMessage());
-              return fetchRedblock(redblock.getKey());
+              // bypass the cache, which still holds the display entity ids from before this one was spawned
+              return refreshRedblock(redblock.getKey());
           })
           .thenApply(result -> result.ifSuccess(rb -> updateDynmapMarker(rb, assignedUsers, assignedRoles)))
           .exceptionally(ex -> {
@@ -254,18 +291,24 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
      */
     private CompletableFuture<Void> loadCache() {
         logger.info("Loading RedBlocks from the api...");
-        var projectLoads = configService.getMappedProjectKeys().stream()
-                .map(projectKey -> loadProjectPage(projectKey, 1))
-                .toArray(CompletableFuture[]::new);
 
-        return CompletableFuture.allOf(projectLoads)
+        var projectLoad = getProjects().thenAccept(result -> {
+            if (result.isFailure()) throw new IllegalStateException("Could not load RedBlock projects: " + result.getErrorMessage());
+        });
+        var redblockProjectLoads = configService.getMappedProjectKeys().stream()
+                .map(projectKey -> loadProjectPage(projectKey, 1))
+                .collect(Collectors.toCollection(java.util.ArrayList::new));
+        redblockProjectLoads.add(projectLoad);
+
+        return CompletableFuture.allOf(redblockProjectLoads.toArray(new CompletableFuture[0]))
                 .thenRun(() -> logger.info("Loaded " + activeRedblocks.size() + " active RedBlocks."));
     }
 
     private CompletableFuture<Void> loadProjectPage(String projectKey, long page) {
         var search = new GfRedblockSearchRequest();
-        search.statusFilter = new GfRedblockSearchRequest.StatusFilter(List.of(STATUS_INCOMPLETE, STATUS_PENDING), GfRedblockSearchRequest.StatusFilter.MatchType.OR);
-        search.deletionFilter = new GfRedblockSearchRequest.DeletionFilter(List.of(), GfRedblockSearchRequest.DeletionFilter.MatchType.AND);
+        search.addFilterGroup(new GfRedblockSearchRequest.FilterGroup()
+                .status(GfRedblockSearchRequest.StatusFilter.anyOf(STATUS_INCOMPLETE, STATUS_PENDING))
+                .deletion(GfRedblockSearchRequest.DeletionFilter.notDeleted()));
         search.resultsPerPage = CACHE_LOAD_PAGE_SIZE;
         search.currentPage = page;
 
@@ -297,7 +340,7 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
     private CompletableFuture<Result<GfRedblock>> changeStatus(String redblockKey, Player changedBy, String newStatus) {
         return fetchRedblock(redblockKey).thenCompose(ifSuccess(redblock -> resolveUserId(changedBy)
                 .thenCompose(ifSuccess(userId -> redblockApiService.addRedblockStatus(redblockKey, newStatus, userId)))
-                .thenCompose(ifSuccess(status -> fetchRedblock(redblockKey)))
+                .thenCompose(ifSuccess(_ -> refreshRedblock(redblockKey)))
                 .thenCompose(ifSuccess(updated -> STATUS_APPROVED.equals(newStatus) ? removeRedblockDisplay(updated) : createRedblockDisplay(updated, resolveAssignedUsers(updated).join(), updated.getRoleAssignments().stream().map(GfRedblockRoleAssignment::getRoleName).toList())))));
     }
 
@@ -305,6 +348,15 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
      * Fetches a redblock from the api and puts it in the cache if it is active, or evicts it if it is not.
      */
     private CompletableFuture<Result<GfRedblock>> fetchRedblock(String redblockKey) {
+        var cached = activeRedblocks.get(redblockKey);
+        if (cached != null) return CompletableFuture.completedFuture(Result.success(cached));
+        return refreshRedblock(redblockKey);
+    }
+
+    /**
+     * Always fetches a redblock from the api, bypassing the cache, then caches it if it is active or evicts it if not.
+     */
+    private CompletableFuture<Result<GfRedblock>> refreshRedblock(String redblockKey) {
         return redblockApiService.getRedblock(redblockKey).thenApply(result -> result.ifSuccess(redblock -> {
             if (redblock.isActive()) activeRedblocks.put(redblock.getKey(), redblock);
             else activeRedblocks.remove(redblock.getKey());

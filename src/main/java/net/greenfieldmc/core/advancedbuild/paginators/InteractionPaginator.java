@@ -17,10 +17,10 @@ public class InteractionPaginator extends ChatPaginatorBuilder<InteractionHandle
         addComponent(Component.text("Advanced Build Mode Interactions", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/avb help " + 1,
-                (ctx, res, pg) -> "/avb help " + (pg - 1),
-                (ctx, res, pg) -> "/avb help " + (pg + 1),
-                (ctx, res, pg) -> "/avb help " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, res, pg, _) -> "/avb help " + 1,
+                (ctx, res, pg, _) -> "/avb help " + (pg - 1),
+                (ctx, res, pg, _) -> "/avb help " + (pg + 1),
+                (ctx, res, pg, _) -> "/avb help " + ((int) Math.ceil(res.size() / 8.0))
         ), ComponentPosition.BOTTOM_CENTER);
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
     }

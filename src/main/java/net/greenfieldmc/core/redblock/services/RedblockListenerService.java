@@ -1,6 +1,7 @@
 package net.greenfieldmc.core.redblock.services;
 
 import com.njdaeger.pdk.serviceprovider.Nullable;
+import net.greenfieldmc.core.redblock.RedblockConstants;
 import net.greenfieldmc.core.IGreenfieldCorePlugin;
 import net.greenfieldmc.core.Util;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockSearchRequest;
@@ -65,12 +66,12 @@ public class RedblockListenerService implements Listener {
                 e.setUseItemInHand(Event.Result.DENY);
                 if (block.getType() == Material.OAK_SIGN) {
                     if (found.get().isIncomplete())
-                        e.getPlayer().performCommand("rbcomplete flags: -id " + found.get().getKey());
+                        e.getPlayer().performCommand("rbcomplete -key " + found.get().getKey());
                     else if (found.get().isPending()) {
                         if (e.getAction() == Action.LEFT_CLICK_BLOCK)
-                            e.getPlayer().performCommand("rbapprove flags: -id " + found.get().getKey());
+                            e.getPlayer().performCommand("rbapprove -key " + found.get().getKey());
                         else if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
-                            e.getPlayer().performCommand("rbdeny flags: -id " + found.get().getKey());
+                            e.getPlayer().performCommand("rbdeny -key " + found.get().getKey());
                     }
                     return;
                 }
@@ -90,9 +91,11 @@ public class RedblockListenerService implements Listener {
             var gfUser = userService.getUserByUuid(player.getUniqueId());
 
             var search = new GfRedblockSearchRequest();
-            search.statusFilter = new GfRedblockSearchRequest.StatusFilter(List.of("Incomplete"), GfRedblockSearchRequest.StatusFilter.MatchType.OR);
             search.resultsPerPage = 1;
-            search.userAssignmentFilter = new GfRedblockSearchRequest.UserAssignmentFilter(List.of(gfUser.getUserId()), GfRedblockSearchRequest.UserAssignmentFilter.MatchType.OR);
+            search.addFilterGroup(new GfRedblockSearchRequest.FilterGroup()
+                    .status(GfRedblockSearchRequest.StatusFilter.anyOf(RedblockConstants.STATUS_INCOMPLETE))
+                    .deletion(GfRedblockSearchRequest.DeletionFilter.notDeleted())
+                    .userAssignment(GfRedblockSearchRequest.UserAssignmentFilter.assignedToAny(List.of(gfUser.getUserId()))));
 
             var result = redblockService.searchRedblocks(player.getWorld(), search).join();
             if (result.isFailure()) {

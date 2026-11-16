@@ -19,6 +19,7 @@ public class RedblockMessages {
     public static final TextComponent MODULE = moduleMessage("RedBlock");
 
     // Error messages
+    public static final Function<String, String> ERROR_REDBLOCK_NOT_FOUND = (type) -> "No " + type + " RedBlock found.";
     public static final BiFunction<String, Integer, String> ERROR_REDBLOCK_NOT_FOUND_RADIUS = (type, radius) -> "No " + type + " RedBlock found within a radius of " + radius + " blocks.";
     public static final BiFunction<String, String, String> ERROR_REDBLOCK_NOT_FOUND_ID = (type, id) -> "No " + type + " RedBlock found with id #" + id + ".";
     public static final BiFunction<String, String, String> ERROR_REDBLOCK_NOT_FOUND_KEY = (type, id) -> "No " + type + " RedBlock found with key " + id + ".";
@@ -48,13 +49,14 @@ public class RedblockMessages {
     public static final Function<Integer, TextComponent> REDBLOCK_DELETED = id -> MODULE.append(Component.text("Deleted RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<String, TextComponent> REDBLOCK_DELETED_NEW = id -> MODULE.append(Component.text("Deleted RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_EDITED = id -> MODULE.append(Component.text("Edited RedBlock #" + id, NamedTextColor.GRAY));
+    public static final Function<String, TextComponent> REDBLOCK_EDITED_NEW = id -> MODULE.append(Component.text("Edited RedBlock " + id, NamedTextColor.GRAY));
     public static final Function<Integer, TextComponent> REDBLOCK_GOTO = id -> MODULE.append(Component.text("Teleported to RedBlock #" + id, NamedTextColor.GRAY));
     public static final Function<String, TextComponent> REDBLOCK_GOTO_NEW = id -> MODULE.append(Component.text("Teleported to RedBlock " + id, NamedTextColor.GRAY));
 
     public static final Function<Integer, TextComponent> REDBLOCK_JOIN_NOTIFICATION = count -> MODULE.append(Component.text("You have ", NamedTextColor.GRAY))
             .append(Component.text(count, NamedTextColor.LIGHT_PURPLE))
             .append(Component.text(" RedBlocks assigned to you. ", NamedTextColor.GRAY))
-            .append(Component.text("\n[Click this to view them]", NamedTextColor.LIGHT_PURPLE, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/rbl flags: -mine -incomplete")));
+            .append(Component.text("\n[Click this to view them]", NamedTextColor.LIGHT_PURPLE, TextDecoration.UNDERLINED).clickEvent(ClickEvent.runCommand("/rbl -mine -status incomplete")));
 
     // Redblock sign messages
     public static final TextComponent[] SIGN_CLICK_THIS_IF_COMPLETED = new TextComponent[] {

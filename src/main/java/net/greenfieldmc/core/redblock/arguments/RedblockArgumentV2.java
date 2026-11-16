@@ -7,31 +7,33 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.command.brigadier.arguments.AbstractStringTypedArgument;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
+import net.greenfieldmc.core.greenfieldapi.services.IGreenfieldRedblockApiService;
 import net.greenfieldmc.core.redblock.services.IRedblockServiceV2;
 import org.bukkit.command.CommandSender;
 import com.njdaeger.pdk.serviceprovider.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 public class RedblockArgumentV2 extends AbstractStringTypedArgument<GfRedblock> {
 
     private static final DynamicCommandExceptionType REDBLOCK_NOT_FOUND = new DynamicCommandExceptionType(key -> () -> "Redblock " + key.toString() + " not found");
 
     private final IRedblockServiceV2 redblockService;
+    private final Predicate<GfRedblock> statusFilter;
 
-    public RedblockArgumentV2(IRedblockServiceV2 redblockService, List<String> statusFilter) {
+    public RedblockArgumentV2(IRedblockServiceV2 redblockService, Predicate<GfRedblock> statusFilter) {
         this.redblockService = redblockService;
+        this.statusFilter = statusFilter;
     }
 
     @Override
     public Map<GfRedblock, Message> listSuggestions(ICommandContext commandContext) {
-        var serviceResult = redblockService.getRedblocks(null);
-        return serviceResult.stream().collect(java.util.stream.Collectors.toMap(redblock -> redblock, redblock -> redblock::getMessage));
-//        if (serviceResult.isFailure()) {
-//            return Map.of();
-//        }
-//        return serviceResult.getData().stream().collect(java.util.stream.Collectors.toMap(redblock -> redblock, redblock -> redblock::getMessage));
+        var serviceResult = redblockService.getRedblocks(statusFilter);
+        return serviceResult.stream()
+                .collect(java.util.stream.Collectors.toMap(redblock -> redblock, redblock -> redblock::getMessage));
     }
 
     @Override

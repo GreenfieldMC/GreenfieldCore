@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
  */
 public class RedblockConfigService implements IRedblockConfigService {
 
-    private final Map<String, String> worldToProject = new HashMap<>();
-    private final Map<String, String> projectToWorld = new HashMap<>();
+    private final Map<World, String> worldToProject = new HashMap<>();
+    private final Map<String, World> projectToWorld = new HashMap<>();
 
     public RedblockConfigService(IGreenfieldCorePlugin plugin, Logger logger) {
         try {
@@ -31,6 +31,11 @@ public class RedblockConfigService implements IRedblockConfigService {
 
             if (config.hasSection("world-project-mappings")) {
                 for (var worldName : config.getSection("world-project-mappings").getKeys(false)) {
+                    var world = Bukkit.getWorld(worldName);
+                    if (world == null) {
+                        logger.warning("World " + worldName + " in redblock-config.yml does not exist on this server.");
+                        continue;
+                    }
                     var projectKey = config.getString("world-project-mappings." + worldName);
                     if (projectKey == null || projectKey.isBlank()) {
                         logger.warning("World " + worldName + " in redblock-config.yml has no project key.");
@@ -40,8 +45,8 @@ public class RedblockConfigService implements IRedblockConfigService {
                         logger.warning("Project " + projectKey + " is mapped to more than one world in redblock-config.yml. Ignoring world " + worldName + ".");
                         continue;
                     }
-                    worldToProject.put(worldName, projectKey);
-                    projectToWorld.put(projectKey, worldName);
+                    worldToProject.put(world, projectKey);
+                    projectToWorld.put(projectKey, world);
                 }
             }
 
@@ -59,17 +64,21 @@ public class RedblockConfigService implements IRedblockConfigService {
 
     @Override
     public @Nullable String getProjectKey(World world) {
-        return worldToProject.get(world.getName());
+        return worldToProject.get(world);
     }
 
     @Override
     public @Nullable World getWorld(String projectKey) {
-        var worldName = projectToWorld.get(projectKey);
-        return worldName == null ? null : Bukkit.getWorld(worldName);
+        return projectToWorld.get(projectKey);
     }
 
     @Override
     public Set<String> getMappedProjectKeys() {
         return Set.copyOf(projectToWorld.keySet());
+    }
+
+    @Override
+    public Set<World> getMappedWorlds() {
+        return Set.copyOf(worldToProject.keySet());
     }
 }

@@ -11,7 +11,7 @@ public class RedblockInfoPaginator extends ChatPaginatorBuilder<Redblock.Redbloc
 
     public RedblockInfoPaginator() {
         super();
-        addComponent((ctx, paginator, res, pg) -> Component.text("Redblock Information", paginator.getHighlightColor()), ComponentPosition.TOP_CENTER);
+        addComponent((ctx, paginator, res, pg, maxResults) -> Component.text("Redblock Information", paginator.getHighlightColor()), ComponentPosition.TOP_CENTER);
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
         setEqualSignCount(25);
         setResultsPerPage(16);

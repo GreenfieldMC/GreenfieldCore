@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class RedblockFilterComponent implements IComponent<Redblock, ICommandContext> {
 
     @Override
-    public TextComponent getText(ICommandContext context, ChatPaginator<Redblock, ICommandContext> paginator, List<Redblock> results, int currentPage) {
+    public TextComponent getText(ICommandContext context, ChatPaginator<Redblock, ICommandContext> paginator, List<Redblock> results, int currentPage, int totalResults) {
 
         var deleted = context.hasFlag("deleted");
         var incomplete = context.hasFlag("incomplete");

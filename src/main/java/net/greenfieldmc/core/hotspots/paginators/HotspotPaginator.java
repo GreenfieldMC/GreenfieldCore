@@ -19,10 +19,10 @@ public class HotspotPaginator extends ChatPaginatorBuilder<Hotspot, Pair<Hotspot
         addComponent(Component.text("Hotspot List", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg) -> "/hslist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page 1" + getListMode(ctx.getFirst()),
-                (ctx, res, pg) -> "/hslist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page " + (pg - 1) + getListMode(ctx.getFirst()),
-                (ctx, res, pg) -> "/hslist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page " + (pg + 1) + getListMode(ctx.getFirst()),
-                (ctx, res, pg) -> "/rblist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page " + ((int) Math.ceil(res.size() / 8.0)) + getListMode(ctx.getFirst())
+                (ctx, res, pg, _) -> "/hslist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page 1" + getListMode(ctx.getFirst()),
+                (ctx, res, pg, _) -> "/hslist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page " + (pg - 1) + getListMode(ctx.getFirst()),
+                (ctx, res, pg, _) -> "/hslist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page " + (pg + 1) + getListMode(ctx.getFirst()),
+                (ctx, res, pg, _) -> "/rblist hotspots" + getCategoryName(ctx.getSecond()) + " flags: -page " + ((int) Math.ceil(res.size() / 8.0)) + getListMode(ctx.getFirst())
         ), ComponentPosition.BOTTOM_CENTER);
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
     }

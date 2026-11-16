@@ -10,6 +10,7 @@ import net.greenfieldmc.core.shared.services.IVaultService;
 import org.bukkit.command.CommandSender;
 import com.njdaeger.pdk.serviceprovider.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RoleListArgument extends AbstractDelimitedTypedArgument<String> {
@@ -17,9 +18,11 @@ public class RoleListArgument extends AbstractDelimitedTypedArgument<String> {
     private static final DynamicCommandExceptionType ROLE_NOT_FOUND = new DynamicCommandExceptionType(o -> () -> "Role " + o.toString() + " not found");
 
     private final IVaultService vaultService;
+    private final boolean withWildcardSupport;
 
-    public RoleListArgument(IVaultService vaultService) {
+    public RoleListArgument(IVaultService vaultService, boolean withWildcardSupport) {
         this.vaultService = vaultService;
+        this.withWildcardSupport = withWildcardSupport;
     }
 
     @Override
@@ -36,6 +39,7 @@ public class RoleListArgument extends AbstractDelimitedTypedArgument<String> {
     public String convertSingleToCustom(@Nullable CommandSender source, String nativeType, StringReader reader) throws CommandSyntaxException {
         var role = nativeType.trim();
         if (vaultService == null) return role;
+        if (withWildcardSupport && role.equals("*")) return role;
         if (vaultService.getGroupList().stream().noneMatch(r -> r.equalsIgnoreCase(role))) {
             reader.setCursor(reader.getCursor() - nativeType.length());
             throw ROLE_NOT_FOUND.createWithContext(reader, role);
@@ -46,6 +50,8 @@ public class RoleListArgument extends AbstractDelimitedTypedArgument<String> {
     @Override
     public List<String> listBasicDelimitedSuggestions(ICommandContext commandContext) {
         if (vaultService == null) return List.of();
-        return vaultService.getGroupList();
+        var roles = new ArrayList<>(vaultService.getGroupList());
+        if (withWildcardSupport) roles.add("*");
+        return roles;
     }
 }

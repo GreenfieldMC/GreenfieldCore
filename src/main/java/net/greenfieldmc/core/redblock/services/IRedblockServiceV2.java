@@ -2,6 +2,7 @@ package net.greenfieldmc.core.redblock.services;
 
 import net.greenfieldmc.core.greenfieldapi.models.Result;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblock;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockProject;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockSearchResult;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockSearchRequest;
 import net.greenfieldmc.core.greenfieldapi.models.users.GfUser;
@@ -15,10 +16,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 public interface IRedblockServiceV2 {
-
-    String STATUS_INCOMPLETE = "Incomplete";
-    String STATUS_PENDING = "Pending";
-    String STATUS_APPROVED = "Approved";
 
     /**
      * Get a redblock by its PROJ-keyId. If the redblock is in memory, the cached copy is returned and refreshed in the
@@ -62,14 +59,14 @@ public interface IRedblockServiceV2 {
      * assignment changes.
      * @param redblockKey The PROJECT-KEY of the redblock
      * @param message The new message of the redblock
-     * @param userAdditions The users to assign to the redblock
-     * @param userRemovals The users to unassign from the redblock
-     * @param roleAdditions The roles to assign to the redblock
-     * @param roleRemovals The roles to unassign from the redblock
+     * @param userAdditions The users to assign to the redblock. No operation performed if null or empty.
+     * @param userRemovals The users to unassign from the redblock. No operation performed if null. When empty, all users are unassigned.
+     * @param roleAdditions The roles to assign to the redblock. No operation performed if null or empty.
+     * @param roleRemovals The roles to unassign from the redblock. No operation performed if null. When empty, all roles are unassigned.
      * @param editedBy The player who edited the redblock
      * @return The edited redblock
      */
-    CompletableFuture<Result<GfRedblock>> editRedblock(String redblockKey, @Nullable String message, @Nullable List<GfUser> userAdditions, @Nullable List<GfUser> userRemovals, @Nullable List<String> roleAdditions, @Nullable List<String> roleRemovals, Player editedBy);
+    CompletableFuture<Result<GfRedblock>> editRedblock(String redblockKey, @Nullable String message, @Nullable List<GfUser> userAdditions, @Nullable List<GfUser> userRemovals, @Nullable List<String> roleAdditions, @Nullable List<String> roleRemovals, GfUser editedBy);
 
     /**
      * Completes an incomplete redblock, marking it as pending approval
@@ -102,5 +99,11 @@ public interface IRedblockServiceV2 {
      * @return The redblock as it was before it was deleted
      */
     CompletableFuture<Result<GfRedblock>> deleteRedblock(String redblockKey, Player deletedBy);
+
+    /**
+     * Gets all redblock projects from the api
+     * @return A list of all redblock projects
+     */
+    CompletableFuture<Result<List<GfRedblockProject>>> getProjects();
 
 }

@@ -211,12 +211,12 @@ public class Template implements PageItem<Triple<TemplatePaginator.TemplatePagin
             if (isSelected) {
                 // Template is in brush, show remove option
                 line.append(Component.text("X", NamedTextColor.RED, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush remove template " + getTemplateName() + " flags: -page " + generatorInfo.getSecond().getFlag("page", 1)))
+                        .clickEvent(ClickEvent.runCommand("/tbrush remove template " + getTemplateName() + " -page " + generatorInfo.getSecond().getFlag("page", 1)))
                         .hoverEvent(HoverEvent.showText(Component.text("Remove this template from brush", NamedTextColor.GRAY))));
             } else {
                 // Template is not in brush, show add option
                 line.append(Component.text("S", NamedTextColor.BLUE, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/tbrush add template " + getTemplateName() + " flags: -page " + generatorInfo.getSecond().getFlag("page", 1)))
+                        .clickEvent(ClickEvent.runCommand("/tbrush add template " + getTemplateName() + " -page " + generatorInfo.getSecond().getFlag("page", 1)))
                         .hoverEvent(HoverEvent.showText(Component.text("Add this template to brush", NamedTextColor.GRAY))));
             }
         }

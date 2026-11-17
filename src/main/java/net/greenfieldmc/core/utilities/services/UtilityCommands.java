@@ -53,12 +53,8 @@ public class UtilityCommands {
                             if (i != number / i) divisors.add(number / i);
                         }
                     }
-                    if (divisors.isEmpty()) {
-                        ctx.asPlayer().sendMessage("§a" + number + " is prime!");
-                    } else {
-                        divisors.sort(Integer::compareTo);
-                        ctx.asPlayer().sendMessage("§e" + number + " is not prime. Divisors: " + divisors + ".");
-                    }
+                    if (divisors.isEmpty()) ctx.send(UtilityMessages.NUMBER_IS_PRIME.apply(number));
+                    else ctx.send(UtilityMessages.NUMBER_IS_NOT_PRIME.apply(number, divisors));
                 })
                 .register(plugin);
     }

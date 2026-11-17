@@ -18,12 +18,23 @@ public class RedblockListPaginator extends ChatPaginatorBuilder<Redblock, IComma
         addComponent(new ResultCountComponent<>(true), ComponentPosition.TOP_LEFT);
         addComponent(new RedblockFilterComponent(), ComponentPosition.TOP_RIGHT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg, _) -> "/rblist flags: " + ctx.lastOrDefault("").replace("-page " + pg, "") + " -page 1",
-                (ctx, res, pg, _) -> "/rblist flags: " + ctx.lastOrDefault("").replace("-page " + pg, "") + " -page " + (pg - 1),
-                (ctx, res, pg, _) -> "/rblist flags: " + ctx.lastOrDefault("").replace("-page " + pg, "") + " -page " + (pg + 1),
-                (ctx, res, pg, _) -> "/rblist flags: " + ctx.lastOrDefault("").replace("-page " + pg, "") + " -page " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, _, pg, _) -> pageFunction(ctx, pg, 1),
+                (ctx, _, pg, _) -> pageFunction(ctx, pg, pg - 1),
+                (ctx, _, pg, _) -> pageFunction(ctx, pg, pg + 1),
+                (ctx, _, pg, total) -> pageFunction(ctx, pg, (int) Math.ceil(total / 8.0))
         ), ComponentPosition.BOTTOM_CENTER);
         setLineWrappingMode(LineWrappingMode.ELLIPSIS);
+    }
+
+    private static String pageFunction(ICommandContext context, int currentPage, int wantedPage) {
+        var input = context.getRawInput();
+        if (input.contains(" ")) {
+            input = input.split(" ", 2)[1];
+        } else {
+            input = "";
+        }
+        input = input.replace("-page " + currentPage, "").strip();
+        return "/" + context.getAlias() + " " + (input.isEmpty() ? "" : input + " ") + "-page " + wantedPage;
     }
 
 }

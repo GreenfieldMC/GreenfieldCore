@@ -1,6 +1,5 @@
 package net.greenfieldmc.core.testresult.paginators;
 
-import net.greenfieldmc.core.Util;
 import net.greenfieldmc.core.testresult.TestAttempt;
 import com.njdaeger.pdk.command.brigadier.ICommandContext;
 import com.njdaeger.pdk.utils.text.pager.ChatPaginatorBuilder;
@@ -11,8 +10,6 @@ import com.njdaeger.pdk.utils.text.pager.components.ResultCountComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.UUID;
-
 public class TestAttemptPaginator extends ChatPaginatorBuilder<TestAttempt, ICommandContext> {
 
     public TestAttemptPaginator() {
@@ -21,15 +18,22 @@ public class TestAttemptPaginator extends ChatPaginatorBuilder<TestAttempt, ICom
         addComponent(Component.text("User Test Build Attempts", NamedTextColor.LIGHT_PURPLE), ComponentPosition.TOP_CENTER);
         addComponent(new ResultCountComponent<>(false), ComponentPosition.TOP_LEFT);
         addComponent(new PageNavigationComponent<>(
-                (ctx, res, pg, _) -> "/attempts user " + userFromContext(ctx) + " flags: -page 1",
-                (ctx, res, pg, _) -> "/attempts user " + userFromContext(ctx) + " flags: -page " + (pg - 1),
-                (ctx, res, pg, _) -> "/attempts user " + userFromContext(ctx) + " flags: -page " + (pg + 1),
-                (ctx, res, pg, _) -> "/attempts user " + userFromContext(ctx) + " flags: -page " + ((int) Math.ceil(res.size() / 8.0))
+                (ctx, _, pg, _) -> pageFunction(ctx, pg, 1),
+                (ctx, _, pg, _) -> pageFunction(ctx, pg, pg - 1),
+                (ctx, _, pg, _) -> pageFunction(ctx, pg, pg + 1),
+                (ctx, _, pg, total) -> pageFunction(ctx, pg, (int) Math.ceil(total / 8.0))
         ), ComponentPosition.BOTTOM_CENTER);
     }
 
-    private String userFromContext(ICommandContext ctx) {
-        return Util.resolvePlayerName(ctx.getTyped("user", UUID.class));
+    private static String pageFunction(ICommandContext context, int currentPage, int wantedPage) {
+        var input = context.getRawInput();
+        if (input.contains(" ")) {
+            input = input.split(" ", 2)[1];
+        } else {
+            input = "";
+        }
+        input = input.replace("-page " + currentPage, "").strip();
+        return "/" + context.getAlias() + " " + (input.isEmpty() ? "" : input + " ") + "-page " + wantedPage;
     }
 
 }

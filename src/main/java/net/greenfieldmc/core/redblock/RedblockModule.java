@@ -7,13 +7,12 @@ import net.greenfieldmc.core.Module;
 import net.greenfieldmc.core.ModuleConfig;
 import net.greenfieldmc.core.redblock.services.IRedblockConfigService;
 import net.greenfieldmc.core.redblock.services.IRedblockServiceV2;
-import net.greenfieldmc.core.redblock.services.IRedblockStorageService;
 import net.greenfieldmc.core.redblock.services.RedblockCommandServiceV2;
 import net.greenfieldmc.core.redblock.services.RedblockConfigService;
 import net.greenfieldmc.core.redblock.services.RedblockDynmapLoader;
 import net.greenfieldmc.core.redblock.services.RedblockListenerService;
 import net.greenfieldmc.core.redblock.services.RedblockServiceV2Impl;
-import net.greenfieldmc.core.redblock.services.RedblockStorageServiceImpl;
+import net.greenfieldmc.core.redblock.services.YamlRedblockMigrationService;
 
 public class RedblockModule extends Module {
 
@@ -32,6 +31,7 @@ public class RedblockModule extends Module {
 
     @Override
     protected void tryEnable() throws Exception {
+        moduleServiceProvider.initialize(YamlRedblockMigrationService.class);
         moduleServiceProvider.initialize(RedblockListenerService.class);
         moduleServiceProvider.initialize(RedblockCommandServiceV2.class);
     }

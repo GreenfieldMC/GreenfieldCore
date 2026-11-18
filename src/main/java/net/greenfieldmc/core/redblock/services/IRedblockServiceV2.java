@@ -106,4 +106,13 @@ public interface IRedblockServiceV2 {
      */
     CompletableFuture<Result<List<GfRedblockProject>>> getProjects();
 
+    /**
+     * Fetches a redblock from the api and, if it is active, places its cube, sign and display entity again, the same
+     * way an edit does, replacing whatever display entities the api has saved for it. Inactive redblocks are only
+     * fetched, nothing is placed for them.
+     * @param redblockKey The PROJECT-KEY of the redblock
+     * @return The redblock
+     */
+    CompletableFuture<Result<GfRedblock>> refreshRedblockDisplay(String redblockKey);
+
 }

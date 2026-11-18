@@ -6,6 +6,9 @@ import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockProject;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockRoleAssignment;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockStatus;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockUserAssignment;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfBulkImportRedblocksRequest;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfBulkImportStarted;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfBulkImportStatus;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockSearchRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockSearchResult;
 import org.bukkit.Location;
@@ -35,6 +38,24 @@ public interface IGreenfieldRedblockApiService {
     CompletableFuture<Result<GfRedblockProject>> getProject(String projectKey);
 
     CompletableFuture<Result<GfRedblockProject>> updateProject(String projectKey, String projectName);
+
+    /**
+     * Queues a bulk import of legacy redblocks. The import runs in the background on the api; follow it with
+     * {@link #getBulkImportStatus(UUID, long)}. The api creates any project in the world projects that doesn't exist yet.
+     *
+     * @param request the redblocks to import and the project each world's redblocks go into
+     * @return the id of the queued import job
+     */
+    CompletableFuture<Result<GfBulkImportStarted>> bulkImportRedblocks(GfBulkImportRedblocksRequest request);
+
+    /**
+     * Gets the status of a bulk import, and the redblocks it has finished after the cursor.
+     *
+     * @param importJobId the id of the import job
+     * @param cursor the cursor from the previous status, or 0 for the first request
+     * @return the status of the import
+     */
+    CompletableFuture<Result<GfBulkImportStatus>> getBulkImportStatus(UUID importJobId, long cursor);
 
     CompletableFuture<Result<GfRedblockSearchResult>> searchRedblocks(String projectKey, GfRedblockSearchRequest searchRequest);
 

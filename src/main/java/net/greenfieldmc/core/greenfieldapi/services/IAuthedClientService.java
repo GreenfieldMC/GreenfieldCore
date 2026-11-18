@@ -10,6 +10,8 @@ public interface IAuthedClientService {
 
     <T> CompletableFuture<Result<T>> makePostRequest(String endpoint, Object requestBody, Class<T> responseType);
 
+    <T> CompletableFuture<Result<T>> makePostRequestNoLog(String endpoint, Object requestBody, Class<T> responseType);
+
     <T> CompletableFuture<Result<T>> makePutRequest(String endpoint, Object requestBody, Class<T> responseType);
 
     <T> CompletableFuture<Result<T>> makePatchRequest(String endpoint, Object requestBody, Class<T> responseType);

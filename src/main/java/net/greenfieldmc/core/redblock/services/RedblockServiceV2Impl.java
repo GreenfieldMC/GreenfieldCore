@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -194,6 +195,15 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
         return redblockApiService.getProjects().thenApply(result -> result.ifSuccess(projectList -> projectList.forEach(project -> projects.put(project.getProjectKey(), project))));
     }
 
+    @Override
+    public CompletableFuture<Result<GfRedblock>> refreshRedblockDisplay(String redblockKey) {
+        return refreshRedblock(redblockKey).thenCompose(ifSuccess(redblock -> {
+            if (!redblock.isActive()) return CompletableFuture.completedFuture(Result.success(redblock));
+            var roles = redblock.getRoleAssignments().stream().map(GfRedblockRoleAssignment::getRoleName).toList();
+            return resolveAssignedUsers(redblock).thenCompose(users -> createRedblockDisplay(redblock, users, roles));
+        }));
+    }
+
     // region Helper Methods
 
     // region Display methods
@@ -217,6 +227,9 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
                 : RedblockMessages.SIGN_CLICK_THIS_IF_COMPLETED;
 
         return runSync(plugin, () -> {
+            // entities are only found once their chunk's entities are loaded, which getEntities waits for. Without this,
+            // the old display entities of a redblock in an unloaded chunk would be left behind
+            location.getChunk().getEntities();
             removeEntities(redblock.getEntities());
             createCube(woolMaterial, location, signText);
             return createDisplay(redblock.getKey(), assignedUsers, assignedRoles, location, redblock.getMessage());
@@ -296,7 +309,13 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
             if (result.isFailure()) throw new IllegalStateException("Could not load RedBlock projects: " + result.getErrorMessage());
         });
         var redblockProjectLoads = configService.getMappedProjectKeys().stream()
-                .map(projectKey -> loadProjectPage(projectKey, 1))
+                .map(projectKey -> forEachActiveRedblock(projectKey, 1, (redblockKey, fetched) -> {
+                    if (fetched.isFailure())
+                        return CompletableFuture.failedFuture(new IllegalStateException("Could not load RedBlock " + redblockKey + ": " + fetched.getErrorMessage()));
+                    var redblock = fetched.getData();
+                    var roles = redblock.getRoleAssignments().stream().map(GfRedblockRoleAssignment::getRoleName).toList();
+                    return resolveAssignedUsers(redblock).thenAccept(users -> updateDynmapMarker(redblock, users, roles));
+                }))
                 .collect(Collectors.toCollection(java.util.ArrayList::new));
         redblockProjectLoads.add(projectLoad);
 
@@ -304,7 +323,14 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
                 .thenRun(() -> logger.info("Loaded " + activeRedblocks.size() + " active RedBlocks."));
     }
 
-    private CompletableFuture<Void> loadProjectPage(String projectKey, long page) {
+    // endregion
+
+    /**
+     * Fetches every active redblock of a project from the api, one page at a time, which also puts it in the cache, and
+     * runs the action on each one. The action gets the result of the fetch, so it decides what a failed fetch means.
+     * Completes exceptionally if a search fails or an action completes exceptionally.
+     */
+    private CompletableFuture<Void> forEachActiveRedblock(String projectKey, long page, BiFunction<String, Result<GfRedblock>, CompletableFuture<Void>> action) {
         var search = new GfRedblockSearchRequest();
         search.addFilterGroup(new GfRedblockSearchRequest.FilterGroup()
                 .status(GfRedblockSearchRequest.StatusFilter.anyOf(STATUS_INCOMPLETE, STATUS_PENDING))
@@ -316,26 +342,19 @@ public class RedblockServiceV2Impl implements IRedblockServiceV2 {
             if (result.isFailure())
                 return CompletableFuture.failedFuture(new IllegalStateException("Could not search project " + projectKey + " (page " + page + "): " + result.getErrorMessage()));
 
-            // the search only returns the lightweight model, so fetch the full redblocks one page at a time
+            // the search only returns the lightweight model, so fetch the full redblocks one page at a time. This
+            // bypasses the cache, so redblocks added to the api after the cache was loaded are found too
             var hits = result.getData().getResults();
             var fetches = hits.stream()
-                    .map(hit -> fetchRedblock(hit.getKey()).thenCompose(fetched -> {
-                        if (fetched.isFailure())
-                            return CompletableFuture.failedFuture(new IllegalStateException("Could not load RedBlock " + hit.getKey() + ": " + fetched.getErrorMessage()));
-                        var redblock = fetched.getData();
-                        var roles = redblock.getRoleAssignments().stream().map(GfRedblockRoleAssignment::getRoleName).toList();
-                        return resolveAssignedUsers(redblock).thenAccept(users -> updateDynmapMarker(redblock, users, roles));
-                    }))
+                    .map(hit -> refreshRedblock(hit.getKey()).thenCompose(fetched -> action.apply(hit.getKey(), fetched)))
                     .toArray(CompletableFuture[]::new);
 
             var hasMorePages = !hits.isEmpty() && page * CACHE_LOAD_PAGE_SIZE < result.getData().getTotalResults();
             return CompletableFuture.allOf(fetches).thenCompose(v -> hasMorePages
-                    ? loadProjectPage(projectKey, page + 1)
+                    ? forEachActiveRedblock(projectKey, page + 1, action)
                     : CompletableFuture.completedFuture(null));
         });
     }
-
-    // endregion
 
     private CompletableFuture<Result<GfRedblock>> changeStatus(String redblockKey, Player changedBy, String newStatus) {
         return fetchRedblock(redblockKey).thenCompose(ifSuccess(redblock -> resolveUserId(changedBy)

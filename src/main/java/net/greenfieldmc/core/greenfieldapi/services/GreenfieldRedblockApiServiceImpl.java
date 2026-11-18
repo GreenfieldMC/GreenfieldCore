@@ -7,6 +7,9 @@ import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockRoleAssign
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockSearchResult;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockStatus;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.GfRedblockUserAssignment;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfBulkImportRedblocksRequest;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfBulkImportStarted;
+import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfBulkImportStatus;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfProjectCreateRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockAddStatusRequest;
 import net.greenfieldmc.core.greenfieldapi.models.redblocks.apimodels.GfRedblockCreateRequest;
@@ -52,7 +55,19 @@ public class GreenfieldRedblockApiServiceImpl implements IGreenfieldRedblockApiS
     @Override
     public CompletableFuture<Result<GfRedblockProject>> updateProject(String projectKey, String projectName) {
         var endpoint = "/redblocks/projects/" + projectKey;
-        return clientService.makePutRequest(endpoint, new GfProjectCreateRequest(projectKey), GfRedblockProject.class);
+        return clientService.makePutRequest(endpoint, new GfProjectCreateRequest(projectName), GfRedblockProject.class);
+    }
+
+    @Override
+    public CompletableFuture<Result<GfBulkImportStarted>> bulkImportRedblocks(GfBulkImportRedblocksRequest request) {
+        var endpoint = "/redblocks/import/bulk";
+        return clientService.makePostRequestNoLog(endpoint, request, GfBulkImportStarted.class);
+    }
+
+    @Override
+    public CompletableFuture<Result<GfBulkImportStatus>> getBulkImportStatus(UUID importJobId, long cursor) {
+        var endpoint = "/redblocks/import/bulk/" + importJobId + "?cursor=" + cursor;
+        return clientService.makeGetRequest(endpoint, GfBulkImportStatus.class);
     }
 
     @Override

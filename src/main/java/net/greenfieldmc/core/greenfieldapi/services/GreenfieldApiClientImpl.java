@@ -82,6 +82,12 @@ public class GreenfieldApiClientImpl implements IAuthedClientService {
     }
 
     @Override
+    public <T> CompletableFuture<Result<T>> makePostRequestNoLog(String endpoint, Object requestBody, Class<T> responseType) {
+        logger.info("POST: " + endpoint + " (body not logged)");
+        return makeAuthenticatedRequest(endpoint, "POST", requestBody, responseType);
+    }
+
+    @Override
     public <T> CompletableFuture<Result<T>> makePutRequest(String endpoint, Object requestBody, Class<T> responseType) {
         logger.info("PUT: " + endpoint + " with body: " + gson.toJson(requestBody));
         return makeAuthenticatedRequest(endpoint, "PUT", requestBody, responseType);
